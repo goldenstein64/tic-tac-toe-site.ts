@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <script src="./htmx.min.js"></script>
+    <script src="./htmx-ext-sse.js"></script>
+    <meta charset="UTF-8" />
+
+    <link rel="stylesheet" href="./game.css" />
+  </head>
+  <body>
+    <h1>tic-tac-toe-site</h1>
+    <aside>
+      <!-- your info -->
+    </aside>
+    <main
+      hx-trigger="load"
+      hx-ext="sse"
+      sse-connect="/api/game-move?id={{ id }}"
+    >
+      <h3>Winner: <span id="winner-label" sse-swap="winner"></span></h3>
+
+      <ol class="game-board">
+        <!-- There should be 9 -->
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-1"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 1 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-2"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 2 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-3"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 3 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-4"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 4 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-5"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 5 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-6"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 6 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-7"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 7 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-8"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 8 }"
+        ></button>
+        <button
+          class="game-button"
+          type="button"
+          sse-swap="pos-9"
+          hx-swap="outerHTML"
+          hx-put="/api/game-move"
+          hx-vals="{&quot;id&quot;: {{ id }}, &quot;position&quot;: 9 }"
+        ></button>
+      </ol>
+    </main>
+    <aside>
+      <!-- opponent's info -->
+    </aside>
+  </body>
+</html>

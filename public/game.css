@@ -1,0 +1,12 @@
+.game-board {
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.game-button {
+  aspect-ratio: 1;
+}
