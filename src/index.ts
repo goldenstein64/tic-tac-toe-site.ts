@@ -1,13 +1,15 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import Mustache from "mustache";
-import api from "./routes/game-api";
+import gameApi from "./routes/game-api";
+import gameListApi from "./routes/game-list-api";
 
 const gameTmpl = await Bun.file("assets/game.html.mustache").text();
 // another template for index i guess lol
 
 const app = new Elysia()
-  .use(api)
+  .use(gameApi)
+  .use(gameListApi)
   .get(
     "/game",
     async ({ set, query }) => {

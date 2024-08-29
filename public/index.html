@@ -3,14 +3,14 @@
 <html>
   <head>
     <script src="./htmx.min.js"></script>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
   </head>
   <body>
     <h1>tic-tac-toe-site</h1>
-    <ul>
+    <ul hx-get="/api/active-games" hx-trigger="load">
       <!-- list of games that the user is playing in -->
     </ul>
-    <ul>
+    <ul hx-get="/api/available-games" hx-trigger="load">
       <!-- list of games that are waiting for an opponent -->
     </ul>
   </body>
