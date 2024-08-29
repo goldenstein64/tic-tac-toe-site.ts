@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import Mustache from "mustache";
-import api from "./routes/api";
+import api from "./routes/game-api";
 
 const gameTmpl = await Bun.file("assets/game.html.mustache").text();
 // another template for index i guess lol
@@ -11,6 +11,7 @@ const app = new Elysia()
   .get(
     "/game",
     async ({ set, query }) => {
+      console.log("received /game request");
       const { id } = query;
       set.headers["content-type"] = "text/html";
       return Mustache.render(gameTmpl, { id });
