@@ -7,6 +7,9 @@
   </head>
   <body>
     <h1>tic-tac-toe-site</h1>
+    <button type="button" hx-on:click="location.href='./create-game.html'">
+      Create Game
+    </button>
     <ul hx-get="/api/active-games" hx-trigger="load">
       <!-- list of games that the user is playing in -->
     </ul>
