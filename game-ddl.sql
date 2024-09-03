@@ -1,23 +1,23 @@
 CREATE TABLE User (
-	id INT PRIMARY KEY,
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	username TEXT CHECK (LENGTH(username) BETWEEN 8 AND 32),
-	winCount INT DEFAULT (0)
+	winCount INTEGER DEFAULT (0)
 ) STRICT;
 
 CREATE TABLE IsComputer (
-	userId INT PRIMARY KEY REFERENCES User(id)
+	userId INTEGER PRIMARY KEY REFERENCES User(id)
 ) STRICT;
 
 CREATE TABLE Game (
-	id INT PRIMARY KEY,
-	playerX INT REFERENCES User(id),
-	playerO INT REFERENCES User(id)
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	playerX INTEGER REFERENCES User(id),
+	playerO INTEGER REFERENCES User(id)
 ) STRICT;
 
 CREATE TABLE Move (
-	gameId INT REFERENCES Game(id),
-	ordering INT, -- 1-9, odds are X and evens are O
-	position INT, -- 1-9, left-to-right, top-to-bottom
+	gameId INTEGER REFERENCES Game(id),
+	ordering INTEGER, -- 1-9, odds are X and evens are O
+	position INTEGER, -- 1-9, left-to-right, top-to-bottom
 	-- the player is inferred from ordering
 	PRIMARY KEY (gameId, ordering)
 ) STRICT;
