@@ -6,6 +6,7 @@ import mitt from "mitt";
 import { Board } from "@goldenstein64/tic-tac-toe/lib";
 
 import { db } from "../libs/db";
+import { intString } from "../types";
 
 const selectNextOrdering = db.query<
   { newOrdering: number },
@@ -92,11 +93,6 @@ function waitForEvent<K extends Record<EventType, unknown>>(
     emitter.on(type, listener);
   });
 }
-
-const intString = t
-  .Transform(t.String())
-  .Decode(parseInt)
-  .Encode((v) => v.toString());
 
 export default new Elysia({ prefix: "/api" })
   .put(
