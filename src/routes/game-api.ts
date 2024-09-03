@@ -18,7 +18,7 @@ const selectNextOrdering = db.query<
 `);
 
 const insertMove = db.query<
-  never,
+  undefined,
   [{ gameId: number; ordering: number; position: number }]
 >(`
   INSERT INTO Move (gameId, ordering, position)
