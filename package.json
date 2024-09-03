@@ -9,7 +9,6 @@
     "@elysiajs/static": "^1.1.0",
     "@goldenstein64/tic-tac-toe": "link:@goldenstein64/tic-tac-toe",
     "elysia": "latest",
-    "jose": "^5.8.0",
     "mitt": "^3.0.1",
     "mustache": "^4.2.0"
   },
