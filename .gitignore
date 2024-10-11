@@ -47,3 +47,4 @@ game.db-shm
 game.db-wal
 
 /secret
+/.env.local
