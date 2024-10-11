@@ -1,21 +1,21 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
-import Mustache from "mustache";
+import html from "@elysiajs/html";
 import gameApi from "./routes/game-api";
 import gameListApi from "./routes/game-list-api";
-
-const gameTmpl = await Bun.file("assets/game.html.mustache").text();
+import { GameHtml } from "./components/game";
+import { GameListHtml } from "./components/game-list";
 
 const app = new Elysia()
+  .use(html())
   .use(gameApi)
   .use(gameListApi)
+  .get("/", () => GameListHtml())
   .get(
     "/game",
-    async ({ set, query }) => {
-      console.log("received /game request");
+    ({ query }) => {
       const { id } = query;
-      set.headers["content-type"] = "text/html";
-      return Mustache.render(gameTmpl, { id });
+      return GameHtml({ gameId: id, userId: 4 });
     },
     { query: t.Object({ id: t.Number() }) }
   )
