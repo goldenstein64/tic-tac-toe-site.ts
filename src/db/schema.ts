@@ -171,6 +171,10 @@ export const GameRelations = relations(Game, ({ one, many }) => ({
   composes: many(Move),
 }));
 
+export const MoveRelations = relations(Move, ({ one }) => ({
+  belongsTo: one(Game, { fields: [Move.gameId], references: [Game.id] }),
+}));
+
 export const LobbyRelations = relations(Lobby, ({ one }) => ({
   createdBy: one(User, { fields: [Lobby.createdBy], references: [User.id] }),
 }));
