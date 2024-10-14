@@ -1,4 +1,32 @@
 import { Html } from "@elysiajs/html";
+import { ActiveLobby, Lobby, User } from "../db/schema";
+import { db } from "../db";
+import { eq, sql } from "drizzle-orm";
+
+const selectActiveGames = db
+  .select({ lobbyId: Lobby.id })
+  .from(Lobby)
+  .innerJoin(ActiveLobby, eq(ActiveLobby.id, Lobby.id))
+  .where(eq(Lobby.status, "active"))
+  .prepare();
+
+const selectAvailableGames = db
+  .select({
+    lobbyId: Lobby.id,
+    opponent: Lobby.createdBy,
+    createdAt: Lobby.createdAt,
+  })
+  .from(Lobby)
+  .where(eq(Lobby.status, "waiting"))
+  .prepare();
+
+const selectUser = db
+  .select({ username: User.username })
+  .from(User)
+  .where(eq(User.id, sql.placeholder("userId")))
+  .prepare();
+
+type UserConfigProps = { userId: number };
 
 export function GameListHead() {
   return (
@@ -9,56 +37,101 @@ export function GameListHead() {
   );
 }
 
-export function GameItem(props: { status: string; playerCount: number }) {
-  const { status, playerCount } = props;
+async function UserConfig({ userId }: UserConfigProps) {
+  const users = await selectUser.execute({ userId });
+  const username = users.length > 0 ? users[0].username : "";
+  return (
+    <form hx-patch="/api/user" hx-target="#username-result">
+      <label for="set-username">Username: </label>
+      <input id="set-username" value={username}></input>
+      <input type="submit">Change</input>
+      <div id="username-result"></div>
+    </form>
+  );
+}
+
+export function WaitingGameItem() {}
+
+type ActiveGameItemProps = { lobbyId: number };
+
+export function ActiveGameItem({ lobbyId }: ActiveGameItemProps) {
   return (
     <tr>
-      <td>{status}</td>
-      <td>{playerCount}/2</td>
+      <td>
+        <a href={`/game?id=${lobbyId}`}>Resume</a>
+        <a>Forfeit</a>
+      </td>
+      <td>{lobbyId}</td>
     </tr>
   );
 }
 
-export function GameListBody() {
+type AvailableGameItemProps = {
+  lobbyId: number;
+  opponent: number;
+  createdAt: Date;
+};
+
+export function AvailableGameItem({
+  lobbyId,
+  opponent,
+  createdAt,
+}: AvailableGameItemProps) {
+  return (
+    <tr>
+      <td>
+        <a href={`/game?id=${lobbyId}`}>Join</a>
+      </td>
+      <td>{lobbyId}</td>
+      <td>{createdAt.toUTCString()}</td>
+      <td>{opponent}</td>
+    </tr>
+  );
+}
+
+export async function GameListBody({ userId }: GameListProps) {
+  const availableGames = await selectAvailableGames.execute();
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
-      <button type="button" hx-on:click="location.href='/create-game.html'">
-        Create Game
-      </button>
+      <a href="/create-game.html">Create Game</a>
+      <UserConfig userId={userId} />
+      <h2>Waiting Games</h2>
       <table>
         <tr>
-          <th>Status</th>
-          <th># of Players</th>
-          <th />
+          <th>Actions</th>
+          <th>Id</th>
         </tr>
-        <span
-          hx-get="/api/active-games"
-          hx-trigger="load"
-          hx-swap="outerHTML"
-        />
       </table>
+      <h2>Active Games</h2>
       <table>
         <tr>
-          <th>Status</th>
-          <th># of Players</th>
-          <th />
+          <th>Actions</th>
+          <th>Id</th>
+          <th>Opponent</th>
         </tr>
-        <span
-          hx-get="/api/available-games"
-          hx-trigger="load"
-          hx-swap="outerHTML"
-        />
+      </table>
+      <h2>Available Games</h2>
+      <table>
+        <tr>
+          <th>Actions</th>
+          <th>Id</th>
+          <th>Created At</th>
+          <th>Opponent</th>
+        </tr>
+        {availableGames.map(AvailableGameItem)}
       </table>
     </body>
   );
 }
 
-export function GameListHtml() {
+type GameListProps = UserConfigProps;
+
+export async function GameListHtml(props: GameListProps) {
   return (
     <html>
       <GameListHead />
-      <GameListBody />
+      <GameListBody {...props} />
     </html>
   );
 }

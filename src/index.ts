@@ -10,7 +10,7 @@ const app = new Elysia()
   .use(html())
   .use(gameApi)
   .use(gameListApi)
-  .get("/", () => GameListHtml())
+  .get("/", () => GameListHtml({ userId: 4 }))
   .get(
     "/game",
     ({ query }) => {
