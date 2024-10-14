@@ -76,7 +76,7 @@ export default new Elysia({ prefix: "/api" })
       board.data[position - 1] = mark;
       event.emit("message", [ordering, position]);
 
-      set.headers["content-type"] = "text/html";
+      set.headers["Content-Type"] = "text/html";
       return (
         <GameButton disabled={true} gameId={gameId} position={position}>
           {mark}
@@ -95,9 +95,9 @@ export default new Elysia({ prefix: "/api" })
     "/game-move",
     async function* getMoveStream({ query, set }) {
       const { id: gameId } = query;
-      set.headers["x-accel-buffering"] = "no";
-      set.headers["cache-control"] = "no-cache";
-      set.headers["content-type"] = "text/event-stream";
+      set.headers["X-Accel-Buffering"] = "no";
+      set.headers["Cache-Control"] = "no-cache";
+      set.headers["Content-Type"] = "text/event-stream";
 
       const { board, event } = getGameState(gameId);
 
