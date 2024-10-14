@@ -1,7 +1,7 @@
 CREATE TABLE "User" (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 	"username" TEXT CHECK (LENGTH(username) BETWEEN 8 AND 32),
-	"winCount" INTEGER DEFAULT (0)
+	"createdAt" INTEGER DEFAULT unixepoch() NOT NULL
 ) STRICT;
 
 CREATE TABLE "IsComputer" (
@@ -25,14 +25,9 @@ CREATE TABLE "Move" (
 CREATE TABLE "Lobby" (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 	"createdBy" INTEGER REFERENCES "User"("id") NOT NULL,
-	"createdAt" TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"createdAt" INTEGER DEFAULT unixepoch() NOT NULL,
 	-- 0 = waiting, 1 = active, 2 = finished
 	"lobbyStatus" INTEGER DEFAULT 0 NOT NULL
-) STRICT;
-
-CREATE TABLE "WaitingLobby" (
-	"id" INTEGER PRIMARY KEY REFERENCES "Lobby"("id"),
-	"waitingUser" INTEGER REFERENCES "User"("id") NOT NULL
 ) STRICT;
 
 CREATE TABLE "ActiveLobby" (
@@ -42,14 +37,8 @@ CREATE TABLE "ActiveLobby" (
 
 CREATE TABLE "FinishedLobby" (
 	"id" INTEGER PRIMARY KEY REFERENCES "Lobby"("id"),
-	"finishedAt" TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"finishedAt" INTEGER DEFAULT unixepoch() NOT NULL,
 	"gameId" INTEGER REFERENCES "Game"("id") NOT NULL
-) STRICT;
-
-CREATE TABLE "UserInLobby" (
-	"userId" INTEGER,
-	"lobbyId" INTEGER,
-	PRIMARY KEY ("userId", "lobbyId")
 ) STRICT;
 
 INSERT INTO "User" ("id", "username", "winCount") VALUES

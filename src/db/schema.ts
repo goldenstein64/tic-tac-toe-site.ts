@@ -7,8 +7,10 @@ import {
   customType,
 } from "drizzle-orm/sqlite-core";
 
+export type LobbyStatus = "waiting" | "active" | "finished";
+
 const lobbyStatus = customType<{
-  data: "waiting" | "active" | "finished";
+  data: LobbyStatus;
   driverData: 0 | 1 | 2;
   notNull: true;
   default: true;
@@ -52,8 +54,10 @@ function timestamp<S extends string>(name: S) {
 
 export const User = createTable("User", {
   id: number("id").primaryKey({ autoIncrement: true }),
-  username: text("username").notNull(),
-  winCount: number("winCount").notNull().default(0),
+  username: text("username").notNull().unique(),
+  createdAt: timestamp("createdAt")
+    .notNull()
+    .default(sql`(unixepoch())`),
 });
 
 export const IsComputer = createTable("IsComputer", {
@@ -97,15 +101,6 @@ export const Lobby = createTable("Lobby", {
   status: lobbyStatus("status").notNull().default("waiting"),
 });
 
-export const WaitingLobby = createTable("WaitingLobby", {
-  id: number("id")
-    .primaryKey()
-    .references(() => Lobby.id),
-  waitingUser: number("waitingUser")
-    .notNull()
-    .references(() => User.id),
-});
-
 export const ActiveLobby = createTable("ActiveLobby", {
   id: number("id")
     .primaryKey()
@@ -143,9 +138,6 @@ export const FinishedLobby = createTable("FinishedLobby", {
   - belongs to one Game
 - Lobby
   - created by one User
-- WaitingLobby
-  - derives one Lobby
-  - waiting with one User
 - ActiveLobby
   - derives one Lobby
   - hosts one Game
@@ -156,7 +148,6 @@ export const FinishedLobby = createTable("FinishedLobby", {
 
 export const UserRelations = relations(User, ({ many }) => ({
   creatorOf: many(Lobby),
-  waitsIn: many(WaitingLobby),
   playsXsIn: many(Game),
   playsOsIn: many(Game),
 }));
@@ -177,14 +168,6 @@ export const MoveRelations = relations(Move, ({ one }) => ({
 
 export const LobbyRelations = relations(Lobby, ({ one }) => ({
   createdBy: one(User, { fields: [Lobby.createdBy], references: [User.id] }),
-}));
-
-export const WaitingLobbyRelations = relations(WaitingLobby, ({ one }) => ({
-  derives: one(Lobby, { fields: [WaitingLobby.id], references: [Lobby.id] }),
-  waiting: one(User, {
-    fields: [WaitingLobby.waitingUser],
-    references: [User.id],
-  }),
 }));
 
 export const ActiveLobbyRelations = relations(ActiveLobby, ({ one }) => ({
