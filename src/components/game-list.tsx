@@ -41,7 +41,7 @@ async function UserConfig({ userId }: UserConfigProps) {
   const users = await selectUser.execute({ userId });
   const username = users.length > 0 ? users[0].username : "";
   return (
-    <form hx-patch="/api/user" hx-target="#username-result">
+    <form hx-post="/api/user" hx-target="#username-result">
       <label for="set-username">Username: </label>
       <input id="set-username" value={username}></input>
       <input type="submit">Change</input>
@@ -50,7 +50,18 @@ async function UserConfig({ userId }: UserConfigProps) {
   );
 }
 
-export function WaitingGameItem() {}
+type WaitingGameItemProps = { lobbyId: number };
+
+export function WaitingGameItem({ lobbyId }: WaitingGameItemProps) {
+  return (
+    <tr>
+      <td>
+        <button hx-delete={`/api/lobby?id=${lobbyId}`}>Forget</button>
+      </td>
+      <td>{lobbyId}</td>
+    </tr>
+  );
+}
 
 type ActiveGameItemProps = { lobbyId: number };
 
@@ -58,8 +69,10 @@ export function ActiveGameItem({ lobbyId }: ActiveGameItemProps) {
   return (
     <tr>
       <td>
-        <a href={`/game?id=${lobbyId}`}>Resume</a>
-        <a>Forfeit</a>
+        <button hx-get={`/api/lobby?id=${lobbyId}`}>Resume</button>
+        <button hx-patch={`/api/lobby?id=${lobbyId}&action=forfeit`}>
+          Forfeit
+        </button>
       </td>
       <td>{lobbyId}</td>
     </tr>
@@ -80,7 +93,7 @@ export function AvailableGameItem({
   return (
     <tr>
       <td>
-        <a href={`/game?id=${lobbyId}`}>Join</a>
+        <button hx-patch={`/api/lobby?id=${lobbyId}&action=join`}>Join</button>
       </td>
       <td>{lobbyId}</td>
       <td>{createdAt.toUTCString()}</td>
@@ -94,7 +107,7 @@ export async function GameListBody({ userId }: GameListProps) {
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
-      <a href="/create-game.html">Create Game</a>
+      <button hx-post="/api/lobby">Create Game</button>
       <UserConfig userId={userId} />
       <h2>Waiting Games</h2>
       <table>
