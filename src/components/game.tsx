@@ -18,7 +18,7 @@ const selectGameMoves = db
   .prepare();
 
 const selectUser = db
-  .select({ username: User.username, winCount: User.winCount })
+  .select({ username: User.username })
   .from(User)
   .where(eq(User.id, sql.placeholder("userId")))
   .prepare();
@@ -100,22 +100,9 @@ export function PlayerInfo(props: { userId: number }) {
   const { userId } = props;
   const info = selectUser.get({ userId });
   if (!info) return <aside />;
-  const { username, winCount } = info;
+  const { username } = info;
 
-  return (
-    <aside>
-      <table>
-        <tr>
-          <th />
-          <th>{username}</th>
-        </tr>
-        <tr>
-          <td>Win Count:</td>
-          <td>{winCount}</td>
-        </tr>
-      </table>
-    </aside>
-  );
+  return <aside>{username}</aside>;
 }
 
 export function GameMain(props: { gameId: number }) {
