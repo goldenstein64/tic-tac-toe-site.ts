@@ -1,15 +1,19 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
-import gameApi from "./routes/game-api";
-import gameListApi from "./routes/game-list-api";
+
 import { GameHtml } from "./components/game";
 import { GameListHtml } from "./components/game-list";
+
+import gameApi from "./routes/game-api";
+import lobbyApi from "./routes/lobby-api";
+import userApi from "./routes/user-api";
 
 const app = new Elysia()
   .use(html())
   .use(gameApi)
-  .use(gameListApi)
+  .use(lobbyApi)
+  .use(userApi)
   .get("/", () => GameListHtml({ userId: 4 }))
   .get(
     "/game",
