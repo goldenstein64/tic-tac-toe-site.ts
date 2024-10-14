@@ -13,9 +13,8 @@ const app = new Elysia()
   .get("/", () => GameListHtml({ userId: 4 }))
   .get(
     "/game",
-    ({ query }) => {
-      const { id } = query;
-      return GameHtml({ gameId: id, userId: 4 });
+    ({ query: { id: gameId } }) => {
+      return GameHtml({ gameId, userId: 4 });
     },
     { query: t.Object({ id: t.Number() }) }
   )
