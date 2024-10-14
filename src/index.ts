@@ -3,7 +3,7 @@ import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
 
 import { GameHtml } from "./components/game";
-import { GameListHtml } from "./components/game-list";
+import { LobbiesHtml } from "./components/lobbies";
 
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
@@ -14,7 +14,7 @@ const app = new Elysia()
   .use(gameApi)
   .use(lobbyApi)
   .use(userApi)
-  .get("/", () => GameListHtml({ userId: 4 }))
+  .get("/", () => LobbiesHtml({ userId: 4 }))
   .get(
     "/game",
     ({ query: { id: gameId } }) => {

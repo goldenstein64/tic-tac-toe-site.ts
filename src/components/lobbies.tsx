@@ -28,7 +28,7 @@ const selectUser = db
 
 type UserConfigProps = { userId: number };
 
-export function GameListHead() {
+export function LobbiesHead() {
   return (
     <head>
       <script src="./htmx.min.js"></script>
@@ -59,9 +59,9 @@ async function UserConfig({ userId }: UserConfigProps) {
   );
 }
 
-type WaitingGameItemProps = { lobbyId: number };
+type WaitingLobbyItemProps = { lobbyId: number };
 
-export function WaitingGameItem({ lobbyId }: WaitingGameItemProps) {
+export function WaitingLobbyItem({ lobbyId }: WaitingLobbyItemProps) {
   return (
     <tr>
       <td>
@@ -72,9 +72,9 @@ export function WaitingGameItem({ lobbyId }: WaitingGameItemProps) {
   );
 }
 
-type ActiveGameItemProps = { lobbyId: number };
+type ActiveLobbyItemProps = { lobbyId: number };
 
-export function ActiveGameItem({ lobbyId }: ActiveGameItemProps) {
+export function ActiveLobbyItem({ lobbyId }: ActiveLobbyItemProps) {
   return (
     <tr>
       <td>
@@ -88,17 +88,17 @@ export function ActiveGameItem({ lobbyId }: ActiveGameItemProps) {
   );
 }
 
-type AvailableGameItemProps = {
+type AvailableLobbyItemProps = {
   lobbyId: number;
   opponent: number;
   createdAt: Date;
 };
 
-export function AvailableGameItem({
+export function AvailableLobbyItem({
   lobbyId,
   opponent,
   createdAt,
-}: AvailableGameItemProps) {
+}: AvailableLobbyItemProps) {
   return (
     <tr>
       <td>
@@ -111,8 +111,8 @@ export function AvailableGameItem({
   );
 }
 
-export async function GameListBody({ userId }: GameListProps) {
-  const availableGames = await selectAvailableGames.execute();
+export async function LobbiesBody({ userId }: GameListProps) {
+  const availableLobbies = await selectAvailableGames.execute();
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
@@ -141,7 +141,7 @@ export async function GameListBody({ userId }: GameListProps) {
           <th>Created At</th>
           <th>Opponent</th>
         </tr>
-        {availableGames.map(AvailableGameItem)}
+        {availableLobbies.map(AvailableLobbyItem)}
       </table>
     </body>
   );
@@ -149,11 +149,11 @@ export async function GameListBody({ userId }: GameListProps) {
 
 type GameListProps = UserConfigProps;
 
-export async function GameListHtml(props: GameListProps) {
+export async function LobbiesHtml(props: GameListProps) {
   return (
     <html>
-      <GameListHead />
-      <GameListBody {...props} />
+      <LobbiesHead />
+      <LobbiesBody {...props} />
     </html>
   );
 }
