@@ -1,3 +1,4 @@
+import { Html, html } from "@elysiajs/html";
 import { Elysia, t } from "elysia";
 import { eq, sql } from "drizzle-orm";
 
@@ -17,15 +18,36 @@ const selectUser = db
   .where(eq(User.username, sql.placeholder("username")))
   .prepare();
 
-export default new Elysia({ prefix: "/api" }).post(
+export default new Elysia({ prefix: "/api" }).use(html()).post(
   "/user",
-  async ({ body: { username }, cookie: { userId: userIdCookie }, set }) => {
+  async ({ body: { username }, cookie: { userId: userIdCookie } }) => {
     const users = await selectUser.execute({ username });
     userIdCookie.maxAge = 86400;
     userIdCookie.sameSite = "strict";
     if (users.length > 0) {
       // a user exists with this username, tell them they can't use it
-      return { success: false };
+      return (
+        <div>
+          <input
+            hx-select="#set-username"
+            hx-swap="outerHTML"
+            id="set-username"
+          />
+          <div
+            hx-select="#username-result"
+            hx-swap="outerHTML"
+            id="username-result"
+          >
+            Username is taken
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <input hx-select="#set-username" id="set-username" value={username} />
+        </div>
+      );
     }
   },
   {

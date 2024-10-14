@@ -41,11 +41,20 @@ async function UserConfig({ userId }: UserConfigProps) {
   const users = await selectUser.execute({ userId });
   const username = users.length > 0 ? users[0].username : "";
   return (
-    <form hx-post="/api/user" hx-target="#username-result">
+    <form hx-post="/api/user">
       <label for="set-username">Username: </label>
-      <input id="set-username" value={username}></input>
+      <input
+        hx-select="#set-username"
+        hx-swap="outerHTML"
+        id="set-username"
+        value={username}
+      />
       <input type="submit">Change</input>
-      <div id="username-result"></div>
+      <div
+        hx-select="#username-result"
+        hx-swap="outerHTML"
+        id="username-result"
+      />
     </form>
   );
 }
