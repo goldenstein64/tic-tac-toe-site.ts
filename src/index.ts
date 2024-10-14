@@ -8,6 +8,7 @@ import { LobbiesHtml } from "./components/lobbies";
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
 import userApi from "./routes/user-api";
+import { intString } from "./types";
 
 const app = new Elysia()
   .use(html())
@@ -20,7 +21,7 @@ const app = new Elysia()
     ({ query: { id: gameId } }) => {
       return GameHtml({ gameId, userId: 4 });
     },
-    { query: t.Object({ id: t.Number() }) }
+    { query: t.Object({ id: intString }) }
   )
   .use(staticPlugin({ assets: "public", prefix: "/" }))
   .listen(3000);
