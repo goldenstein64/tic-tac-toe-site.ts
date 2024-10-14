@@ -63,7 +63,7 @@ function waitForEvent<K extends Record<EventType, unknown>>(
 }
 
 export default new Elysia({ prefix: "/api" })
-  .put(
+  .post(
     "/game-move",
     async function addMove({ body, set }) {
       const { id: gameId, position } = body;

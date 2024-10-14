@@ -55,7 +55,7 @@ export function GameButton(props: GameButtonProps) {
       type="button"
       sse-swap={`pos-${position}`}
       hx-swap="outerHTML"
-      hx-put="/api/game-move"
+      hx-post="/api/game-move"
       hx-vals={hxVals}
       disabled={disabled}
       style="aspect-ratio: 1"
