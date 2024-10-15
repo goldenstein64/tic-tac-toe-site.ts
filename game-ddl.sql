@@ -1,6 +1,6 @@
 CREATE TABLE "User" (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
-	"username" TEXT CHECK (LENGTH(username) BETWEEN 8 AND 32),
+	"username" TEXT CHECK (LENGTH(username) BETWEEN 1 AND 32),
 	"createdAt" INTEGER DEFAULT unixepoch() NOT NULL
 ) STRICT;
 
