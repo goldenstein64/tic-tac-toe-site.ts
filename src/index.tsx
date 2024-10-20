@@ -23,7 +23,8 @@ const app = new Elysia()
     },
     { query: t.Object({ id: intString }) }
   )
-  .use(staticPlugin({ assets: "public", prefix: "/" }))
+  .get("/create-game", () => Bun.file("./public/create-game.html"))
+  .use(staticPlugin())
   .listen(3000);
 
 console.log(

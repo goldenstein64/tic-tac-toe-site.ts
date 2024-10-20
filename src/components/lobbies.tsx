@@ -31,9 +31,9 @@ type UserConfigProps = { userId: number };
 export function LobbiesHead() {
   return (
     <head>
+      <script src="/public/htmx.min.js" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <script src="/htmx.min.js" />
     </head>
   );
 }
