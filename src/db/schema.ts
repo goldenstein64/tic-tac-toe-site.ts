@@ -9,6 +9,8 @@ import {
 
 export type LobbyStatus = "waiting" | "active" | "finished";
 
+const UNIX_EPOCH = sql<number>`(unixepoch())`;
+
 const lobbyStatus = customType<{
   data: LobbyStatus;
   driverData: 0 | 1 | 2;
@@ -55,9 +57,7 @@ function timestamp<S extends string>(name: S) {
 export const User = createTable("User", {
   id: number("id").primaryKey({ autoIncrement: true }),
   username: text("username").notNull().unique(),
-  createdAt: timestamp("createdAt")
-    .notNull()
-    .default(sql`(unixepoch())`),
+  createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
 });
 
 export const IsComputer = createTable("IsComputer", {
@@ -95,9 +95,7 @@ export const Lobby = createTable("Lobby", {
   createdBy: number("createdBy")
     .notNull()
     .references(() => User.id),
-  createdAt: timestamp("createdAt")
-    .notNull()
-    .default(sql`(unixepoch())`),
+  createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
   status: lobbyStatus("status").notNull().default("waiting"),
 });
 
@@ -114,9 +112,7 @@ export const FinishedLobby = createTable("FinishedLobby", {
   id: number("id")
     .primaryKey()
     .references(() => Lobby.id),
-  finishedAt: timestamp("finishedAt")
-    .notNull()
-    .default(sql`(unixepoch())`),
+  finishedAt: timestamp("finishedAt").notNull().default(UNIX_EPOCH),
   gameId: number("gameId")
     .notNull()
     .references(() => Game.id),
