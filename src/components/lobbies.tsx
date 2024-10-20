@@ -66,10 +66,26 @@ export function WaitingLobbyItem({ lobbyId }: WaitingLobbyItemProps) {
   return (
     <tr>
       <td>
-        <button hx-delete={`/api/lobby?id=${lobbyId}`}>Forget</button>
+        <button hx-delete="/api/lobby" hx-vals={{ id: lobbyId }}>
+          Forget
+        </button>
       </td>
       <td>{lobbyId}</td>
     </tr>
+  );
+}
+
+export async function WaitingLobbies() {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <td>Actions</td>
+          <td>Id</td>
+        </tr>
+      </thead>
+      <tbody />
+    </table>
   );
 }
 
@@ -79,13 +95,33 @@ export function ActiveLobbyItem({ lobbyId }: ActiveLobbyItemProps) {
   return (
     <tr>
       <td>
-        <button hx-get={`/api/lobby?id=${lobbyId}`}>Resume</button>
-        <button hx-patch={`/api/lobby?id=${lobbyId}&action=forfeit`}>
+        <button hx-on:click={`location.href='/game?id=${lobbyId}'`}>
+          Resume
+        </button>
+        <button
+          hx-patch="/api/lobby"
+          hx-vals={{ id: lobbyId, action: "forfeit" }}
+        >
           Forfeit
         </button>
       </td>
       <td>{lobbyId}</td>
     </tr>
+  );
+}
+
+export async function ActiveLobbies() {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <td>Actions</td>
+          <td>Id</td>
+          <td>Opponent</td>
+        </tr>
+      </thead>
+      <tbody />
+    </table>
   );
 }
 
@@ -103,7 +139,9 @@ export function AvailableLobbyItem({
   return (
     <tr>
       <td>
-        <button hx-patch={`/api/lobby?id=${lobbyId}&action=join`}>Join</button>
+        <button hx-patch="/api/lobby" hx-vals={{ id: lobbyId, action: "join" }}>
+          Join
+        </button>
       </td>
       <td>{lobbyId}</td>
       <td>{createdAt.toUTCString()}</td>
@@ -112,38 +150,35 @@ export function AvailableLobbyItem({
   );
 }
 
-export async function LobbiesBody({ userId }: GameListProps) {
+export async function AvailableLobbies() {
   const availableLobbies = await selectAvailableGames.execute();
+  return (
+    <table>
+      <thead>
+        <tr>
+          <td>Actions</td>
+          <td>Id</td>
+          <td>Created At</td>
+          <td>Opponent</td>
+        </tr>
+      </thead>
+      <tbody>{availableLobbies.map(AvailableLobbyItem)}</tbody>
+    </table>
+  );
+}
+
+export async function LobbiesBody({ userId }: GameListProps) {
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
-      <button hx-post="/api/lobby">Create Game</button>
+      <button hx-on:click="location.href='/create-game'">Create Game</button>
       <UserConfig userId={userId} />
       <h2>Waiting Games</h2>
-      <table>
-        <tr>
-          <th>Actions</th>
-          <th>Id</th>
-        </tr>
-      </table>
+      <WaitingLobbies />
       <h2>Active Games</h2>
-      <table>
-        <tr>
-          <th>Actions</th>
-          <th>Id</th>
-          <th>Opponent</th>
-        </tr>
-      </table>
+      <ActiveLobbies />
       <h2>Available Games</h2>
-      <table>
-        <tr>
-          <th>Actions</th>
-          <th>Id</th>
-          <th>Created At</th>
-          <th>Opponent</th>
-        </tr>
-        {availableLobbies.map(AvailableLobbyItem)}
-      </table>
+      <AvailableLobbies />
     </body>
   );
 }
