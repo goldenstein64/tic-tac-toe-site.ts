@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
-import html from "@elysiajs/html";
+import html, { Html } from "@elysiajs/html";
 
 import { GameHtml } from "./components/game";
 import { LobbiesHtml } from "./components/lobbies";
