@@ -50,16 +50,14 @@ type GameButtonProps = {
 
 export function GameButton(props: GameButtonProps) {
   const { disabled, gameId, position, children: mark } = props;
-  const hxVals = JSON.stringify({ id: gameId, position: position });
   return (
     <button
       type="button"
       sse-swap={`pos-${position}`}
       hx-swap="outerHTML"
       hx-post="/api/game-move"
-      hx-vals={hxVals}
+      hx-vals={{ id: gameId, position: position }}
       disabled={disabled}
-      style="aspect-ratio: 1"
     >
       {mark}
     </button>
@@ -82,6 +80,7 @@ export function GameBoard(props: { gameId: number }) {
         width: 400px;
         margin-left: auto;
         margin-right: auto;
+        aspect-ratio: 1;
       "
     >
       {range(9).map((i) => {
