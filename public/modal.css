@@ -1,0 +1,51 @@
+dialog {
+  border: 0px;
+}
+
+/* Modal overlay background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+
+  /* Show modal when active */
+  &.active {
+    visibility: visible;
+  }
+}
+
+/* Modal content box */
+.modal-content {
+  display: flex; /* flexbox */
+  flex-direction: column; /* make a vertical list */
+  align-items: center; /* center items */
+  width: 340px;
+  padding: 20px;
+
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+
+  /* Username form styling */
+  & input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+  }
+
+  & button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 30%;
+  }
+}
