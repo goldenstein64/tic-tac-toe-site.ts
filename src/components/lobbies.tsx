@@ -1,5 +1,5 @@
 import { Html } from "@elysiajs/html";
-import { ActiveLobby, Game, Lobby, User } from "../db/schema";
+import { ActiveLobby, FinishedLobby, Game, Lobby, User } from "../db/schema";
 import { db } from "../db";
 import { eq, sql, aliasedTable, and } from "drizzle-orm";
 import { UsernameHead, UsernameModal } from "./username-modal";
@@ -16,6 +16,24 @@ const selectActiveLobbies = (() => {
     .from(Lobby)
     .innerJoin(ActiveLobby, eq(ActiveLobby.id, Lobby.id))
     .innerJoin(Game, eq(Game.id, ActiveLobby.gameId))
+    .innerJoin(playerX, eq(playerX.id, Game.playerX))
+    .innerJoin(playerO, eq(playerO.id, Game.playerO))
+    .where(eq(Lobby.status, "active"))
+    .prepare();
+})();
+
+const selectFinishedLobbies = (() => {
+  const playerX = aliasedTable(User, "playerX");
+  const playerO = aliasedTable(User, "playerO");
+  return db
+    .select({
+      lobbyId: Lobby.id,
+      playerX: playerX.username,
+      playerO: playerO.username,
+    })
+    .from(Lobby)
+    .innerJoin(FinishedLobby, eq(FinishedLobby.id, Lobby.id))
+    .innerJoin(Game, eq(Game.id, FinishedLobby.gameId))
     .innerJoin(playerX, eq(playerX.id, Game.playerX))
     .innerJoin(playerO, eq(playerO.id, Game.playerO))
     .where(eq(Lobby.status, "active"))
@@ -211,6 +229,47 @@ export async function AvailableLobbies() {
   );
 }
 
+type FinishedLobbyItemProps = {
+  lobbyId: number;
+  playerX: string;
+  playerO: string;
+};
+
+export function FinishedLobbyItem({
+  lobbyId,
+  playerX,
+  playerO,
+}: FinishedLobbyItemProps) {
+  return (
+    <tr>
+      <td>
+        <button>View</button>
+      </td>
+      <td>{lobbyId}</td>
+      <td>{playerX}</td>
+      <td>{playerO}</td>
+    </tr>
+  );
+}
+
+export async function FinishedLobbies() {
+  const finishedLobbies = await selectFinishedLobbies.execute();
+  return (
+    <table>
+      <thead>
+        <tr>
+          <td>Actions</td>
+          <td>Id</td>
+          <td>Created At</td>
+          <td>Player X</td>
+          <td>Player O</td>
+        </tr>
+      </thead>
+      <tbody>{finishedLobbies.map(FinishedLobbyItem)}</tbody>
+    </table>
+  );
+}
+
 export async function LobbiesBody({ userId }: GameListProps) {
   return (
     <body>
@@ -223,6 +282,8 @@ export async function LobbiesBody({ userId }: GameListProps) {
       <ActiveLobbies />
       <h2>Available Games</h2>
       <AvailableLobbies />
+      <h2>Finished Games</h2>
+      <FinishedLobbies />
 
       <UsernameModal />
     </body>
