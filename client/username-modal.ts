@@ -81,6 +81,7 @@ htmx.on("#username-modal", "htmx:after-request", (rawEvt) => {
 
   const response: APIPutUsernameResponse = JSON.parse(xhr.response);
   if (response.success) {
+    usernameConfigInput.value = usernameInput.value;
     usernameModal.close();
   } else {
     alert(response.message);
