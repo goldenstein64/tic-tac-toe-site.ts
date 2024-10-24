@@ -313,7 +313,7 @@ export default new Elysia({ prefix: "/api" })
       } else if (computerIdX || computerIdO) {
         // only one is a computer, create an active lobby with this user as the
         // human
-        tx.transaction(async () => {
+        await tx.transaction(async () => {
           const gameId = await insertGame({
             playerX: computerIdX ?? userId,
             playerO: computerIdO ?? userId,
