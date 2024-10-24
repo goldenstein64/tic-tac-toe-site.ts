@@ -11,7 +11,7 @@ const ALPHANUMERIC = /\w+/;
 const DAY_LENGTH = 86_400;
 const UNIX_EPOCH = sql<number>`(unixepoch())`;
 
-const USER_AGE = sql<number>`${UNIX_EPOCH} - ${User.createdAt}`;
+const USER_AGE = sql<number>`(${UNIX_EPOCH} - ${User.createdAt})`;
 
 const upsertUser = async (args: { username: string; id?: number }) => {
   const { username, id } = args;
