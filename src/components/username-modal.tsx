@@ -4,7 +4,7 @@ export function UsernameHead() {
   return (
     <>
       <link rel="stylesheet" href="/public/modal.css" />
-      <script defer type="module" src="/public/username-modal.js" />
+      <script defer type="module" src="/public/out/username-modal.js" />
     </>
   );
 }

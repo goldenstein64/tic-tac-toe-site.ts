@@ -2,16 +2,18 @@
   "name": "tic-tac-toe-site2",
   "version": "1.0.50",
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run --watch src/index.tsx",
     "db": "drizzle-kit"
   },
   "dependencies": {
+    "@elysiajs/eden": "^1.1.3",
     "@elysiajs/html": "^1.1.1",
     "@elysiajs/static": "^1.1.1",
     "@goldenstein64/tic-tac-toe": "link:@goldenstein64/tic-tac-toe",
     "drizzle-orm": "^0.33.0",
     "drizzle-typebox": "^0.1.1",
-    "elysia": "^1.1.22",
+    "elysia": "^1.1.23",
+    "htmx.org": "^1.9.12",
     "mitt": "^3.0.1"
   },
   "overrides": {
