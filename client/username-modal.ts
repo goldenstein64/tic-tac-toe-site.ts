@@ -4,33 +4,25 @@ import type { App } from "../src";
 
 const client = treaty<App>("localhost:3000");
 
-interface HTMXAfterRequest {
+type AfterRequestEvent = CustomEvent<{
   elt: HTMLElement;
   xhr: XMLHttpRequest;
   target: HTMLElement;
   requestConfig: any;
   successful: boolean;
   failed: boolean;
-}
+}>;
 
-type AfterRequestEvent = CustomEvent<HTMXAfterRequest>;
-
-interface HTMXBeforeRequest {
+type BeforeRequestEvent = CustomEvent<{
   elt: HTMLElement;
   xhr: XMLHttpRequest;
   target: HTMLElement;
   requestConfig: any;
-}
+}>;
 
-type BeforeRequestEvent = CustomEvent<HTMXBeforeRequest>;
-
-type APIGetUsernameResponse =
-  | { success: true; username: string }
-  | { success: false };
-
-type APIPutUsernameResponse =
-  | { success: true }
-  | { success: false; message: string };
+type APIPutUsernameResponse = NonNullable<
+  Awaited<ReturnType<typeof client.api.username.put>>["data"]
+>;
 
 const ALPHANUM = /^\w+$/;
 
