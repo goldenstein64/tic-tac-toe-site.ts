@@ -3,7 +3,9 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
-    "db": "drizzle-kit"
+    "db": "drizzle-kit",
+    "start": "bun run src/index.tsx",
+    "prestart": "bun run build.ts"
   },
   "dependencies": {
     "@elysiajs/eden": "^1.1.3",
