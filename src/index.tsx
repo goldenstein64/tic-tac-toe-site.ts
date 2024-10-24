@@ -23,7 +23,7 @@ const app = new Elysia()
     },
     { query: t.Object({ id: intString }) }
   )
-  .get("/create-game", () => Bun.file("./public/create-game.html"))
+  .get("/create-lobby", () => Bun.file("./public/create-lobby.html"))
   .use(staticPlugin())
   .listen(3000);
 

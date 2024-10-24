@@ -215,7 +215,7 @@ export async function LobbiesBody({ userId }: GameListProps) {
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
-      <button hx-on:click="location.href='/create-game'">Create Game</button>
+      <button hx-on:click="location.href='/create-lobby'">Create Game</button>
       <UserConfig userId={userId} />
       <h2>Waiting Games</h2>
       <WaitingLobbies userId={userId} />
