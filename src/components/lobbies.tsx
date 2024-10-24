@@ -1,16 +1,28 @@
 import { Html } from "@elysiajs/html";
-import { ActiveLobby, Lobby, User } from "../db/schema";
+import { ActiveLobby, Game, Lobby, User } from "../db/schema";
 import { db } from "../db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, aliasedTable, and } from "drizzle-orm";
+import { UsernameHead, UsernameModal } from "./username-modal";
 
-const selectActiveGames = db
-  .select({ lobbyId: Lobby.id })
-  .from(Lobby)
-  .innerJoin(ActiveLobby, eq(ActiveLobby.id, Lobby.id))
-  .where(eq(Lobby.status, "active"))
-  .prepare();
+const selectActiveLobbies = (() => {
+  const playerX = aliasedTable(User, "playerX");
+  const playerO = aliasedTable(User, "playerO");
+  return db
+    .select({
+      lobbyId: Lobby.id,
+      playerX: playerX.username,
+      playerO: playerO.username,
+    })
+    .from(Lobby)
+    .innerJoin(ActiveLobby, eq(ActiveLobby.id, Lobby.id))
+    .innerJoin(Game, eq(Game.id, ActiveLobby.gameId))
+    .innerJoin(playerX, eq(playerX.id, Game.playerX))
+    .innerJoin(playerO, eq(playerO.id, Game.playerO))
+    .where(eq(Lobby.status, "active"))
+    .prepare();
+})();
 
-const selectAvailableGames = db
+const selectAvailableLobbies = db
   .select({
     lobbyId: Lobby.id,
     opponent: Lobby.createdBy,
@@ -18,6 +30,20 @@ const selectAvailableGames = db
   })
   .from(Lobby)
   .where(eq(Lobby.status, "waiting"))
+  .prepare();
+
+const selectWaitingLobbies = db
+  .select({
+    lobbyId: Lobby.id,
+    createdAt: Lobby.createdAt,
+  })
+  .from(Lobby)
+  .where(
+    and(
+      eq(Lobby.status, "waiting"),
+      eq(Lobby.createdBy, sql.placeholder("userId"))
+    )
+  )
   .prepare();
 
 const selectUser = db
@@ -34,35 +60,36 @@ export function LobbiesHead() {
       <script src="/public/htmx.min.js" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <UsernameHead />
     </head>
   );
 }
 
-async function UserConfig({ userId }: UserConfigProps) {
+export async function UserConfig({ userId }: UserConfigProps) {
   const users = await selectUser.execute({ userId });
   const username = users.length > 0 ? users[0].username : "";
   return (
-    <form hx-post="/api/user">
-      <label for="set-username">Username: </label>
+    <form id="user-config" hx-post="/api/username" hx-swap="none">
+      <label for="username">Username: </label>
       <input
-        hx-select="#set-username"
-        hx-swap="outerHTML"
-        id="set-username"
+        type="text"
+        class="username-input"
+        name="username"
         value={username}
       />
-      <input type="submit">Change</input>
-      <div
-        hx-select="#username-result"
-        hx-swap="outerHTML"
-        id="username-result"
-      />
+      <button type="submit" class="username-submit">
+        Change
+      </button>
     </form>
   );
 }
 
-type WaitingLobbyItemProps = { lobbyId: number };
+type WaitingLobbyItemProps = { lobbyId: number; createdAt: Date };
 
-export function WaitingLobbyItem({ lobbyId }: WaitingLobbyItemProps) {
+export function WaitingLobbyItem({
+  lobbyId,
+  createdAt,
+}: WaitingLobbyItemProps) {
   return (
     <tr>
       <td>
@@ -71,27 +98,40 @@ export function WaitingLobbyItem({ lobbyId }: WaitingLobbyItemProps) {
         </button>
       </td>
       <td>{lobbyId}</td>
+      <td>{createdAt.toUTCString()}</td>
     </tr>
   );
 }
 
-export async function WaitingLobbies() {
+type WaitingLobbiesProps = { userId: number };
+
+export async function WaitingLobbies({ userId }: WaitingLobbiesProps) {
+  const waitingLobbies = await selectWaitingLobbies.execute({ userId });
   return (
     <table>
       <thead>
         <tr>
           <td>Actions</td>
           <td>Id</td>
+          <td>Created At</td>
         </tr>
       </thead>
-      <tbody />
+      <tbody>{waitingLobbies.map(WaitingLobbyItem)}</tbody>
     </table>
   );
 }
 
-type ActiveLobbyItemProps = { lobbyId: number };
+type ActiveLobbyItemProps = {
+  lobbyId: number;
+  playerX: string;
+  playerO: string;
+};
 
-export function ActiveLobbyItem({ lobbyId }: ActiveLobbyItemProps) {
+export function ActiveLobbyItem({
+  lobbyId,
+  playerX,
+  playerO,
+}: ActiveLobbyItemProps) {
   return (
     <tr>
       <td>
@@ -106,21 +146,25 @@ export function ActiveLobbyItem({ lobbyId }: ActiveLobbyItemProps) {
         </button>
       </td>
       <td>{lobbyId}</td>
+      <td>{playerX}</td>
+      <td>{playerO}</td>
     </tr>
   );
 }
 
 export async function ActiveLobbies() {
+  const activeLobbies = await selectActiveLobbies.execute();
   return (
     <table>
       <thead>
         <tr>
           <td>Actions</td>
           <td>Id</td>
-          <td>Opponent</td>
+          <td>Player X</td>
+          <td>Player O</td>
         </tr>
       </thead>
-      <tbody />
+      <tbody>{activeLobbies.map(ActiveLobbyItem)}</tbody>
     </table>
   );
 }
@@ -151,7 +195,7 @@ export function AvailableLobbyItem({
 }
 
 export async function AvailableLobbies() {
-  const availableLobbies = await selectAvailableGames.execute();
+  const availableLobbies = await selectAvailableLobbies.execute();
   return (
     <table>
       <thead>
@@ -174,11 +218,13 @@ export async function LobbiesBody({ userId }: GameListProps) {
       <button hx-on:click="location.href='/create-game'">Create Game</button>
       <UserConfig userId={userId} />
       <h2>Waiting Games</h2>
-      <WaitingLobbies />
+      <WaitingLobbies userId={userId} />
       <h2>Active Games</h2>
       <ActiveLobbies />
       <h2>Available Games</h2>
       <AvailableLobbies />
+
+      <UsernameModal />
     </body>
   );
 }
