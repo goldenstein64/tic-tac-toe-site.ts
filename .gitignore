@@ -48,3 +48,4 @@ game.db-wal
 
 /secret
 /.env.local
+/public/out
