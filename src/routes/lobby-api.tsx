@@ -90,14 +90,14 @@ const insertLobby = async (args: { userId: number; status: LobbyStatus }) => {
   return result[0];
 };
 
-const deleteLobbyIdSql = db
+const deleteLobbyByIdSql = db
   .delete(Lobby)
   .where(eq(Lobby.id, sql.placeholder("id")))
   .prepare();
-const deleteLobby = async (args: { id: number }) =>
-  deleteLobbyIdSql.execute(args);
+const deleteLobbyById = async (args: { id: number }) =>
+  deleteLobbyByIdSql.execute(args);
 
-const selectPlayerInGameSql = db
+const findPlayerInGameSql = db
   .select({ playerX: Game.playerX, playerO: Game.playerO })
   .from(Game)
   .where(
@@ -114,7 +114,7 @@ const selectPlayerInGame = async (args: {
   lobbyId: number;
   userId: number;
 }) => {
-  const result = await selectPlayerInGameSql.execute(args);
+  const result = await findPlayerInGameSql.execute(args);
   if (result.length > 1) {
     throw new Error("selected more than one lobby!");
   }
@@ -348,7 +348,7 @@ export default new Elysia({ prefix: "/api" })
         return error(403, "not a waiting lobby or not created by user");
       }
 
-      await deleteLobby({ id: lobbyId });
+      await deleteLobbyById({ id: lobbyId });
 
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";
