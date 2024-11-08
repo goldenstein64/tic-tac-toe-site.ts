@@ -16,7 +16,6 @@ export function UsernameModal() {
         <h2>Enter your username</h2>
         <input
           type="text"
-          id="username-input"
           name="username"
           autofocus="true"
           placeholder="Username"
@@ -25,7 +24,7 @@ export function UsernameModal() {
           <li>Must be between 1 and 32 characters</li>
           <li>Must be entirely alphanumeric</li>
         </ul>
-        <button id="username-submit" type="submit" hx-disabled-elt="this">
+        <button type="submit" hx-disabled-elt="this">
           Submit
         </button>
       </form>

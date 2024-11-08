@@ -1,8 +1,5 @@
-declare const htmx: typeof import("htmx.org");
 import { treaty } from "@elysiajs/eden";
 import type { App } from "../src";
-
-const client = treaty<App>("localhost:3000");
 
 type AfterRequestEvent = CustomEvent<{
   elt: HTMLElement;
@@ -24,14 +21,22 @@ type APIPutUsernameResponse = NonNullable<
   Awaited<ReturnType<typeof client.api.username.put>>["data"]
 >;
 
+const client = treaty<App>("localhost:3000");
+
 const ALPHANUM = /^\w+$/;
 
-const usernameConfigInput = htmx.find(
-  "#user-config .username-input"
+const usernameConfigInput = document.querySelector(
+  "#user-config input[name='username']"
 ) as HTMLInputElement;
-const usernameInput = htmx.find("#username-input") as HTMLInputElement;
-const usernameModal = htmx.find("#username-modal") as HTMLDialogElement;
-const usernameSubmit = htmx.find("#username-submit") as HTMLButtonElement;
+const usernameInput = document.querySelector(
+  "#username-modal input[name='username']"
+) as HTMLInputElement;
+const usernameModal = document.querySelector(
+  "#username-modal"
+) as HTMLDialogElement;
+const usernameSubmit = document.querySelector(
+  "#username-modal button[type='submit']"
+) as HTMLButtonElement;
 
 {
   const { data, error } = await client.api.username.get();
@@ -50,11 +55,11 @@ function isUsernameValid(username: string): boolean {
   );
 }
 
-htmx.on("#username-input", "change", () => {
+usernameInput.addEventListener("change", () => {
   usernameSubmit.disabled = !isUsernameValid(usernameInput.value);
 });
 
-htmx.on("#username-modal", "htmx:before-request", (rawEvt) => {
+usernameModal.addEventListener("htmx:before-request", (rawEvt) => {
   const evt = rawEvt as unknown as BeforeRequestEvent;
   const parameters: FormData = evt.detail.requestConfig.parameters;
 
@@ -74,7 +79,7 @@ htmx.on("#username-modal", "htmx:before-request", (rawEvt) => {
   evt.preventDefault();
 });
 
-htmx.on("#username-modal", "htmx:after-request", (rawEvt) => {
+usernameModal.addEventListener("htmx:after-request", (rawEvt) => {
   const evt = rawEvt as unknown as AfterRequestEvent;
   const xhr = evt.detail.xhr;
   if (xhr.status < 200 || xhr.status >= 300) return;
