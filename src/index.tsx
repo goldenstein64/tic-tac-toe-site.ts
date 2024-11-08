@@ -18,8 +18,8 @@ const app = new Elysia()
   .get("/", () => LobbiesHtml({ userId: 4 }))
   .get(
     "/game",
-    ({ query: { id: gameId } }) => {
-      return GameHtml({ gameId, userId: 4 });
+    ({ query: { id: lobbyId } }) => {
+      return GameHtml({ lobbyId, userId: 4 });
     },
     { query: t.Object({ id: intString }) }
   )
