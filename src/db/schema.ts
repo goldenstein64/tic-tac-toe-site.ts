@@ -29,7 +29,7 @@ const lobbyStatus = customType<{
       case 2:
         return "finished";
       default:
-        throw new Error("invalid lobby status");
+        throw new Error("invalid lobby number status");
     }
   },
   toDriver(val) {
@@ -41,7 +41,7 @@ const lobbyStatus = customType<{
       case "finished":
         return 2;
       default:
-        throw new Error("invalid lobby status");
+        throw new Error("invalid lobby string status");
     }
   },
 });
@@ -66,8 +66,26 @@ export const IsComputer = createTable("IsComputer", {
     .references(() => User.id),
 });
 
-export const Game = createTable("Game", {
+export const Lobby = createTable("Lobby", {
   id: number("id").primaryKey({ autoIncrement: true }),
+  createdBy: number("createdBy")
+    .notNull()
+    .references(() => User.id),
+  createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
+  status: lobbyStatus("status").notNull().default("waiting"),
+});
+
+export const FinishedLobby = createTable("FinishedLobby", {
+  id: number("id")
+    .primaryKey()
+    .references(() => Lobby.id),
+  finishedAt: timestamp("finishedAt").notNull().default(UNIX_EPOCH),
+});
+
+export const Game = createTable("Game", {
+  lobbyId: number("lobbyId")
+    .primaryKey()
+    .references(() => Lobby.id),
   playerX: number("playerX")
     .notNull()
     .references(() => User.id),
@@ -79,44 +97,16 @@ export const Game = createTable("Game", {
 export const Move = createTable(
   "Move",
   {
-    gameId: number("gameId")
+    lobbyId: number("lobbyId")
       .notNull()
-      .references(() => Game.id),
+      .references(() => Lobby.id),
     ordering: number("ordering").notNull(),
     position: number("position").notNull(),
   },
   (Move) => ({
-    primaryKey: primaryKey({ columns: [Move.gameId, Move.ordering] }),
+    primaryKey: primaryKey({ columns: [Move.lobbyId, Move.ordering] }),
   })
 );
-
-export const Lobby = createTable("Lobby", {
-  id: number("id").primaryKey({ autoIncrement: true }),
-  createdBy: number("createdBy")
-    .notNull()
-    .references(() => User.id),
-  createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
-  status: lobbyStatus("status").notNull().default("waiting"),
-});
-
-export const ActiveLobby = createTable("ActiveLobby", {
-  id: number("id")
-    .primaryKey()
-    .references(() => Lobby.id),
-  gameId: number("gameId")
-    .notNull()
-    .references(() => Game.id),
-});
-
-export const FinishedLobby = createTable("FinishedLobby", {
-  id: number("id")
-    .primaryKey()
-    .references(() => Lobby.id),
-  finishedAt: timestamp("finishedAt").notNull().default(UNIX_EPOCH),
-  gameId: number("gameId")
-    .notNull()
-    .references(() => Game.id),
-});
 
 /*
 - User
@@ -156,22 +146,18 @@ export const GameRelations = relations(Game, ({ one, many }) => ({
   XsPlayedBy: one(User, { fields: [Game.playerX], references: [User.id] }),
   OsPlayedBy: one(User, { fields: [Game.playerO], references: [User.id] }),
   composes: many(Move),
+  belongsTo: one(Lobby, { fields: [Game.lobbyId], references: [Lobby.id] }),
 }));
 
 export const MoveRelations = relations(Move, ({ one }) => ({
-  belongsTo: one(Game, { fields: [Move.gameId], references: [Game.id] }),
+  belongsTo: one(Lobby, { fields: [Move.lobbyId], references: [Lobby.id] }),
 }));
 
 export const LobbyRelations = relations(Lobby, ({ one }) => ({
   createdBy: one(User, { fields: [Lobby.createdBy], references: [User.id] }),
 }));
 
-export const ActiveLobbyRelations = relations(ActiveLobby, ({ one }) => ({
-  derives: one(Lobby, { fields: [ActiveLobby.id], references: [Lobby.id] }),
-  hosts: one(Game, { fields: [ActiveLobby.gameId], references: [Game.id] }),
-}));
-
 export const FinishedLobbyRelations = relations(FinishedLobby, ({ one }) => ({
   derives: one(Lobby, { fields: [FinishedLobby.id], references: [Lobby.id] }),
-  hosted: one(Game, { fields: [FinishedLobby.gameId], references: [Game.id] }),
+  hosted: one(Game, { fields: [FinishedLobby.id], references: [Game.lobbyId] }),
 }));

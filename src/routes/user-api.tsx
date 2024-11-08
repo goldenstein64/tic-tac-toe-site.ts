@@ -1,16 +1,14 @@
-import { Html, html } from "@elysiajs/html";
+import html, { Html } from "@elysiajs/html";
 import { Elysia, t } from "elysia";
-import { and, eq, gt, sql, notExists, or, exists, lte } from "drizzle-orm";
+import { eq, sql, notExists } from "drizzle-orm";
 
-import { ActiveLobby, FinishedLobby, Game, Lobby, User } from "../db/schema";
+import { User } from "../db/schema";
 import { db } from "../db";
-import { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { intString } from "../types";
 
 const ALPHANUMERIC = /\w+/;
 const DAY_LENGTH = 86_400;
 const UNIX_EPOCH = sql<number>`(unixepoch())`;
-
 const USER_AGE = sql<number>`(${UNIX_EPOCH} - ${User.createdAt})`;
 
 const upsertUser = async (args: { username: string; id?: number }) => {
@@ -40,62 +38,6 @@ const upsertUser = async (args: { username: string; id?: number }) => {
     return result[0].id;
   } else {
     throw new Error("upsertUser updated more than one user!");
-  }
-};
-
-const selectCurrentUsersInGameSql = db
-  .select()
-  .from(User)
-  .where(
-    and(
-      or(eq(Game.playerX, User.id), eq(Game.playerO, User.id)),
-      lte(USER_AGE, DAY_LENGTH)
-    )
-  );
-
-const selectCurrentGameSql = (gameId: SQLiteColumn) =>
-  db
-    .select()
-    .from(Game)
-    .where(and(eq(gameId, Game.id), exists(selectCurrentUsersInGameSql)));
-
-const removeOutdatedActiveLobbiesSql = db
-  .delete(ActiveLobby)
-  .where(notExists(selectCurrentGameSql(ActiveLobby.gameId)))
-  .returning({ id: ActiveLobby.id })
-  .prepare();
-
-const removeOutdatedFinishedLobbiesSql = db
-  .delete(FinishedLobby)
-  .where(notExists(selectCurrentGameSql(FinishedLobby.gameId)))
-  .returning({ id: ActiveLobby.id })
-  .prepare();
-
-const removeLobbySql = db
-  .delete(Lobby)
-  .where(eq(Lobby.id, sql.placeholder("id")))
-  .prepare();
-
-const removeOutdatedUserSql = db
-  .delete(User)
-  .where(
-    and(
-      eq(User.id, sql.placeholder("id")),
-      gt(sql<number>`${UNIX_EPOCH} - ${User.createdAt}`, DAY_LENGTH)
-    )
-  )
-  .returning({ id: User.id })
-  .prepare();
-const removeOutdatedUser = async (args: { id: number }) => {
-  const { id } = args;
-  const result = await removeOutdatedUserSql.execute({ id });
-
-  if (result.length === 0) {
-    return undefined;
-  } else if (result.length === 1) {
-    return result[0].id;
-  } else {
-    throw new Error("removeOutdatedUser removed more than 1 user!");
   }
 };
 

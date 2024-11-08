@@ -1,5 +1,5 @@
 import { Html } from "@elysiajs/html";
-import { ActiveLobby, FinishedLobby, Game, Lobby, User } from "../db/schema";
+import { Game, Lobby, User } from "../db/schema";
 import { db } from "../db";
 import { eq, sql, aliasedTable, and } from "drizzle-orm";
 import { UsernameHead, UsernameModal } from "./username-modal";
@@ -14,8 +14,7 @@ const selectActiveLobbies = (() => {
       playerO: playerO.username,
     })
     .from(Lobby)
-    .innerJoin(ActiveLobby, eq(ActiveLobby.id, Lobby.id))
-    .innerJoin(Game, eq(Game.id, ActiveLobby.gameId))
+    .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
     .innerJoin(playerX, eq(playerX.id, Game.playerX))
     .innerJoin(playerO, eq(playerO.id, Game.playerO))
     .where(eq(Lobby.status, "active"))
@@ -32,11 +31,10 @@ const selectFinishedLobbies = (() => {
       playerO: playerO.username,
     })
     .from(Lobby)
-    .innerJoin(FinishedLobby, eq(FinishedLobby.id, Lobby.id))
-    .innerJoin(Game, eq(Game.id, FinishedLobby.gameId))
+    .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
     .innerJoin(playerX, eq(playerX.id, Game.playerX))
     .innerJoin(playerO, eq(playerO.id, Game.playerO))
-    .where(eq(Lobby.status, "active"))
+    .where(eq(Lobby.status, "finished"))
     .prepare();
 })();
 

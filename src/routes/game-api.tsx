@@ -15,13 +15,13 @@ import { GameButton } from "../components/game";
 const selectMaxOrdering = db
   .select({ ordering: max(Move.ordering) })
   .from(Move)
-  .where(eq(Move.gameId, sql.placeholder("gameId")))
+  .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
   .prepare();
 
 const insertMove = db
   .insert(Move)
   .values({
-    gameId: sql.placeholder("gameId"),
+    lobbyId: sql.placeholder("lobbyId"),
     ordering: sql.placeholder("ordering"),
     position: sql.placeholder("position"),
   })
@@ -66,19 +66,19 @@ export default new Elysia({ prefix: "/api" })
   .post(
     "/game-move",
     async function addMove({ body, set }) {
-      const { id: gameId, position } = body;
-      const result = selectMaxOrdering.get({ gameId });
+      const { id: lobbyId, position } = body;
+      const result = selectMaxOrdering.get({ lobbyId });
       const ordering = (result?.ordering ?? 0) + 1;
 
-      insertMove.run({ gameId, ordering, position });
-      const { board, event } = getGameState(gameId);
+      insertMove.run({ lobbyId, ordering, position });
+      const { board, event } = getGameState(lobbyId);
       const mark = orderingToMark(ordering);
       board.data[position - 1] = mark;
       event.emit("message", [ordering, position]);
 
       set.headers["Content-Type"] = "text/html";
       return (
-        <GameButton disabled={true} gameId={gameId} position={position}>
+        <GameButton disabled={true} lobbyId={lobbyId} position={position}>
           {mark}
         </GameButton>
       );
@@ -94,19 +94,19 @@ export default new Elysia({ prefix: "/api" })
   .get(
     "/game-move",
     async function* getMoveStream({ query, set }) {
-      const { id: gameId } = query;
+      const { id: lobbyId } = query;
       set.headers["X-Accel-Buffering"] = "no";
       set.headers["Cache-Control"] = "no-cache";
       set.headers["Content-Type"] = "text/event-stream";
 
-      const { board, event } = getGameState(gameId);
+      const { board, event } = getGameState(lobbyId);
 
       while (true) {
         const [ordering, position] = await waitForEvent(event, "message");
         const mark = orderingToMark(ordering);
         yield `event: pos-${position}\n`;
         yield `data: ${(
-          <GameButton disabled={false} gameId={gameId} position={position}>
+          <GameButton disabled={false} lobbyId={lobbyId} position={position}>
             {mark}
           </GameButton>
         )}\n\n`;

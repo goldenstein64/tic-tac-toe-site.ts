@@ -1,18 +1,18 @@
 import type { LobbyStatus } from "../db/schema";
+import type { Static } from "elysia";
 
 import html, { Html } from "@elysiajs/html";
-import Elysia, { error, Static, t } from "elysia";
-import { and, eq, exists, or, sql } from "drizzle-orm";
+import Elysia, { error, t } from "elysia";
+import { and, eq, or, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
 
 import { intString } from "../types";
 import { db, tx } from "../db";
-import { ActiveLobby, FinishedLobby, Game, Lobby, Move } from "../db/schema";
+import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
 import runGame from "../libs/run-game";
 
-export type LobbyAction = "forfeit" | "join";
-
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
+export type LobbyAction = Static<typeof LobbyAction>;
 
 const playerTypeSet = [-1, 1, 2, 3];
 
@@ -36,16 +36,6 @@ const PlayerTypeString = t
     }
   })
   .Encode((value: PlayerType) => value.toString());
-
-const selectLobbyByIdSql = db
-  .select({ status: Lobby.status, createdBy: Lobby.createdBy })
-  .from(Lobby)
-  .where(eq(Lobby.id, sql.placeholder("lobbyId")))
-  .prepare();
-const selectLobbyById = async (args: { lobbyId: number }) => {
-  const result = await selectLobbyByIdSql.execute(args);
-  return result.length > 0 ? result[0] : undefined;
-};
 
 const selectLobbyByIdStatusCreatedBySql = db
   .select({ id: Lobby.id })
@@ -74,18 +64,16 @@ const selectLobbyByIdStatusCreatedBy = async (args: {
 const insertGameSql = db
   .insert(Game)
   .values({
+    lobbyId: sql.placeholder("lobbyId"),
     playerX: sql.placeholder("playerX"),
     playerO: sql.placeholder("playerO"),
   })
-  .returning({ id: Game.id })
   .prepare();
-const insertGame = async (args: { playerX: number; playerO: number }) => {
-  const result = await insertGameSql.execute(args);
-  if (result.length <= 0) {
-    throw new Error("unable to insert game!");
-  }
-  return result[0].id;
-};
+const insertGame = async (args: {
+  lobbyId: number;
+  playerX: number;
+  playerO: number;
+}) => insertGameSql.execute(args);
 
 const insertLobbySql = db
   .insert(Lobby)
@@ -100,6 +88,38 @@ const insertLobby = async (args: { userId: number; status: LobbyStatus }) => {
   if (result.length <= 0) throw new Error("unable to insert lobby!");
 
   return result[0];
+};
+
+const deleteLobbyIdSql = db
+  .delete(Lobby)
+  .where(eq(Lobby.id, sql.placeholder("id")))
+  .prepare();
+const deleteLobby = async (args: { id: number }) =>
+  deleteLobbyIdSql.execute(args);
+
+const selectPlayerInGameSql = db
+  .select({ playerX: Game.playerX, playerO: Game.playerO })
+  .from(Game)
+  .where(
+    and(
+      eq(Game.lobbyId, sql.placeholder("lobbyId")),
+      or(
+        eq(Game.playerX, sql.placeholder("userId")),
+        eq(Game.playerO, sql.placeholder("userId"))
+      )
+    )
+  )
+  .prepare();
+const selectPlayerInGame = async (args: {
+  lobbyId: number;
+  userId: number;
+}) => {
+  const result = await selectPlayerInGameSql.execute(args);
+  if (result.length > 1) {
+    throw new Error("selected more than one lobby!");
+  }
+
+  return result.length === 1 ? result[0] : undefined;
 };
 
 const updateLobbyStatus = async (args: {
@@ -121,58 +141,18 @@ const updateLobbyStatus = async (args: {
   return result.length === 1 ? result[0] : undefined;
 };
 
-const insertActiveLobbySql = db
-  .insert(ActiveLobby)
-  .values({ gameId: sql.placeholder("gameId"), id: sql.placeholder("id") })
-  .prepare();
-const insertActiveLobby = async (args: { gameId: number; id: number }) => {
-  return await insertActiveLobbySql.execute(args);
-};
-
-const deleteActiveLobbySql = db
-  .delete(ActiveLobby)
-  .where(
-    and(
-      eq(ActiveLobby.id, sql.placeholder("lobbyId")),
-      exists(
-        db
-          .select()
-          .from(Game)
-          .where(
-            and(
-              eq(Game.id, ActiveLobby.gameId),
-              or(
-                eq(Game.playerX, sql.placeholder("userId")),
-                eq(Game.playerO, sql.placeholder("userId"))
-              )
-            )
-          )
-      )
-    )
-  )
-  .returning({ gameId: ActiveLobby.gameId })
-  .prepare();
-const deleteActiveLobby = async (args: { lobbyId: number; userId: number }) => {
-  const result = await deleteActiveLobbySql.execute(args);
-  if (result.length > 1) {
-    throw new Error("removed more than one active lobby!");
-  }
-  return result.length === 1 ? result[0].gameId : undefined;
-};
-
 const insertFinishedLobbySql = db
   .insert(FinishedLobby)
-  .values({ gameId: sql.placeholder("gameId"), id: sql.placeholder("id") })
+  .values({ id: sql.placeholder("id") })
   .prepare();
-const insertFinishedLobby = async (args: { gameId: number; id: number }) => {
-  return await insertFinishedLobbySql.execute(args);
-};
+const insertFinishedLobby = async (args: { id: number }) =>
+  insertFinishedLobbySql.execute(args);
 
-const insertMoves = async (args: { gameId: number; moves: number[] }) => {
-  const { gameId, moves } = args;
+const insertMoves = async (args: { lobbyId: number; moves: number[] }) => {
+  const { lobbyId, moves } = args;
   await db.insert(Move).values(
     moves.map((position, i) => ({
-      gameId,
+      lobbyId,
       ordering: i + 1,
       position: position + 1,
     }))
@@ -180,8 +160,19 @@ const insertMoves = async (args: { gameId: number; moves: number[] }) => {
 };
 
 class CustomRollbackError extends Error {}
+class ResponseError extends Error {
+  errorObject: ReturnType<typeof error>;
 
-type ForfeitResult = { success: true } | { success: false; message: string };
+  constructor(code: Parameters<typeof error>[0], response?: string) {
+    super(response);
+    this.errorObject = error(code, response);
+  }
+}
+
+type ForfeitResult =
+  | { success: true }
+  | { success: false; message: string }
+  | ReturnType<typeof error>;
 
 async function forfeitActiveLobby(
   lobbyId: number,
@@ -189,6 +180,14 @@ async function forfeitActiveLobby(
 ): Promise<ForfeitResult> {
   try {
     return await tx.transaction(async () => {
+      const playerResult = await selectPlayerInGame({ lobbyId, userId });
+      if (
+        playerResult === undefined ||
+        (playerResult.playerX !== userId && playerResult.playerO !== userId)
+      ) {
+        throw new ResponseError("Forbidden");
+      }
+
       const lobby = await updateLobbyStatus({
         id: lobbyId,
         fromStatus: "active",
@@ -201,26 +200,24 @@ async function forfeitActiveLobby(
         );
       }
 
-      const activeGameId = await deleteActiveLobby({ lobbyId, userId });
-      if (activeGameId === undefined) {
-        throw new CustomRollbackError(
-          "unable to forfeit game (active row didn't exist or user wasn't part of the game)"
-        );
-      }
-
-      await insertFinishedLobby({ gameId: activeGameId, id: lobbyId });
+      await insertFinishedLobby({ id: lobbyId });
       return { success: true };
     });
   } catch (err) {
     if (err instanceof CustomRollbackError) {
       return { success: false, message: err.message };
+    } else if (err instanceof ResponseError) {
+      return err.errorObject;
     } else {
       throw err;
     }
   }
 }
 
-type JoinResult = { success: true } | { success: false; message: string };
+type JoinResult =
+  | { success: true }
+  | { success: false; message: string }
+  | ReturnType<typeof error>;
 
 async function joinWaitingLobby(
   lobbyId: number,
@@ -250,9 +247,8 @@ async function joinWaitingLobby(
       }
 
       // add a Game and ActiveLobby row
-      const gameId = await insertGame({ playerX, playerO });
+      await insertGame({ lobbyId, playerX, playerO });
 
-      await insertActiveLobby({ gameId, id: lobbyId });
       return { success: true };
     });
   } catch (err) {
@@ -299,30 +295,33 @@ export default new Elysia({ prefix: "/api" })
         const moves = await runGame(computerIdX, computerIdO);
 
         await tx.transaction(async () => {
-          const gameId = await insertGame({
-            playerX: computerIdX,
-            playerO: computerIdO,
-          });
-          await insertMoves({ gameId, moves });
           const { id: lobbyId } = await insertLobby({
             userId,
             status: "finished",
           });
-          await insertFinishedLobby({ gameId, id: lobbyId });
+          await Promise.all([
+            insertGame({
+              lobbyId,
+              playerX: computerIdX,
+              playerO: computerIdO,
+            }),
+            insertMoves({ lobbyId, moves }),
+          ]);
+          await insertFinishedLobby({ id: lobbyId });
         });
       } else if (computerIdX || computerIdO) {
         // only one is a computer, create an active lobby with this user as the
         // human
         await tx.transaction(async () => {
-          const gameId = await insertGame({
-            playerX: computerIdX ?? userId,
-            playerO: computerIdO ?? userId,
-          });
           const { id: lobbyId } = await insertLobby({
             userId,
             status: "active",
           });
-          await insertActiveLobby({ gameId, id: lobbyId });
+          await insertGame({
+            lobbyId,
+            playerX: computerIdX ?? userId,
+            playerO: computerIdO ?? userId,
+          });
         });
       } else {
         // neither are computers, create a waiting lobby with this user waiting
@@ -339,15 +338,17 @@ export default new Elysia({ prefix: "/api" })
     async ({ query: { id }, set, cookie: { userId: userIdCookie } }) => {
       // delete a waiting lobby
       const userId = userIdCookie.value;
-      const lobby = await selectLobbyByIdStatusCreatedBy({
+      const lobbyId = await selectLobbyByIdStatusCreatedBy({
         lobbyId: id,
         createdBy: userId,
         status: "waiting",
       });
-      if (lobby === undefined) {
+      if (lobbyId === undefined) {
         // this is not a waiting lobby or it was not created by them
         return error(403, "not a waiting lobby or not created by user");
       }
+
+      await deleteLobby({ id: lobbyId });
 
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";

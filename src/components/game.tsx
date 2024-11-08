@@ -14,7 +14,7 @@ function orderingToMark(ordering: number): Mark {
 const selectGameMoves = db
   .select({ position: Move.position, ordering: Move.ordering })
   .from(Move)
-  .where(eq(Move.gameId, sql.placeholder("gameId")))
+  .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
   .prepare();
 
 const selectUser = db
@@ -26,7 +26,7 @@ const selectUser = db
 const selectGamePlayers = db
   .select({ playerX: Game.playerX, playerO: Game.playerO })
   .from(Game)
-  .where(eq(Game.id, sql.placeholder("gameId")))
+  .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
   .prepare();
 
 export function GameHead() {
@@ -43,20 +43,20 @@ export function GameHead() {
 
 type GameButtonProps = {
   disabled: boolean;
-  gameId: number;
+  lobbyId: number;
   position: number;
   children?: Mark;
 };
 
 export function GameButton(props: GameButtonProps) {
-  const { disabled, gameId, position, children: mark } = props;
+  const { disabled, lobbyId, position, children: mark } = props;
   return (
     <button
       type="button"
       sse-swap={`pos-${position}`}
       hx-swap="outerHTML"
       hx-post="/api/game-move"
-      hx-vals={{ id: gameId, position: position }}
+      hx-vals={{ id: lobbyId, position: position }}
       disabled={disabled}
     >
       {mark}
@@ -64,9 +64,9 @@ export function GameButton(props: GameButtonProps) {
   );
 }
 
-export function GameBoard(props: { gameId: number }) {
-  const { gameId } = props;
-  const movesArray = selectGameMoves.all({ gameId });
+export function GameBoard(props: { lobbyId: number }) {
+  const { lobbyId } = props;
+  const movesArray = selectGameMoves.all({ lobbyId });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
   );
@@ -87,7 +87,7 @@ export function GameBoard(props: { gameId: number }) {
         const ordering = moves.get(i + 1);
         const mark = ordering ? orderingToMark(ordering) : undefined;
         return (
-          <GameButton disabled={false} gameId={gameId} position={i + 1}>
+          <GameButton disabled={false} lobbyId={lobbyId} position={i + 1}>
             {mark}
           </GameButton>
         );
@@ -105,31 +105,31 @@ export function PlayerInfo(props: { userId: number }) {
   return <aside>{username}</aside>;
 }
 
-export function GameMain(props: { gameId: number }) {
-  const { gameId } = props;
+export function GameMain(props: { lobbyId: number }) {
+  const { lobbyId } = props;
   return (
     <main
       hx-trigger="load"
       hx-ext="sse"
-      sse-connect={`/api/game-move?id=${gameId}`}
+      sse-connect={`/api/game-move?id=${lobbyId}`}
     >
       <h3>
         Winner: <span sse-swap="winner" />
       </h3>
 
-      <GameBoard gameId={gameId} />
+      <GameBoard lobbyId={lobbyId} />
     </main>
   );
 }
 
 type GameHtmlProps = {
-  gameId: number;
+  lobbyId: number;
   userId: number;
 };
 
-export function GameBody(props: { gameId: number; userId: number }) {
-  const { gameId, userId } = props;
-  const result = selectGamePlayers.get({ gameId });
+export function GameBody(props: { lobbyId: number; userId: number }) {
+  const { lobbyId, userId } = props;
+  const result = selectGamePlayers.get({ lobbyId });
   if (!result) return null;
   const { playerX, playerO } = result;
   const opponentId = userId === playerX ? playerO : playerX;
@@ -137,7 +137,7 @@ export function GameBody(props: { gameId: number; userId: number }) {
     <body>
       <h1>tic-tac-toe-site</h1>
       <PlayerInfo userId={userId} />
-      <GameMain gameId={gameId} />
+      <GameMain lobbyId={lobbyId} />
       <PlayerInfo userId={opponentId} />
     </body>
   );
