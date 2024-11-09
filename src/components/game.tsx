@@ -151,3 +151,5 @@ export function GameHtml(props: GameHtmlProps) {
     </html>
   );
 }
+
+export default GameHtml;

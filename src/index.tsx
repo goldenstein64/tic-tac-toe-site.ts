@@ -1,9 +1,9 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
-import html, { Html } from "@elysiajs/html";
+import html from "@elysiajs/html";
 
-import { GameHtml } from "./components/game";
-import { LobbiesHtml } from "./components/lobbies";
+import GameHtml from "./components/game";
+import LobbiesHtml from "./components/lobbies";
 
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";

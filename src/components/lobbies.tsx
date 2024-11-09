@@ -298,3 +298,5 @@ export async function LobbiesHtml(props: GameListProps) {
     </html>
   );
 }
+
+export default LobbiesHtml;
