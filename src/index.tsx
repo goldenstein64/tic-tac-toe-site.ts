@@ -25,10 +25,11 @@ const app = new Elysia()
   )
   .get("/create-lobby", () => Bun.file("./public/create-lobby.html"))
   .use(staticPlugin())
-  .listen(3000);
+  .listen({ port: 3000 });
 
 export type App = typeof app;
 
+console.log(`NODE_ENV='${Bun.env.NODE_ENV}'`);
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`
 );
