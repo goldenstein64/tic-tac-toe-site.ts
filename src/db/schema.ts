@@ -1,58 +1,11 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   text,
-  integer,
   sqliteTable as createTable,
   primaryKey,
-  customType,
 } from "drizzle-orm/sqlite-core";
-
-export type LobbyStatus = "waiting" | "active" | "finished";
-
-const UNIX_EPOCH = sql<number>`(unixepoch())`;
-
-const lobbyStatus = customType<{
-  data: LobbyStatus;
-  driverData: 0 | 1 | 2;
-  notNull: true;
-  default: true;
-}>({
-  dataType() {
-    return "integer";
-  },
-  fromDriver(val) {
-    switch (val) {
-      case 0:
-        return "waiting";
-      case 1:
-        return "active";
-      case 2:
-        return "finished";
-      default:
-        throw new Error("invalid lobby number status");
-    }
-  },
-  toDriver(val) {
-    switch (val) {
-      case "waiting":
-        return 0;
-      case "active":
-        return 1;
-      case "finished":
-        return 2;
-      default:
-        throw new Error("invalid lobby string status");
-    }
-  },
-});
-
-function number<S extends string>(name: S) {
-  return integer(name, { mode: "number" });
-}
-
-function timestamp<S extends string>(name: S) {
-  return integer(name, { mode: "timestamp" });
-}
+import { lobbyStatus, number, timestamp } from "./datatypes";
+import { UNIX_EPOCH } from "./constants";
 
 export const User = createTable("User", {
   id: number("id").primaryKey({ autoIncrement: true }),

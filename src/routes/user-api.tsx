@@ -3,12 +3,12 @@ import { Elysia, t } from "elysia";
 import { eq, sql, notExists } from "drizzle-orm";
 
 import { User } from "../db/schema";
+import { UNIX_EPOCH } from "../db/constants";
 import { db } from "../db";
 import { intString } from "../types";
 
 const ALPHANUMERIC = /\w+/;
 const DAY_LENGTH = 86_400;
-const UNIX_EPOCH = sql<number>`(unixepoch())`;
 const USER_AGE = sql<number>`(${UNIX_EPOCH} - ${User.createdAt})`;
 
 const upsertUser = async (args: { username: string; id?: number }) => {
