@@ -23,9 +23,11 @@ Bun.spawnSync({ cmd: ["drizzle-kit", "push"], stdout: "inherit" });
 console.log("writing initial data...");
 const db = drizzle(new Database("game.db"), { schema });
 
-const easyCreated = new Date(Date.UTC(2024, 3, 5, 20, 47)); // 2024/3/5 20:47
-const mediumCreated = new Date(Date.UTC(2023, 8, 4, 17, 35)); // 2023/8/4 17:35
-const hardCreated = new Date(Date.UTC(2023, 8, 6, 20, 23)); // 2023/8/6 20:23
+// UTC, 24-hour time
+const easyCreated = new Date(Date.UTC(2024, 3, 6, 1, 47)); // 2024/3/6 1:47
+const mediumCreated = new Date(Date.UTC(2023, 8, 4, 22, 35)); // 2023/8/4 22:35
+const hardCreated = new Date(Date.UTC(2023, 8, 7, 1, 23)); // 2023/8/7 1:23
+const debugCreated = new Date(Date.UTC(2024, 11, 16, 3, 5)); // 2024/11/16 3:05
 
 const insertComputerUsers = db
   .insert(User)
@@ -33,6 +35,7 @@ const insertComputerUsers = db
     { id: 1, username: "EasyComputer", createdAt: easyCreated },
     { id: 2, username: "MediumComputer", createdAt: mediumCreated },
     { id: 3, username: "HardComputer", createdAt: hardCreated },
+    { id: 4, username: "DebugUser", createdAt: debugCreated },
   ])
   .onConflictDoNothing();
 
