@@ -9,8 +9,9 @@ import { UNIX_EPOCH } from "./constants";
 
 export const User = createTable("User", {
   id: number("id").primaryKey({ autoIncrement: true }),
-  username: text("username").notNull().unique(),
+  username: text("username").notNull(),
   createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
+  refreshKey: number("refreshKey").notNull(),
 });
 
 export const IsComputer = createTable("IsComputer", {
