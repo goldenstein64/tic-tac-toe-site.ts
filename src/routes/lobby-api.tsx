@@ -1,4 +1,4 @@
-import type { LobbyStatus } from "../db/schema";
+import type { LobbyStatus } from "../db/datatypes";
 import type { Static } from "elysia";
 
 import html, { Html } from "@elysiajs/html";
