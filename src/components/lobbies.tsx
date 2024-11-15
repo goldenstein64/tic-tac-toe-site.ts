@@ -268,7 +268,8 @@ export async function FinishedLobbies() {
   );
 }
 
-export async function LobbiesBody({ userId }: GameListProps) {
+export async function LobbiesBody({ user }: LobbiesProps) {
+  const userId = user.id;
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
@@ -288,9 +289,9 @@ export async function LobbiesBody({ userId }: GameListProps) {
   );
 }
 
-type GameListProps = UserConfigProps;
+type LobbiesProps = { user: SelectUser };
 
-export async function LobbiesHtml(props: GameListProps) {
+export async function LobbiesHtml(props: LobbiesProps) {
   return (
     <html>
       <LobbiesHead />

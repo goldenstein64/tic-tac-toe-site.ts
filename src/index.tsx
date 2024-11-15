@@ -32,11 +32,11 @@ const app = new Elysia({ name: "app" })
   .use(gameApi)
   .use(lobbyApi)
   .use(userApi)
-  .get("/", () => LobbiesHtml({ userId: 4 }))
+  .get("/", ({ user }) => LobbiesHtml({ user }))
   .get(
     "/game",
-    ({ query: { id: lobbyId } }) => {
-      return GameHtml({ lobbyId, userId: 4 });
+    ({ query: { id: lobbyId }, user }) => {
+      return GameHtml({ lobbyId, user });
     },
     { query: t.Object({ id: intString }) }
   )

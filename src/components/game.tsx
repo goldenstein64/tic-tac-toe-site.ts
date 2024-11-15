@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 
 import { range } from "../util/range";
 import { db } from "../db";
-import { Game, Move, User } from "../db/schema";
+import { Game, Move, SelectUser, User } from "../db/schema";
 
 function orderingToMark(ordering: number): Mark {
   return ordering % 2 === 1 ? "X" : "O";
@@ -18,7 +18,7 @@ const selectGameMoves = db
   .prepare();
 
 const selectUser = db
-  .select({ username: User.username })
+  .select()
   .from(User)
   .where(eq(User.id, sql.placeholder("userId")))
   .prepare();
@@ -42,7 +42,7 @@ export function GameHead() {
 }
 
 type GameButtonProps = {
-  disabled: boolean;
+  disabled?: boolean;
   lobbyId: number;
   position: number;
   children?: Mark;
@@ -96,13 +96,9 @@ export function GameBoard(props: { lobbyId: number }) {
   );
 }
 
-export function PlayerInfo(props: { userId: number }) {
-  const { userId } = props;
-  const info = selectUser.get({ userId });
-  if (!info) return <aside />;
-  const { username } = info;
-
-  return <aside>{username}</aside>;
+export function PlayerInfo({ user }: { user: SelectUser | undefined }) {
+  if (!user) return <aside />;
+  return <aside>{user.username}</aside>;
 }
 
 export function GameMain(props: { lobbyId: number }) {
@@ -124,21 +120,21 @@ export function GameMain(props: { lobbyId: number }) {
 
 type GameHtmlProps = {
   lobbyId: number;
-  userId: number;
+  user: SelectUser;
 };
 
-export function GameBody(props: { lobbyId: number; userId: number }) {
-  const { lobbyId, userId } = props;
+export function GameBody({ lobbyId, user }: GameHtmlProps) {
   const result = selectGamePlayers.get({ lobbyId });
   if (!result) return null;
   const { playerX, playerO } = result;
-  const opponentId = userId === playerX ? playerO : playerX;
+  const opponentId = user.id === playerX ? playerO : playerX;
+  const opponent = selectUser.get({ userId: opponentId });
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
-      <PlayerInfo userId={userId} />
+      <PlayerInfo user={user} />
       <GameMain lobbyId={lobbyId} />
-      <PlayerInfo userId={opponentId} />
+      <PlayerInfo user={opponent} />
     </body>
   );
 }

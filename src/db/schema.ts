@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import {
   text,
   sqliteTable as createTable,
@@ -13,12 +13,16 @@ export const User = createTable("User", {
   createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
   refreshKey: number("refreshKey").notNull(),
 });
+export type SelectUser = InferSelectModel<typeof User>;
+export type InsertUser = InferInsertModel<typeof User>;
 
 export const IsComputer = createTable("IsComputer", {
   userId: number("userId")
     .primaryKey()
     .references(() => User.id),
 });
+export type SelectIsComputer = InferSelectModel<typeof IsComputer>;
+export type InsertIsComputer = InferInsertModel<typeof IsComputer>;
 
 export const Lobby = createTable("Lobby", {
   id: number("id").primaryKey({ autoIncrement: true }),
@@ -28,6 +32,8 @@ export const Lobby = createTable("Lobby", {
   createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
   status: lobbyStatus("status").notNull().default("waiting"),
 });
+export type SelectLobby = InferSelectModel<typeof Lobby>;
+export type InsertLobby = InferInsertModel<typeof Lobby>;
 
 export const FinishedLobby = createTable("FinishedLobby", {
   id: number("id")
@@ -35,6 +41,8 @@ export const FinishedLobby = createTable("FinishedLobby", {
     .references(() => Lobby.id),
   finishedAt: timestamp("finishedAt").notNull().default(UNIX_EPOCH),
 });
+export type SelectFinishedLobby = InferSelectModel<typeof FinishedLobby>;
+export type InsertFinishedLobby = InferInsertModel<typeof FinishedLobby>;
 
 export const Game = createTable("Game", {
   lobbyId: number("lobbyId")
@@ -47,6 +55,8 @@ export const Game = createTable("Game", {
     .notNull()
     .references(() => User.id),
 });
+export type SelectGame = InferSelectModel<typeof Game>;
+export type InsertGame = InferInsertModel<typeof Game>;
 
 export const Move = createTable(
   "Move",
@@ -61,6 +71,8 @@ export const Move = createTable(
     primaryKey: primaryKey({ columns: [Move.lobbyId, Move.ordering] }),
   })
 );
+export type SelectMove = InferSelectModel<typeof Move>;
+export type InsertMove = InferInsertModel<typeof Move>;
 
 /*
 - User
