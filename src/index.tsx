@@ -12,8 +12,10 @@ import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
 import userApi from "./routes/user-api";
 import { intString } from "./types";
+import swagger from "@elysiajs/swagger";
 
 const app = new Elysia({ name: "app" })
+  .use(swagger())
   .use(html())
   .use(JWTAuth)
   .get("/login", async ({ user }) => (user ? redirect("/", 302) : LoginHtml()))

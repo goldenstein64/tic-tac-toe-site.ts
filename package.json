@@ -12,6 +12,7 @@
     "@elysiajs/html": "^1.1.1",
     "@elysiajs/jwt": "^1.1.1",
     "@elysiajs/static": "^1.1.1",
+    "@elysiajs/swagger": "^1.1.5",
     "@goldenstein64/tic-tac-toe": "link:@goldenstein64/tic-tac-toe",
     "arctic": "^2.2.2",
     "drizzle-orm": "^0.33.0",
