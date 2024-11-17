@@ -29,58 +29,59 @@ async function selectUserById(args: { userId: number }) {
   return result.length === 1 ? result[0] : undefined;
 }
 
-export default new Elysia({ name: "JWTAuth" })
-  .use(
-    jwt({
-      name: "jwtAccess",
-      secret: Bun.env.JWT_ACCESS_SECRET,
-      schema: t.Object({ userId: t.Number() }),
-    })
-  )
-  .use(
-    jwt({
-      name: "jwtRefresh",
-      secret: Bun.env.JWT_REFRESH_SECRET,
-      schema: t.Object({ userId: t.Number(), refreshKey: t.Number() }),
-    })
-  )
-  .resolve(
-    { as: "scoped" },
-    async ({
-      jwtAccess,
-      jwtRefresh,
-      cookie: { cookieAccess, cookieRefresh },
-    }): Promise<{ user: InferSelectModel<typeof User> | null }> => {
-      // check whether they're already logged in
-      const access = await jwtAccess.verify(cookieAccess.value);
-      if (access) {
-        const user = await selectUserById({ userId: access.userId });
-        return user ? { user } : { user: null };
+export default () =>
+  new Elysia({ name: "JWTAuth" })
+    .use(
+      jwt({
+        name: "jwtAccess",
+        secret: Bun.env.JWT_ACCESS_SECRET,
+        schema: t.Object({ userId: t.Number() }),
+      })
+    )
+    .use(
+      jwt({
+        name: "jwtRefresh",
+        secret: Bun.env.JWT_REFRESH_SECRET,
+        schema: t.Object({ userId: t.Number(), refreshKey: t.Number() }),
+      })
+    )
+    .resolve(
+      { as: "scoped" },
+      async ({
+        jwtAccess,
+        jwtRefresh,
+        cookie: { cookieAccess, cookieRefresh },
+      }): Promise<{ user: InferSelectModel<typeof User> | null }> => {
+        // check whether they're already logged in
+        const access = await jwtAccess.verify(cookieAccess.value);
+        if (access) {
+          const user = await selectUserById({ userId: access.userId });
+          return user ? { user } : { user: null };
+        }
+
+        // otherwise, try to refresh the token
+        const refresh = await jwtRefresh.verify(cookieRefresh.value);
+        if (!refresh) return { user: null };
+
+        const { userId, refreshKey } = refresh;
+
+        const user = await selectUserById({ userId });
+
+        if (!user || refreshKey !== user.refreshKey) {
+          // user wasn't found or their refresh key didn't match :(
+          return { user: null };
+        }
+
+        // by this point, we can refresh the user's access token
+        cookieAccess.set({
+          value: jwtAccess.sign({
+            userId,
+            exp: Math.floor(Date.now() / 1000) + ACCESS_MAX_AGE,
+          }),
+          ...accessCookieOpts,
+        });
+
+        // now we can expose them to the rest of the API
+        return { user };
       }
-
-      // otherwise, try to refresh the token
-      const refresh = await jwtRefresh.verify(cookieRefresh.value);
-      if (!refresh) return { user: null };
-
-      const { userId, refreshKey } = refresh;
-
-      const user = await selectUserById({ userId });
-
-      if (!user || refreshKey !== user.refreshKey) {
-        // user wasn't found or their refresh key didn't match :(
-        return { user: null };
-      }
-
-      // by this point, we can refresh the user's access token
-      cookieAccess.set({
-        value: jwtAccess.sign({
-          userId,
-          exp: Math.floor(Date.now() / 1000) + ACCESS_MAX_AGE,
-        }),
-        ...accessCookieOpts,
-      });
-
-      // now we can expose them to the rest of the API
-      return { user };
-    }
-  );
+    );

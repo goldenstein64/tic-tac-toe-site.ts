@@ -6,7 +6,7 @@ import GameHtml from "./components/game";
 import LobbiesHtml from "./components/lobbies";
 import LoginHtml from "./components/login";
 
-import JWTAuth from "./libs/jwt-auth";
+import jwtAuth from "./libs/jwt-auth";
 
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
@@ -17,7 +17,7 @@ import { intString } from "./types";
 const app = new Elysia({ name: "app" })
   .use(debug)
   .use(html())
-  .use(JWTAuth)
+  .use(jwtAuth())
   .get("/login", async ({ user }) => (user ? redirect("/", 302) : LoginHtml()))
   .guard({
     cookie: t.Object({
