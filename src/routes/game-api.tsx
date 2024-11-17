@@ -1,10 +1,9 @@
-import type { Emitter, EventType } from "mitt";
 import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
 
+import { EventEmitter } from "node:events";
 import { Elysia, t } from "elysia";
-import mitt from "mitt";
 import { Board } from "@goldenstein64/tic-tac-toe/lib";
-import { Html } from "@elysiajs/html";
+import html, { Html } from "@elysiajs/html";
 import { eq, max, sql } from "drizzle-orm";
 
 import { db } from "../db";
@@ -27,8 +26,12 @@ const insertMove = db
   })
   .prepare();
 
+type GameEventEmitter = EventEmitter<{
+  [evt: string]: [[ordering: number, position: number]];
+}>;
+
 type GameState = {
-  event: Emitter<{ message: [number, number] }>;
+  event: GameEventEmitter;
   board: Board;
 };
 
@@ -37,7 +40,7 @@ function getGameState(gameId: number): GameState {
   let state = gameStates.get(gameId);
   if (state === undefined) {
     state = {
-      event: mitt(),
+      event: new EventEmitter(),
       board: new Board(),
     };
     gameStates.set(gameId, state);
@@ -49,36 +52,30 @@ function orderingToMark(ordering: number): Mark {
   return ordering % 2 === 1 ? "X" : "O";
 }
 
-function waitForEvent<K extends Record<EventType, unknown>>(
-  emitter: Emitter<K>,
-  type: keyof K
-): Promise<K[keyof K]> {
-  return new Promise((resolve) => {
-    function listener(args: K[keyof K]): void {
-      resolve(args);
-      emitter.off(type, listener);
-    }
-    emitter.on(type, listener);
-  });
+function waitForMessageEvent(
+  emitter: GameEventEmitter,
+  evt: string
+): Promise<[number, number]> {
+  return new Promise((resolve) => emitter.once(evt, resolve));
 }
 
 export default new Elysia({ prefix: "/api" })
+  .use(html())
   .post(
     "/game-move",
-    async function addMove({ body, set }) {
-      const { id: lobbyId, position } = body;
+    async function addMove({ body: { id: lobbyId, position }, set }) {
       const result = selectMaxOrdering.get({ lobbyId });
       const ordering = (result?.ordering ?? 0) + 1;
 
       insertMove.run({ lobbyId, ordering, position });
       const { board, event } = getGameState(lobbyId);
       const mark = orderingToMark(ordering);
-      board.data[position - 1] = mark;
+      board.setMark(position - 1, mark);
       event.emit("message", [ordering, position]);
 
       set.headers["Content-Type"] = "text/html";
       return (
-        <GameButton disabled={true} lobbyId={lobbyId} position={position}>
+        <GameButton disabled lobbyId={lobbyId} position={position}>
           {mark}
         </GameButton>
       );
@@ -102,10 +99,13 @@ export default new Elysia({ prefix: "/api" })
       const { board, event } = getGameState(lobbyId);
 
       while (true) {
-        const [ordering, position] = await waitForEvent(event, "message");
+        const [ordering, position] = await waitForMessageEvent(
+          event,
+          "message"
+        );
         const mark = orderingToMark(ordering);
         yield `event: pos-${position}\n`;
-        yield `data: ${(
+        yield `data: ${await (
           <GameButton disabled={false} lobbyId={lobbyId} position={position}>
             {mark}
           </GameButton>
