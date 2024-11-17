@@ -1,16 +1,16 @@
 import Database from "bun:sqlite";
 import * as schema from "./src/db/schema";
-import fs from "fs/promises";
 import { drizzle } from "drizzle-orm/bun-sqlite";
+import { $ } from "bun";
 
 const { IsComputer, User } = schema;
 
 console.log("deleting db...");
 {
   const results = await Promise.allSettled([
-    fs.rm("game.db"),
-    fs.rm("game.db-shm"),
-    fs.rm("game.db-wal"),
+    $`rm game.db`,
+    $`rm game.db-shm`,
+    $`rm game.db-wal`,
   ]);
   if (results.some(({ status }) => status === "rejected")) {
     console.log("some files couldn't be deleted!");
@@ -29,13 +29,14 @@ const mediumCreated = new Date(Date.UTC(2023, 8, 4, 22, 35)); // 2023/8/4 22:35
 const hardCreated = new Date(Date.UTC(2023, 8, 7, 1, 23)); // 2023/8/7 1:23
 const debugCreated = new Date(Date.UTC(2024, 11, 16, 3, 5)); // 2024/11/16 3:05
 
+const refreshKey = 1;
 const insertComputerUsers = db
   .insert(User)
   .values([
-    { id: 1, username: "EasyComputer", createdAt: easyCreated },
-    { id: 2, username: "MediumComputer", createdAt: mediumCreated },
-    { id: 3, username: "HardComputer", createdAt: hardCreated },
-    { id: 4, username: "DebugUser", createdAt: debugCreated },
+    { id: 1, username: "EasyComputer", createdAt: easyCreated, refreshKey },
+    { id: 2, username: "MediumComputer", createdAt: mediumCreated, refreshKey },
+    { id: 3, username: "HardComputer", createdAt: hardCreated, refreshKey },
+    { id: 4, username: "DebugUser", createdAt: debugCreated, refreshKey },
   ])
   .onConflictDoNothing();
 
