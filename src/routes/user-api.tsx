@@ -15,7 +15,7 @@ const upsertUser = async (args: { username: string; id?: number }) => {
   const { username, id } = args;
   const result = await db
     .insert(User)
-    .values({ username, id })
+    .values({ username, id, refreshKey: 1 })
     .onConflictDoUpdate({
       // someone with this user id exists
       // just update it with a new username (if it's not taken already)
