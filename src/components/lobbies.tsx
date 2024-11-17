@@ -2,7 +2,6 @@ import { Html } from "@elysiajs/html";
 import { Game, Lobby, User } from "../db/schema";
 import { db } from "../db";
 import { eq, sql, aliasedTable, and } from "drizzle-orm";
-import { UsernameHead, UsernameModal } from "./username-modal";
 
 const selectActiveLobbies = (() => {
   const playerX = aliasedTable(User, "playerX");
@@ -76,7 +75,6 @@ export function LobbiesHead() {
       <script src="/public/htmx.min.js" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <UsernameHead />
     </head>
   );
 }
@@ -283,8 +281,6 @@ export async function LobbiesBody({ user }: LobbiesProps) {
       <AvailableLobbies />
       <h2>Finished Games</h2>
       <FinishedLobbies />
-
-      <UsernameModal />
     </body>
   );
 }
