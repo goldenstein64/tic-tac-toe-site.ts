@@ -1,5 +1,5 @@
 Bun.build({
-  entrypoints: ["client/username-modal.ts"],
+  entrypoints: [],
   minify: false,
   outdir: "public/out",
 });
