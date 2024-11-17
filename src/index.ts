@@ -20,12 +20,9 @@ const app = new Elysia({ name: "app" })
   .use(jwtAuth())
   .get("/login", async ({ user }) => (user ? redirect("/", 302) : LoginHtml()))
   .guard({
-    cookie: t.Object({
-      access: t.String(),
-      refresh: t.String(),
-    }),
-    async beforeHandle({ user }) {
-      if (!user) return redirect("/login", 302);
+    async beforeHandle({ user, path }) {
+      if (!user && !path.startsWith("/debug") && !path.startsWith("/public"))
+        return redirect("/login", 302);
     },
   })
   .resolve(({ user }) => ({ user: user! }))
