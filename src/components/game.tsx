@@ -36,6 +36,7 @@ export function GameHead() {
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <script src="/public/htmx.min.js" />
       <script src="/public/htmx-ext-sse.js" />
+      <link rel="stylesheet" href="/public/global.css" />
       <link rel="stylesheet" href="/public/game.css" />
     </head>
   );

@@ -4,9 +4,10 @@ function LoginHead() {
   return (
     <head>
       <script src="/public/htmx.min.js" />
-      <link rel="stylesheet" href="/public/login.css" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="/public/global.css" />
+      <link rel="stylesheet" href="/public/login.css" />
     </head>
   );
 }
@@ -14,7 +15,7 @@ function LoginHead() {
 function LoginBody() {
   return (
     <body>
-      <button hx-on:click="location.href='/login/discord'">
+      <button hx-on:click="location.href='/login/discord'" class="btn">
         Sign into Discord
       </button>
     </body>
