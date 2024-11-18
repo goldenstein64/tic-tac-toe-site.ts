@@ -179,7 +179,7 @@ async function forfeitActiveLobby(
   userId: number
 ): Promise<ForfeitResult> {
   try {
-    return await tx.transaction(async () => {
+    return await tx(async () => {
       const playerResult = await selectPlayerInGame({ lobbyId, userId });
       if (
         playerResult === undefined ||
@@ -224,7 +224,7 @@ async function joinWaitingLobby(
   userId: number
 ): Promise<JoinResult> {
   try {
-    return await tx.transaction(async () => {
+    return await tx(async () => {
       const lobby = await updateLobbyStatus({
         id: lobbyId,
         fromStatus: "waiting",
@@ -294,7 +294,7 @@ export default new Elysia({ prefix: "/api" })
         // both are computers, compute the game ASAP and create a finished lobby
         const moves = await runGame(computerIdX, computerIdO);
 
-        await tx.transaction(async () => {
+        await tx(async () => {
           const { id: lobbyId } = await insertLobby({
             userId,
             status: "finished",
@@ -312,7 +312,7 @@ export default new Elysia({ prefix: "/api" })
       } else if (computerIdX || computerIdO) {
         // only one is a computer, create an active lobby with this user as the
         // human
-        await tx.transaction(async () => {
+        await tx(async () => {
           const { id: lobbyId } = await insertLobby({
             userId,
             status: "active",

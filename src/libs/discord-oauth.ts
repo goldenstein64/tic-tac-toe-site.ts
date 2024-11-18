@@ -148,7 +148,7 @@ export default () =>
       const userInfo = await discord.userInfo(accessToken);
 
       try {
-        await tx.transaction(async () => {
+        await tx(async () => {
           const discordId = userInfo.id;
           const discordUserId = await selectDiscordUserById({ discordId });
 

@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { Database } from "bun:sqlite";
-import { sql, TransactionRollbackError } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import * as schema from "./schema";
 
@@ -10,30 +10,23 @@ export const db = drizzle(bunDB, { schema });
 db.run(sql`PRAGMA journal_mode = WAL;`);
 db.run(sql`PRAGMA synchronous = NORMAL;`);
 
-class Transaction {
-  readonly savepointName: string;
+type tx = <T>(callback: (tx: tx) => Promise<T>) => Promise<T>;
 
-  constructor(readonly nestedIndex: number = 0) {
-    this.savepointName = `sp${nestedIndex}`;
-  }
+async function transaction<T>(
+  callback: (t: tx) => Promise<T>,
+  idx: number
+): Promise<T> {
+  const savepointName = `sp${idx}`;
 
-  async transaction<T>(callback: (tx: Transaction) => Promise<T>): Promise<T> {
-    db.run(sql.raw(`savepoint ${this.savepointName}`));
-    const tx = new Transaction(this.nestedIndex + 1);
-
-    try {
-      const txResult = await callback(tx);
-      db.run(sql.raw(`release savepoint ${this.savepointName}`));
-      return txResult;
-    } catch (e) {
-      db.run(sql.raw(`rollback to savepoint ${this.savepointName}`));
-      throw e;
-    }
-  }
-
-  rollback() {
-    throw new TransactionRollbackError();
+  db.run(sql.raw(`savepoint ${savepointName}`));
+  try {
+    const txResult = await callback((cb) => transaction(cb, idx + 1));
+    db.run(sql.raw(`release savepoint ${savepointName}`));
+    return txResult;
+  } catch (e) {
+    db.run(sql.raw(`rollback to savepoint ${savepointName}`));
+    throw e;
   }
 }
 
-export const tx = new Transaction();
+export const tx: tx = (cb) => transaction(cb, 0);
