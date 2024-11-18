@@ -11,8 +11,18 @@ declare module "bun" {
   }
 }
 
-const ACCESS_MAX_AGE = 15 * 60; // 15 minutes
-const accessCookieOpts = { maxAge: ACCESS_MAX_AGE, httpOnly: true } as const;
+export const ACCESS_MAX_AGE = 60 * 15; // 15 minutes
+export const REFRESH_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+export const ACCESS_COOKIE_OPTS = {
+  maxAge: ACCESS_MAX_AGE,
+  httpOnly: true,
+  sameSite: "lax",
+} as const;
+export const REFRESH_COOKIE_OPTS = {
+  maxAge: REFRESH_MAX_AGE,
+  httpOnly: true,
+  sameSite: "lax",
+} as const;
 
 const selectUserByIdSql = db
   .select()
@@ -50,7 +60,7 @@ export default () =>
       async ({
         jwtAccess,
         jwtRefresh,
-        cookie: { cookieAccess, cookieRefresh },
+        cookie: { access: cookieAccess, refresh: cookieRefresh },
       }): Promise<{ user: InferSelectModel<typeof User> | null }> => {
         // check whether they're already logged in
         const access = await jwtAccess.verify(cookieAccess.value);
@@ -78,7 +88,7 @@ export default () =>
             userId,
             exp: Math.floor(Date.now() / 1000) + ACCESS_MAX_AGE,
           }),
-          ...accessCookieOpts,
+          ...ACCESS_COOKIE_OPTS,
         });
 
         // now we can expose them to the rest of the API
