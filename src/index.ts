@@ -11,7 +11,7 @@ import jwtAuth from "./libs/jwt-auth";
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
 import discordOAuth from "./libs/discord-oauth";
-import userApi from "./routes/user-api";
+import sessionApi from "./routes/session-api";
 import debug from "./routes/debug";
 import { intString } from "./types";
 
@@ -30,7 +30,7 @@ const app = new Elysia({ name: "app" })
   .resolve(({ user }) => ({ user: user! }))
   .use(gameApi)
   .use(lobbyApi)
-  .use(userApi)
+  .use(sessionApi)
   .get("/", ({ user }) => LobbiesHtml({ user }))
   .get(
     "/game",
