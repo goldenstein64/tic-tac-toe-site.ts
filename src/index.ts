@@ -43,7 +43,6 @@ const app = new Elysia({ name: "app" })
 
 export type App = typeof app;
 
-console.log(`NODE_ENV='${Bun.env.NODE_ENV}'`);
 console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port} in ${Bun.env.NODE_ENV}`
 );
