@@ -61,14 +61,6 @@ const selectWaitingLobbies = db
   )
   .prepare();
 
-const selectUser = db
-  .select({ username: User.username })
-  .from(User)
-  .where(eq(User.id, sql.placeholder("userId")))
-  .prepare();
-
-type UserConfigProps = { userId: number };
-
 export function LobbiesHead() {
   return (
     <head>
@@ -79,22 +71,13 @@ export function LobbiesHead() {
   );
 }
 
-export async function UserConfig({ userId }: UserConfigProps) {
-  const users = await selectUser.execute({ userId });
-  const username = users.length > 0 ? users[0].username : "";
+export async function UserConfig() {
   return (
-    <form id="user-config" hx-post="/api/username" hx-swap="none">
-      <label for="username">Username: </label>
-      <input
-        type="text"
-        class="username-input"
-        name="username"
-        value={username}
-      />
-      <button type="submit" class="username-submit">
-        Change
+    <div>
+      <button hx-delete="/api/session" hx-swap="none">
+        Log out
       </button>
-    </form>
+    </div>
   );
 }
 
@@ -272,7 +255,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
     <body>
       <h1>tic-tac-toe-site</h1>
       <button hx-on:click="location.href='/create-lobby'">Create Game</button>
-      <UserConfig userId={userId} />
+      <UserConfig />
       <h2>Waiting Games</h2>
       <WaitingLobbies userId={userId} />
       <h2>Active Games</h2>
