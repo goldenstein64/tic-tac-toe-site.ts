@@ -16,6 +16,18 @@ export const User = createTable("User", {
 export type SelectUser = InferSelectModel<typeof User>;
 export type InsertUser = InferInsertModel<typeof User>;
 
+export const DiscordUser = createTable("DiscordUser", {
+  discordId: text("discordId").primaryKey(),
+  userId: number("userId")
+    .notNull()
+    .references(() => User.id),
+  accessToken: text("accessToken").notNull(),
+  refreshToken: text("refreshToken").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+});
+export type SelectDiscordUser = InferSelectModel<typeof DiscordUser>;
+export type InsertDiscordUser = InferInsertModel<typeof DiscordUser>;
+
 export const IsComputer = createTable("IsComputer", {
   userId: number("userId")
     .primaryKey()

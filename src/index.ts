@@ -10,6 +10,7 @@ import jwtAuth from "./libs/jwt-auth";
 
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
+import discordOAuth from "./libs/discord-oauth";
 import userApi from "./routes/user-api";
 import debug from "./routes/debug";
 import { intString } from "./types";
@@ -18,6 +19,7 @@ const app = new Elysia({ name: "app" })
   .use(debug)
   .use(html())
   .use(jwtAuth())
+  .use(discordOAuth())
   .get("/login", async ({ user }) => (user ? redirect("/", 302) : LoginHtml()))
   .guard({
     async beforeHandle({ user, path }) {
