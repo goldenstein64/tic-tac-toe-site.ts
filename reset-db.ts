@@ -13,7 +13,7 @@ console.log("deleting db...");
     $`rm game.db-wal`,
   ]);
   if (results.some(({ status }) => status === "rejected")) {
-    console.log("some files couldn't be deleted!");
+    console.error("some files couldn't be deleted!");
   }
 }
 
