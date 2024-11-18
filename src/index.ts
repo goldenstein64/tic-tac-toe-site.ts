@@ -39,7 +39,7 @@ const app = new Elysia({ name: "app" })
     },
     { query: t.Object({ id: intString }) }
   )
-  .get("/create-lobby", () => Bun.file("./public/create-lobby.html"))
+  .get("/create-lobby", () => Bun.file("./private/create-lobby.html"))
   .use(staticPlugin())
   .listen({ port: 3000 });
 

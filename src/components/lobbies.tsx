@@ -290,7 +290,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
   return (
     <body>
       <h1>tic-tac-toe-site</h1>
-      <button hx-on:click="location.href='/create-lobby'">Create Game</button>
+      <button hx-on:click="location.href='/new-lobby'">New Lobby</button>
       <UserConfig />
       <h2>Waiting Games</h2>
       <WaitingLobbies userId={userId} />
