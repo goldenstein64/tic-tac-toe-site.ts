@@ -16,7 +16,7 @@ import debug from "./routes/debug";
 import { intString } from "./types";
 
 const app = new Elysia({ name: "app" })
-  .use(debug)
+  .use(debug())
   .use(html())
   .use(jwtAuth())
   .use(discordOAuth())
