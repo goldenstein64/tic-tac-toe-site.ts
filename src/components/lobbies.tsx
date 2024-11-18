@@ -132,7 +132,7 @@ export function ActiveLobbyItem({
   return (
     <tr>
       <td>
-        <button hx-on:click={`location.href='/game?id=${lobbyId}'`}>
+        <button hx-on:click={`location.href="/game?id=${lobbyId}"`}>
           Resume
         </button>
         <button
