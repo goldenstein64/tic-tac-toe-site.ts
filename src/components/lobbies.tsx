@@ -1,7 +1,9 @@
+import type { SelectUser } from "../db/schema";
+
 import { Html } from "@elysiajs/html";
-import { Game, Lobby, User } from "../db/schema";
+import { FinishedLobby, Game, Lobby, User } from "../db/schema";
 import { db } from "../db";
-import { eq, sql, aliasedTable, and } from "drizzle-orm";
+import { eq, sql, aliasedTable, and, or } from "drizzle-orm";
 
 const selectActiveLobbies = (() => {
   const playerX = aliasedTable(User, "playerX");
@@ -16,7 +18,15 @@ const selectActiveLobbies = (() => {
     .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
     .innerJoin(playerX, eq(playerX.id, Game.playerX))
     .innerJoin(playerO, eq(playerO.id, Game.playerO))
-    .where(eq(Lobby.status, "active"))
+    .where(
+      and(
+        eq(Lobby.status, "active"),
+        or(
+          eq(playerX.id, sql.placeholder("userId")),
+          eq(playerO.id, sql.placeholder("userId"))
+        )
+      )
+    )
     .prepare();
 })();
 
@@ -26,14 +36,25 @@ const selectFinishedLobbies = (() => {
   return db
     .select({
       lobbyId: Lobby.id,
+      createdAt: Lobby.createdAt,
+      finishedAt: FinishedLobby.finishedAt,
       playerX: playerX.username,
       playerO: playerO.username,
     })
     .from(Lobby)
+    .innerJoin(FinishedLobby, eq(FinishedLobby.id, Lobby.id))
     .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
     .innerJoin(playerX, eq(playerX.id, Game.playerX))
     .innerJoin(playerO, eq(playerO.id, Game.playerO))
-    .where(eq(Lobby.status, "finished"))
+    .where(
+      and(
+        eq(Lobby.status, "finished"),
+        or(
+          eq(playerX.id, sql.placeholder("userId")),
+          eq(playerO.id, sql.placeholder("userId"))
+        )
+      )
+    )
     .prepare();
 })();
 
@@ -149,8 +170,10 @@ export function ActiveLobbyItem({
   );
 }
 
-export async function ActiveLobbies() {
-  const activeLobbies = await selectActiveLobbies.execute();
+type ActiveLobbiesProps = { userId: number };
+
+export async function ActiveLobbies({ userId }: ActiveLobbiesProps) {
+  const activeLobbies = await selectActiveLobbies.execute({ userId });
   return (
     <table>
       <thead>
@@ -210,29 +233,41 @@ export async function AvailableLobbies() {
 
 type FinishedLobbyItemProps = {
   lobbyId: number;
+  createdAt: Date;
+  finishedAt: Date;
   playerX: string;
   playerO: string;
 };
 
+/** a row in the finished lobbies table */
 export function FinishedLobbyItem({
   lobbyId,
+  createdAt,
+  finishedAt,
   playerX,
   playerO,
 }: FinishedLobbyItemProps) {
   return (
     <tr>
       <td>
-        <button>View</button>
+        <button hx-on:click={`location.href="/game?id=${lobbyId}"`}>
+          View
+        </button>
       </td>
       <td>{lobbyId}</td>
+      <td>{createdAt.toUTCString()}</td>
+      <td>{finishedAt.toUTCString()}</td>
       <td>{playerX}</td>
       <td>{playerO}</td>
     </tr>
   );
 }
 
-export async function FinishedLobbies() {
-  const finishedLobbies = await selectFinishedLobbies.execute();
+type FinishedLobbiesProps = { userId: number };
+
+/** a table of the user's finished lobbies */
+export async function FinishedLobbies({ userId }: FinishedLobbiesProps) {
+  const finishedLobbies = await selectFinishedLobbies.execute({ userId });
   return (
     <table>
       <thead>
@@ -240,6 +275,7 @@ export async function FinishedLobbies() {
           <td>Actions</td>
           <td>Id</td>
           <td>Created At</td>
+          <td>Finished At</td>
           <td>Player X</td>
           <td>Player O</td>
         </tr>
@@ -259,11 +295,11 @@ export async function LobbiesBody({ user }: LobbiesProps) {
       <h2>Waiting Games</h2>
       <WaitingLobbies userId={userId} />
       <h2>Active Games</h2>
-      <ActiveLobbies />
+      <ActiveLobbies userId={userId} />
       <h2>Available Games</h2>
       <AvailableLobbies />
       <h2>Finished Games</h2>
-      <FinishedLobbies />
+      <FinishedLobbies userId={userId} />
     </body>
   );
 }
