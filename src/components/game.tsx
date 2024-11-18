@@ -53,9 +53,8 @@ export function GameButton(props: GameButtonProps) {
   return (
     <button
       type="button"
+      class="game-button"
       sse-swap={`pos-${position}`}
-      hx-swap="outerHTML"
-      hx-post="/api/game-move"
       hx-vals={{ id: lobbyId, position: position }}
       disabled={disabled}
     >
@@ -72,17 +71,7 @@ export function GameBoard(props: { lobbyId: number }) {
   );
 
   return (
-    <ol
-      style="
-        display: grid;
-        grid-template-rows: 1fr 1fr 1fr;
-        grid-template-columns: 1fr 1fr 1fr;
-        width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        aspect-ratio: 1;
-      "
-    >
+    <ol class="game-board" hx-post="/api/game-move" hx-swap="outerHTML">
       {range(9).map((i) => {
         const ordering = moves.get(i + 1);
         const mark = ordering ? orderingToMark(ordering) : undefined;
