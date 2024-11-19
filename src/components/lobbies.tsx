@@ -2,85 +2,99 @@ import type { SelectUser } from "../db/schema";
 
 import { Html } from "@elysiajs/html";
 import { FinishedLobby, Game, Lobby, User } from "../db/schema";
-import { db } from "../db";
+import { db, typePrepared } from "../db";
 import { eq, sql, aliasedTable, and, or } from "drizzle-orm";
+
+const _placeholders: any = undefined;
 
 const selectActiveLobbies = (() => {
   const playerX = aliasedTable(User, "playerX");
   const playerO = aliasedTable(User, "playerO");
-  return db
-    .select({
-      lobbyId: Lobby.id,
-      playerX: playerX.username,
-      playerO: playerO.username,
-    })
-    .from(Lobby)
-    .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
-    .innerJoin(playerX, eq(playerX.id, Game.playerX))
-    .innerJoin(playerO, eq(playerO.id, Game.playerO))
-    .where(
-      and(
-        eq(Lobby.status, "active"),
-        or(
-          eq(playerX.id, sql.placeholder("userId")),
-          eq(playerO.id, sql.placeholder("userId"))
+  return typePrepared(
+    db
+      .select({
+        lobbyId: Lobby.id,
+        playerX: playerX.username,
+        playerO: playerO.username,
+      })
+      .from(Lobby)
+      .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
+      .innerJoin(playerX, eq(playerX.id, Game.playerX))
+      .innerJoin(playerO, eq(playerO.id, Game.playerO))
+      .where(
+        and(
+          eq(Lobby.status, "active"),
+          or(
+            eq(playerX.id, sql.placeholder("userId")),
+            eq(playerO.id, sql.placeholder("userId"))
+          )
         )
       )
-    )
-    .prepare();
+      .prepare(),
+    _placeholders as { userId: number }
+  );
 })();
 
 const selectFinishedLobbies = (() => {
   const playerX = aliasedTable(User, "playerX");
   const playerO = aliasedTable(User, "playerO");
-  return db
+  return typePrepared(
+    db
+      .select({
+        lobbyId: Lobby.id,
+        createdAt: Lobby.createdAt,
+        finishedAt: FinishedLobby.finishedAt,
+        playerX: playerX.username,
+        playerO: playerO.username,
+      })
+      .from(Lobby)
+      .innerJoin(FinishedLobby, eq(FinishedLobby.id, Lobby.id))
+      .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
+      .innerJoin(playerX, eq(playerX.id, Game.playerX))
+      .innerJoin(playerO, eq(playerO.id, Game.playerO))
+      .where(
+        and(
+          eq(Lobby.status, "finished"),
+          or(
+            eq(playerX.id, sql.placeholder("userId")),
+            eq(playerO.id, sql.placeholder("userId"))
+          )
+        )
+      )
+      .prepare(),
+    _placeholders as { userId: number }
+  );
+})();
+
+const selectAvailableLobbies = typePrepared(
+  db
+    .select({
+      lobbyId: Lobby.id,
+      opponent: Lobby.createdBy,
+      createdAt: Lobby.createdAt,
+    })
+    .from(Lobby)
+    .where(eq(Lobby.status, "waiting"))
+    .prepare(),
+  _placeholders as void
+);
+
+const selectWaitingLobbies = typePrepared(
+  db
     .select({
       lobbyId: Lobby.id,
       createdAt: Lobby.createdAt,
-      finishedAt: FinishedLobby.finishedAt,
-      playerX: playerX.username,
-      playerO: playerO.username,
     })
     .from(Lobby)
-    .innerJoin(FinishedLobby, eq(FinishedLobby.id, Lobby.id))
-    .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
-    .innerJoin(playerX, eq(playerX.id, Game.playerX))
-    .innerJoin(playerO, eq(playerO.id, Game.playerO))
     .where(
       and(
-        eq(Lobby.status, "finished"),
-        or(
-          eq(playerX.id, sql.placeholder("userId")),
-          eq(playerO.id, sql.placeholder("userId"))
-        )
+        eq(Lobby.status, "waiting"),
+        eq(Lobby.createdBy, sql.placeholder("userId"))
       )
     )
-    .prepare();
-})();
-
-const selectAvailableLobbies = db
-  .select({
-    lobbyId: Lobby.id,
-    opponent: Lobby.createdBy,
-    createdAt: Lobby.createdAt,
-  })
-  .from(Lobby)
-  .where(eq(Lobby.status, "waiting"))
-  .prepare();
-
-const selectWaitingLobbies = db
-  .select({
-    lobbyId: Lobby.id,
-    createdAt: Lobby.createdAt,
-  })
-  .from(Lobby)
-  .where(
-    and(
-      eq(Lobby.status, "waiting"),
-      eq(Lobby.createdBy, sql.placeholder("userId"))
-    )
-  )
-  .prepare();
+    .prepare(),
+  _placeholders as { userId: number }
+);
 
 export function LobbiesHead() {
   return (
@@ -125,7 +139,7 @@ export function WaitingLobbyItem({
 type WaitingLobbiesProps = { userId: number };
 
 export async function WaitingLobbies({ userId }: WaitingLobbiesProps) {
-  const waitingLobbies = await selectWaitingLobbies.execute({ userId });
+  const waitingLobbies = selectWaitingLobbies.all({ userId });
   return (
     <table>
       <thead>
@@ -175,7 +189,7 @@ export function ActiveLobbyItem({
 type ActiveLobbiesProps = { userId: number };
 
 export async function ActiveLobbies({ userId }: ActiveLobbiesProps) {
-  const activeLobbies = await selectActiveLobbies.execute({ userId });
+  const activeLobbies = selectActiveLobbies.all({ userId });
   return (
     <table>
       <thead>
@@ -221,7 +235,7 @@ export function AvailableLobbyItem({
 }
 
 export async function AvailableLobbies() {
-  const availableLobbies = await selectAvailableLobbies.execute();
+  const availableLobbies = selectAvailableLobbies.all();
   return (
     <table>
       <thead>
@@ -273,7 +287,7 @@ type FinishedLobbiesProps = { userId: number };
 
 /** a table of the user's finished lobbies */
 export async function FinishedLobbies({ userId }: FinishedLobbiesProps) {
-  const finishedLobbies = await selectFinishedLobbies.execute({ userId });
+  const finishedLobbies = selectFinishedLobbies.all({ userId });
   return (
     <table>
       <thead>

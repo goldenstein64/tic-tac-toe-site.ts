@@ -4,30 +4,41 @@ import { Html } from "@elysiajs/html";
 import { eq, sql } from "drizzle-orm";
 
 import { range } from "../util/range";
-import { db } from "../db";
+import { db, typePrepared } from "../db";
 import { Game, Move, SelectUser, User } from "../db/schema";
 
 function orderingToMark(ordering: number): Mark {
   return ordering % 2 === 1 ? "X" : "O";
 }
 
-const selectGameMoves = db
-  .select({ position: Move.position, ordering: Move.ordering })
-  .from(Move)
-  .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-  .prepare();
+const _placeholders: any = undefined;
 
-const selectUser = db
-  .select()
-  .from(User)
-  .where(eq(User.id, sql.placeholder("userId")))
-  .prepare();
+const selectGameMoves = typePrepared(
+  db
+    .select({ position: Move.position, ordering: Move.ordering })
+    .from(Move)
+    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);
 
-const selectGamePlayers = db
-  .select({ playerX: Game.playerX, playerO: Game.playerO })
-  .from(Game)
-  .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
-  .prepare();
+const selectUser = typePrepared(
+  db
+    .select()
+    .from(User)
+    .where(eq(User.id, sql.placeholder("userId")))
+    .prepare(),
+  _placeholders as { userId: number }
+);
+
+const selectGamePlayers = typePrepared(
+  db
+    .select({ playerX: Game.playerX, playerO: Game.playerO })
+    .from(Game)
+    .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);
 
 export function GameHead() {
   return (
@@ -49,8 +60,12 @@ type GameButtonProps = {
   children?: Mark;
 };
 
-export function GameButton(props: GameButtonProps) {
-  const { disabled, lobbyId, position, children: mark } = props;
+export function GameButton({
+  disabled,
+  lobbyId,
+  position,
+  children: mark,
+}: GameButtonProps) {
   return (
     <button
       type="button"
@@ -87,12 +102,10 @@ export function GameBoard(props: { lobbyId: number }) {
 }
 
 export function PlayerInfo({ user }: { user: SelectUser | undefined }) {
-  if (!user) return <aside />;
-  return <aside>{user.username}</aside>;
+  return !user ? <aside /> : <aside>{user.username}</aside>;
 }
 
-export function GameMain(props: { lobbyId: number }) {
-  const { lobbyId } = props;
+export function GameMain({ lobbyId }: { lobbyId: number }) {
   return (
     <main
       hx-trigger="load"
@@ -108,10 +121,7 @@ export function GameMain(props: { lobbyId: number }) {
   );
 }
 
-type GameHtmlProps = {
-  lobbyId: number;
-  user: SelectUser;
-};
+type GameHtmlProps = { lobbyId: number; user: SelectUser };
 
 export function GameBody({ lobbyId, user }: GameHtmlProps) {
   const result = selectGamePlayers.get({ lobbyId });

@@ -30,3 +30,36 @@ async function transaction<T>(
 }
 
 export const tx: tx = (cb) => transaction(cb, 0);
+
+type BasePlaceholders = object | undefined | void;
+
+interface PreparedStmt<P extends BasePlaceholders, T> {
+  execute(placeholders: P): Promise<T[]>;
+  get(placeholders: P): T | undefined;
+  all(placeholders: P): T[];
+  run(placeholders: P): void;
+}
+
+interface PreparedVoidStmt<P extends BasePlaceholders> {
+  execute(placeholders: P): Promise<void>;
+  run(placeholders: P): void;
+}
+
+export function typePrepared<P extends BasePlaceholders, T>(
+  stmt: PreparedStmt<Record<string, unknown>, T>,
+  _placeholders: P
+): PreparedStmt<P, T>;
+export function typePrepared<P extends BasePlaceholders>(
+  stmt: PreparedVoidStmt<Record<string, unknown>>,
+  _placeholders: P
+): PreparedVoidStmt<P>;
+export function typePrepared<P extends BasePlaceholders, T>(
+  stmt:
+    | PreparedStmt<Record<string, unknown>, T>
+    | PreparedVoidStmt<Record<string, unknown>>,
+  _placeholders: P
+): PreparedStmt<P, T> | PreparedVoidStmt<P> {
+  return stmt as typeof stmt extends PreparedStmt<Record<string, unknown>, T>
+    ? PreparedStmt<P, T>
+    : PreparedVoidStmt<P>;
+}

@@ -7,10 +7,12 @@ import { and, eq, or, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
 
 import { intString } from "../types";
-import { db, tx } from "../db";
+import { db, tx, typePrepared } from "../db";
 import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
 import runGame from "../libs/run-game";
 import jwtAuth from "../libs/jwt-auth";
+
+const _placeholders: any = undefined;
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
@@ -33,96 +35,83 @@ const PlayerTypeString = t
   })
   .Encode((value: PlayerType) => value.toString());
 
-const selectLobbyByIdStatusCreatedBySql = db
-  .select({ id: Lobby.id })
-  .from(Lobby)
-  .where(
-    and(
-      eq(Lobby.id, sql.placeholder("lobbyId")),
-      eq(Lobby.createdBy, sql.placeholder("createdBy")),
-      eq(Lobby.status, sql.placeholder("status"))
-    )
-  )
-  .prepare();
-const selectLobbyByIdStatusCreatedBy = async (args: {
-  lobbyId: number;
-  createdBy: number;
-  status: LobbyStatus;
-}) => {
-  const result = await selectLobbyByIdStatusCreatedBySql.execute(args);
-  if (result.length > 1) {
-    throw new Error("returned more than one lobby!");
-  }
-
-  return result.length > 0 ? result[0].id : undefined;
-};
-
-const insertGameSql = db
-  .insert(Game)
-  .values({
-    lobbyId: sql.placeholder("lobbyId"),
-    playerX: sql.placeholder("playerX"),
-    playerO: sql.placeholder("playerO"),
-  })
-  .prepare();
-const insertGame = async (args: {
-  lobbyId: number;
-  playerX: number;
-  playerO: number;
-}) => insertGameSql.execute(args);
-
-const insertLobbySql = db
-  .insert(Lobby)
-  .values({
-    createdBy: sql.placeholder("userId"),
-    status: sql.placeholder("status"),
-  })
-  .returning({ id: Lobby.id, createdAt: Lobby.createdAt })
-  .prepare();
-const insertLobby = async (args: { userId: number; status: LobbyStatus }) => {
-  const result = await insertLobbySql.execute(args);
-  if (result.length <= 0) throw new Error("unable to insert lobby!");
-
-  return result[0];
-};
-
-const deleteLobbyByIdSql = db
-  .delete(Lobby)
-  .where(eq(Lobby.id, sql.placeholder("id")))
-  .prepare();
-const deleteLobbyById = async (args: { id: number }) =>
-  deleteLobbyByIdSql.execute(args);
-
-const findPlayerInGameSql = db
-  .select({ playerX: Game.playerX, playerO: Game.playerO })
-  .from(Game)
-  .where(
-    and(
-      eq(Game.lobbyId, sql.placeholder("lobbyId")),
-      or(
-        eq(Game.playerX, sql.placeholder("userId")),
-        eq(Game.playerO, sql.placeholder("userId"))
+const selectLobbyByIdStatusCreatedBy = typePrepared(
+  db
+    .select({ id: Lobby.id })
+    .from(Lobby)
+    .where(
+      and(
+        eq(Lobby.id, sql.placeholder("lobbyId")),
+        eq(Lobby.createdBy, sql.placeholder("createdBy")),
+        eq(Lobby.status, sql.placeholder("status"))
       )
     )
-  )
-  .prepare();
-const selectPlayerInGame = async (args: {
-  lobbyId: number;
-  userId: number;
-}) => {
-  const result = await findPlayerInGameSql.execute(args);
-  if (result.length > 1) {
-    throw new Error("selected more than one lobby!");
-  }
+    .prepare(),
+  _placeholders as { lobbyId: number; createdBy: number; status: LobbyStatus }
+);
 
-  return result.length === 1 ? result[0] : undefined;
-};
+const insertGame = typePrepared(
+  db
+    .insert(Game)
+    .values({
+      lobbyId: sql.placeholder("lobbyId"),
+      playerX: sql.placeholder("playerX"),
+      playerO: sql.placeholder("playerO"),
+    })
+    .prepare(),
+  _placeholders as { lobbyId: number; playerX: number; playerO: number }
+);
 
-const updateLobbyStatus = async (args: {
+const insertLobby = typePrepared(
+  db
+    .insert(Lobby)
+    .values({
+      createdBy: sql.placeholder("userId"),
+      status: sql.placeholder("status"),
+    })
+    .returning({ id: Lobby.id, createdAt: Lobby.createdAt })
+    .prepare(),
+  _placeholders as { userId: number; status: LobbyStatus }
+);
+
+const deleteLobbyById = typePrepared(
+  db
+    .delete(Lobby)
+    .where(eq(Lobby.id, sql.placeholder("id")))
+    .prepare(),
+  _placeholders as { id: number }
+);
+
+const selectPlayerInGame = typePrepared(
+  db
+    .select({ playerX: Game.playerX, playerO: Game.playerO })
+    .from(Game)
+    .where(
+      and(
+        eq(Game.lobbyId, sql.placeholder("lobbyId")),
+        or(
+          eq(Game.playerX, sql.placeholder("userId")),
+          eq(Game.playerO, sql.placeholder("userId"))
+        )
+      )
+    )
+    .prepare(),
+  _placeholders as { lobbyId: number; userId: number }
+);
+
+const insertFinishedLobby = typePrepared(
+  db
+    .insert(FinishedLobby)
+    .values({ id: sql.placeholder("id") })
+    .prepare(),
+  _placeholders as { id: number }
+);
+
+async function updateLobbyStatus(args: {
   id: number;
   toStatus: LobbyStatus;
   fromStatus: LobbyStatus;
-}) => {
+}) {
   const { id, toStatus, fromStatus } = args;
   const result = await db
     .update(Lobby)
@@ -135,16 +124,9 @@ const updateLobbyStatus = async (args: {
   }
 
   return result.length === 1 ? result[0] : undefined;
-};
+}
 
-const insertFinishedLobbySql = db
-  .insert(FinishedLobby)
-  .values({ id: sql.placeholder("id") })
-  .prepare();
-const insertFinishedLobby = async (args: { id: number }) =>
-  insertFinishedLobbySql.execute(args);
-
-const insertMoves = async (args: { lobbyId: number; moves: number[] }) => {
+async function insertMoves(args: { lobbyId: number; moves: number[] }) {
   const { lobbyId, moves } = args;
   await db.insert(Move).values(
     moves.map((position, i) => ({
@@ -153,7 +135,7 @@ const insertMoves = async (args: { lobbyId: number; moves: number[] }) => {
       position: position + 1,
     }))
   );
-};
+}
 
 class CustomRollbackError extends Error {}
 class ResponseError extends Error {
@@ -176,7 +158,7 @@ async function forfeitActiveLobby(
 ): Promise<ForfeitResult> {
   try {
     return await tx(async () => {
-      const playerResult = await selectPlayerInGame({ lobbyId, userId });
+      const playerResult = selectPlayerInGame.get({ lobbyId, userId });
       if (
         playerResult === undefined ||
         (playerResult.playerX !== userId && playerResult.playerO !== userId)
@@ -196,7 +178,7 @@ async function forfeitActiveLobby(
         );
       }
 
-      await insertFinishedLobby({ id: lobbyId });
+      insertFinishedLobby.run({ id: lobbyId });
       return { success: true };
     });
   } catch (err) {
@@ -243,7 +225,7 @@ async function joinWaitingLobby(
       }
 
       // add a Game and ActiveLobby row
-      await insertGame({ lobbyId, playerX, playerO });
+      insertGame.run({ lobbyId, playerX, playerO });
 
       return { success: true };
     });
@@ -284,29 +266,29 @@ export default new Elysia({ prefix: "/api" })
         const moves = await runGame(computerIdX, computerIdO);
 
         await tx(async () => {
-          const { id: lobbyId } = await insertLobby({
+          const { id: lobbyId } = insertLobby.get({
             userId,
             status: "finished",
-          });
+          })!;
           await Promise.all([
-            insertGame({
+            insertGame.execute({
               lobbyId,
               playerX: computerIdX,
               playerO: computerIdO,
             }),
             insertMoves({ lobbyId, moves }),
           ]);
-          await insertFinishedLobby({ id: lobbyId });
+          insertFinishedLobby.run({ id: lobbyId });
         });
       } else if (computerIdX || computerIdO) {
         // only one is a computer, create an active lobby with this user as the
         // human
         await tx(async () => {
-          const { id: lobbyId } = await insertLobby({
+          const { id: lobbyId } = insertLobby.get({
             userId,
             status: "active",
-          });
-          await insertGame({
+          })!;
+          await insertGame.execute({
             lobbyId,
             playerX: computerIdX ?? userId,
             playerO: computerIdO ?? userId,
@@ -314,7 +296,7 @@ export default new Elysia({ prefix: "/api" })
         });
       } else {
         // neither are computers, create a waiting lobby with this user waiting
-        await insertLobby({ userId, status: "waiting" });
+        insertLobby.run({ userId, status: "waiting" });
       }
     },
     { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) }
@@ -323,17 +305,17 @@ export default new Elysia({ prefix: "/api" })
     "/lobby",
     async ({ query: { id }, set, user: { id: userId } }) => {
       // delete a waiting lobby
-      const lobbyId = await selectLobbyByIdStatusCreatedBy({
+      const lobby = selectLobbyByIdStatusCreatedBy.get({
         lobbyId: id,
         createdBy: userId,
         status: "waiting",
       });
-      if (lobbyId === undefined) {
+      if (lobby === undefined) {
         // this is not a waiting lobby or it was not created by them
         return error(403, "not a waiting lobby or not created by user");
       }
 
-      await deleteLobbyById({ id: lobbyId });
+      deleteLobbyById.run({ id });
 
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";

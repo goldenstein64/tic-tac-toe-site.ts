@@ -6,25 +6,33 @@ import { Board } from "@goldenstein64/tic-tac-toe/lib";
 import html, { Html } from "@elysiajs/html";
 import { eq, max, sql } from "drizzle-orm";
 
-import { db } from "../db";
+import { db, typePrepared } from "../db";
 import { intString } from "../types";
 import { Move } from "../db/schema";
 import { GameButton } from "../components/game";
 
-const selectMaxOrdering = db
-  .select({ ordering: max(Move.ordering) })
-  .from(Move)
-  .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-  .prepare();
+const _placeholders: any = undefined;
 
-const insertMove = db
-  .insert(Move)
-  .values({
-    lobbyId: sql.placeholder("lobbyId"),
-    ordering: sql.placeholder("ordering"),
-    position: sql.placeholder("position"),
-  })
-  .prepare();
+const selectMaxOrdering = typePrepared(
+  db
+    .select({ ordering: max(Move.ordering) })
+    .from(Move)
+    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);
+
+const insertMove = typePrepared(
+  db
+    .insert(Move)
+    .values({
+      lobbyId: sql.placeholder("lobbyId"),
+      ordering: sql.placeholder("ordering"),
+      position: sql.placeholder("position"),
+    })
+    .prepare(),
+  _placeholders as { lobbyId: number; ordering: number; position: number }
+);
 
 type GameEventEmitter = EventEmitter<{
   [evt: string]: [[ordering: number, position: number]];
