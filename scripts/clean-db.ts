@@ -1,5 +1,5 @@
-import { db } from "./src/db";
-import { DiscordUser } from "./src/db/schema";
+import { db } from "../src/db";
+import { DiscordUser } from "../src/db/schema";
 import { Discord } from "elysia-oauth2";
 
 import { eq, gt } from "drizzle-orm";
@@ -26,6 +26,11 @@ const refreshTokens = await db
   .from(DiscordUser)
   .where(gt(DiscordUser.expiresAt, new Date(Date.now() - 1.5 * DAYS)));
 
+console.log(
+  `refreshing ${refreshTokens.length} token${
+    refreshTokens.length === 1 ? "" : "s"
+  }...`
+);
 const refreshResults = await Promise.allSettled(
   refreshTokens.map(async ({ refreshToken, discordId }) => {
     try {
@@ -46,16 +51,20 @@ const refreshResults = await Promise.allSettled(
   })
 );
 
-const rejectedRefreshes = refreshResults.filter(
-  (result): result is PromiseRejectedResult => result.status === "rejected"
+const refreshCount = refreshResults.reduce(
+  (sum, { status }) => sum + (status === "fulfilled" ? 1 : 0),
+  0
 );
+console.log(`refreshed ${refreshCount} tokens`);
 
-if (rejectedRefreshes.length > 0) {
+if (refreshCount < refreshResults.length) {
+  const rejectedRefreshes = refreshResults.filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected"
+  );
+  const errors = rejectedRefreshes.map(({ reason }) => reason);
   console.error(
-    `${rejectedRefreshes.length} ${
-      refreshResults.length === 1 ? "token" : "tokens"
-    } couldn't be refreshed!\nuser ids:\n${rejectedRefreshes.map(
-      (result) => result.reason
-    )}`
+    `${rejectedRefreshes.length} token${
+      rejectedRefreshes.length === 1 ? "" : "s"
+    } couldn't be refreshed!\nerrors:\n${errors}`
   );
 }

@@ -5,7 +5,9 @@
     "dev": "NODE_ENV=development bun --watch run src/index.ts",
     "db": "drizzle-kit",
     "start": "NODE_ENV=production bun run src/index.ts",
-    "prestart": "bun run build.ts"
+    "prestart": "bun run scripts/build.ts",
+    "reset-db": "bun run scripts/reset-db.ts",
+    "clean-db": "bun run scripts/clean-db.ts"
   },
   "dependencies": {
     "@elysiajs/eden": "^1.1.3",
