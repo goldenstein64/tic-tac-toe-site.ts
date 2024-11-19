@@ -2,7 +2,7 @@
   "name": "tic-tac-toe-site2",
   "version": "1.0.50",
   "scripts": {
-    "dev": "NODE_ENV=development bun run --watch src/index.ts",
+    "dev": "NODE_ENV=development bun --watch run src/index.ts",
     "db": "drizzle-kit",
     "start": "NODE_ENV=production bun run src/index.ts",
     "prestart": "bun run build.ts"
