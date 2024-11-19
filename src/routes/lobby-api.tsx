@@ -338,8 +338,5 @@ export default new Elysia({ prefix: "/api" })
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";
     },
-    {
-      query: t.Object({ id: intString }),
-      cookie: t.Object({ userId: t.Number() }),
-    }
+    { query: t.Object({ id: intString }) }
   );
