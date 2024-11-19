@@ -10,6 +10,7 @@ import { intString } from "../types";
 import { db, tx } from "../db";
 import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
 import runGame from "../libs/run-game";
+import jwtAuth from "../libs/jwt-auth";
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
@@ -262,13 +263,11 @@ async function joinWaitingLobby(
 
 export default new Elysia({ prefix: "/api" })
   .use(html())
+  .use(jwtAuth())
+  .resolve(({ user }) => ({ user: user! }))
   .patch(
     "/lobby",
-    async ({
-      query: { id: lobbyId, action },
-      cookie: { userId: userIdCookie },
-    }) => {
-      const userId = userIdCookie.value;
+    async ({ query: { id: lobbyId, action }, user: { id: userId } }) => {
       switch (action) {
         case "forfeit":
           return await forfeitActiveLobby(lobbyId, userId);
@@ -276,16 +275,11 @@ export default new Elysia({ prefix: "/api" })
           return await joinWaitingLobby(lobbyId, userId);
       }
     },
-    {
-      query: t.Object({ id: intString, action: LobbyAction }),
-      cookie: t.Object({ userId: t.Number() }),
-    }
+    { query: t.Object({ id: intString, action: LobbyAction }) }
   )
   .post(
     "/lobby",
-    async ({ body: { typeX, typeO }, cookie: { userId: userIdCookie } }) => {
-      const userId = userIdCookie.value;
-
+    async ({ body: { typeX, typeO }, user: { id: userId } }) => {
       // create a new lobby
       const computerIdX = typeX === -1 ? undefined : typeX;
       const computerIdO = typeO === -1 ? undefined : typeO;
@@ -328,16 +322,12 @@ export default new Elysia({ prefix: "/api" })
         await insertLobby({ userId, status: "waiting" });
       }
     },
-    {
-      body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }),
-      cookie: t.Object({ userId: t.Number() }),
-    }
+    { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) }
   )
   .delete(
     "/lobby",
-    async ({ query: { id }, set, cookie: { userId: userIdCookie } }) => {
+    async ({ query: { id }, set, user: { id: userId } }) => {
       // delete a waiting lobby
-      const userId = userIdCookie.value;
       const lobbyId = await selectLobbyByIdStatusCreatedBy({
         lobbyId: id,
         createdBy: userId,
