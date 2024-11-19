@@ -15,14 +15,9 @@ import jwtAuth from "../libs/jwt-auth";
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
 
-const playerTypeSet = [-1, 1, 2, 3];
+const playerTypeSet = [-1, 1, 2, 3] as const;
 
-const PlayerType = t.Union([
-  t.Literal(-1),
-  t.Literal(1),
-  t.Literal(2),
-  t.Literal(3),
-]);
+const PlayerType = t.Union(playerTypeSet.map((p) => t.Literal(p)));
 type PlayerType = Static<typeof PlayerType>;
 
 const PlayerTypeString = t
@@ -30,7 +25,7 @@ const PlayerTypeString = t
   .Decode((value: string) => {
     const intValue = parseInt(value);
 
-    if (playerTypeSet.includes(intValue)) {
+    if (playerTypeSet.includes(intValue as PlayerType)) {
       return intValue as PlayerType;
     } else {
       throw new Error("passed in value is not a PlayerType");
