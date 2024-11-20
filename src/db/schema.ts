@@ -52,6 +52,7 @@ export const FinishedLobby = createTable("FinishedLobby", {
     .primaryKey()
     .references(() => Lobby.id),
   finishedAt: timestamp("finishedAt").notNull().default(UNIX_EPOCH),
+  winner: number("winner").references(() => User.id),
 });
 export type SelectFinishedLobby = InferSelectModel<typeof FinishedLobby>;
 export type InsertFinishedLobby = InferInsertModel<typeof FinishedLobby>;
