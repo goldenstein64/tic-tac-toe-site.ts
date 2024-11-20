@@ -3,7 +3,7 @@ import type { SelectUser } from "../db/schema";
 import { Html } from "@elysiajs/html";
 import { FinishedLobby, Game, Lobby, User } from "../db/schema";
 import { db, typePrepared } from "../db";
-import { eq, sql, aliasedTable, and, or } from "drizzle-orm";
+import { eq, sql, aliasedTable, and, ne } from "drizzle-orm";
 
 const _placeholders: any = undefined;
 
@@ -24,10 +24,7 @@ const selectActiveLobbies = (() => {
       .where(
         and(
           eq(Lobby.status, "active"),
-          or(
-            eq(playerX.id, sql.placeholder("userId")),
-            eq(playerO.id, sql.placeholder("userId"))
-          )
+          eq(Lobby.createdBy, sql.placeholder("userId"))
         )
       )
       .prepare(),
@@ -55,10 +52,7 @@ const selectFinishedLobbies = (() => {
       .where(
         and(
           eq(Lobby.status, "finished"),
-          or(
-            eq(playerX.id, sql.placeholder("userId")),
-            eq(playerO.id, sql.placeholder("userId"))
-          )
+          eq(Lobby.createdBy, sql.placeholder("userId"))
         )
       )
       .prepare(),
@@ -74,9 +68,14 @@ const selectAvailableLobbies = typePrepared(
       createdAt: Lobby.createdAt,
     })
     .from(Lobby)
-    .where(eq(Lobby.status, "waiting"))
+    .where(
+      and(
+        eq(Lobby.status, "waiting"),
+        ne(Lobby.createdBy, sql.placeholder("userId"))
+      )
+    )
     .prepare(),
-  _placeholders as void
+  _placeholders as { userId: number }
 );
 
 const selectWaitingLobbies = typePrepared(
@@ -234,8 +233,9 @@ export function AvailableLobbyItem({
   );
 }
 
-export async function AvailableLobbies() {
-  const availableLobbies = selectAvailableLobbies.all();
+type AvailableLobbiesProps = { userId: number };
+export async function AvailableLobbies({ userId }: AvailableLobbiesProps) {
+  const availableLobbies = selectAvailableLobbies.all({ userId });
   return (
     <table>
       <thead>
@@ -319,7 +319,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
       <h2>Active Games</h2>
       <ActiveLobbies userId={userId} />
       <h2>Available Games</h2>
-      <AvailableLobbies />
+      <AvailableLobbies userId={userId} />
       <h2>Finished Games</h2>
       <FinishedLobbies userId={userId} />
     </body>
