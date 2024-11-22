@@ -1,4 +1,5 @@
 import { Html } from "@elysiajs/html";
+import { DebugPanel } from "./debug";
 
 function LoginHead() {
   return (
@@ -15,6 +16,7 @@ function LoginHead() {
 function LoginBody() {
   return (
     <body>
+      <DebugPanel />
       <button hx-on:click="location.href='/login/discord'" class="btn">
         Sign in with Discord
       </button>

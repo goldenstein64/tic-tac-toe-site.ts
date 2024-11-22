@@ -14,6 +14,7 @@ import {
   SelectUser,
   User,
 } from "../db/schema";
+import { DebugPanel } from "./debug";
 
 function orderingToMark(ordering: number): Mark {
   return ordering % 2 === 1 ? "X" : "O";
@@ -237,6 +238,7 @@ export function GameBody({ lobbyId, user }: GameHtmlProps) {
 
   return (
     <body>
+      <DebugPanel />
       <h1>tic-tac-toe-site</h1>
       <PlayerInfo user={user} />
       <GameMain lobby={lobby} />

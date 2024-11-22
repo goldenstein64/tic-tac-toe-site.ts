@@ -4,6 +4,7 @@ import { Html } from "@elysiajs/html";
 import { FinishedLobby, Game, Lobby, User } from "../db/schema";
 import { db, typePrepared } from "../db";
 import { eq, sql, aliasedTable, and, ne } from "drizzle-orm";
+import { DebugPanel } from "./debug";
 
 const _placeholders: any = undefined;
 
@@ -309,6 +310,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
   const userId = user.id;
   return (
     <body>
+      <DebugPanel />
       <h1>tic-tac-toe-site</h1>
       <button class="btn" hx-on:click="location.href='/new-lobby'">
         New Lobby
