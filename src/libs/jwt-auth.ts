@@ -11,8 +11,11 @@ declare module "bun" {
   }
 }
 
-export const ACCESS_MAX_AGE = 60 * 15; // 15 minutes
-export const REFRESH_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+const MINUTES = 60;
+const DAYS = 60 * 60 * 24;
+
+export const ACCESS_MAX_AGE = 15 * MINUTES;
+export const REFRESH_MAX_AGE = 30 * DAYS;
 export const ACCESS_COOKIE_OPTS = {
   maxAge: ACCESS_MAX_AGE,
   httpOnly: true,
