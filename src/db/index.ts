@@ -3,6 +3,7 @@ import { Database } from "bun:sqlite";
 import { sql } from "drizzle-orm";
 
 import * as schema from "./schema";
+import Elysia from "elysia";
 
 const bunDB = new Database("game.db");
 
@@ -63,3 +64,7 @@ export function typePrepared<P extends BasePlaceholders, T>(
     ? PreparedStmt<P, T>
     : PreparedVoidStmt<P>;
 }
+
+export const plugin = new Elysia({ name: "Database" })
+  .decorate("db", db)
+  .decorate("tx", tx);
