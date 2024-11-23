@@ -6,7 +6,7 @@ import {
   Player,
 } from "@goldenstein64/tic-tac-toe/lib/player";
 
-const idToComputerFactory = new Map<number, () => Player>()
+export const idToComputerFactory = new Map<number, () => Player>()
   .set(1, () => new EasyComputer())
   .set(2, () => new MediumComputer())
   .set(3, () => new HardComputer());
@@ -16,7 +16,7 @@ export type ComputerId = 1 | 2 | 3;
 export default async function (
   playerX: ComputerId,
   playerO: ComputerId
-): Promise<number[]> {
+): Promise<[number[], Mark | null]> {
   const computerFactoryX = idToComputerFactory.get(playerX);
   if (computerFactoryX === undefined) {
     throw new Error("X is not a computer!");
@@ -38,10 +38,10 @@ export default async function (
     moves.push(move);
     board.setMark(move, currentMark);
     if (board.won(currentMark)) {
-      return moves;
+      return [moves, currentMark];
     }
     currentIndex = currentIndex === 0 ? 1 : 0;
   }
 
-  return moves;
+  return [moves, null];
 }
