@@ -107,7 +107,6 @@ export function ActiveGameButton({
       type="button"
       class="game-button"
       hx-swap="outerHTML"
-      sse-swap={`pos-${position}`}
       hx-vals={{ id: lobbyId, position: position }}
       disabled={disabled}
     >
