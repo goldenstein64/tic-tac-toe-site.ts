@@ -2,11 +2,12 @@ import type { LobbyStatus } from "../db/datatypes";
 import type { Static } from "elysia";
 import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
 
-import html, { Html } from "@elysiajs/html";
+import html from "@elysiajs/html";
 import Elysia, { error, t } from "elysia";
 import { and, eq, or, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
 
+import { GameState, gameStates } from "./game-api";
 import { intString } from "../types";
 import { db, tx, typePrepared } from "../db";
 import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
@@ -145,9 +146,9 @@ class CustomRollbackError extends Error {}
 class ResponseError extends Error {
   errorObject: ReturnType<typeof error>;
 
-  constructor(code: Parameters<typeof error>[0], response?: string) {
-    super(response);
-    this.errorObject = error(code, response);
+  constructor(...args: Parameters<typeof error>) {
+    super((args[1] as object).toString());
+    this.errorObject = error(...args);
   }
 }
 
@@ -194,6 +195,11 @@ async function forfeitActiveLobby(
       }
 
       insertFinishedLobby.run({ id: lobbyId, winner });
+
+      const state = gameStates.get(lobbyId);
+      if (state === undefined) throw new Error("state was undefined!");
+      state.emit("ended", winnerMark);
+
       return { success: true };
     });
   } catch (err) {
@@ -241,6 +247,11 @@ async function joinWaitingLobby(
 
       // add a Game and ActiveLobby row
       insertGame.run({ lobbyId, playerX, playerO });
+
+      // add a new game state to the map
+      const state = new GameState(lobbyId, playerX, playerO);
+      gameStates.set(lobbyId, state);
+      state.once("ended", () => gameStates.delete(lobbyId));
 
       return { success: true };
     });
