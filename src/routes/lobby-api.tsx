@@ -102,9 +102,9 @@ const selectPlayerInGame = typePrepared(
 const insertFinishedLobby = typePrepared(
   db
     .insert(FinishedLobby)
-    .values({ id: sql.placeholder("id") })
+    .values({ id: sql.placeholder("id"), winner: sql.placeholder("winner") })
     .prepare(),
-  _placeholders as { id: number }
+  _placeholders as { id: number; winner: number | null }
 );
 
 async function updateLobbyStatus(args: {
@@ -159,11 +159,22 @@ async function forfeitActiveLobby(
   try {
     return await tx(async () => {
       const playerResult = selectPlayerInGame.get({ lobbyId, userId });
-      if (
-        playerResult === undefined ||
-        (playerResult.playerX !== userId && playerResult.playerO !== userId)
-      ) {
-        throw new ResponseError("Forbidden");
+      if (playerResult === undefined) {
+        throw new ResponseError(
+          403,
+          "lobby does not exist or does not contain this user"
+        );
+      }
+
+      const { playerX, playerO } = playerResult;
+      let winner: number;
+      let winnerMark: Mark;
+      if (userId === playerX) {
+        winner = playerO;
+        winnerMark = "O";
+      } else {
+        winner = playerX;
+        winnerMark = "X";
       }
 
       const lobby = await updateLobbyStatus({
@@ -178,7 +189,7 @@ async function forfeitActiveLobby(
         );
       }
 
-      insertFinishedLobby.run({ id: lobbyId });
+      insertFinishedLobby.run({ id: lobbyId, winner });
       return { success: true };
     });
   } catch (err) {
@@ -263,7 +274,13 @@ export default new Elysia({ prefix: "/api" })
 
       if (computerIdX && computerIdO) {
         // both are computers, compute the game ASAP and create a finished lobby
-        const moves = await runGame(computerIdX, computerIdO);
+        const [moves, winnerMark] = await runGame(computerIdX, computerIdO);
+        const winner =
+          winnerMark === "X"
+            ? computerIdX
+            : winnerMark === "O"
+            ? computerIdO
+            : null;
 
         await tx(async () => {
           const { id: lobbyId } = insertLobby.get({
@@ -279,6 +296,7 @@ export default new Elysia({ prefix: "/api" })
             insertMoves({ lobbyId, moves }),
           ]);
           insertFinishedLobby.run({ id: lobbyId });
+          insertFinishedLobby.run({ id: lobbyId, winner });
         });
       } else if (computerIdX || computerIdO) {
         // only one is a computer, create an active lobby with this user as the
