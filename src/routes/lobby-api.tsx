@@ -271,7 +271,7 @@ export default new Elysia({ prefix: "/api" })
   )
   .post(
     "/lobby",
-    async ({ body: { typeX, typeO }, user: { id: userId } }) => {
+    async ({ body: { typeX, typeO }, user: { id: userId }, set }) => {
       // create a new lobby
       const computerIdX = typeX === -1 ? undefined : typeX;
       const computerIdO = typeO === -1 ? undefined : typeO;
@@ -317,6 +317,7 @@ export default new Elysia({ prefix: "/api" })
         // neither are computers, create a waiting lobby with this user waiting
         insertLobby.run({ userId, status: "waiting" });
       }
+      set.headers["HX-Redirect"] = "/";
     },
     { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) }
   )
