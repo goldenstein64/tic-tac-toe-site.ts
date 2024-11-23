@@ -107,17 +107,18 @@ const insertFinishedLobby = typePrepared(
   _placeholders as { id: number; winner: number | null }
 );
 
-async function updateLobbyStatus(args: {
+function updateLobbyStatus(args: {
   id: number;
   toStatus: LobbyStatus;
   fromStatus: LobbyStatus;
 }) {
   const { id, toStatus, fromStatus } = args;
-  const result = await db
+  const result = db
     .update(Lobby)
     .set({ status: toStatus })
     .where(and(eq(Lobby.id, id), eq(Lobby.status, fromStatus)))
-    .returning({ status: Lobby.status, createdBy: Lobby.createdBy });
+    .returning({ status: Lobby.status, createdBy: Lobby.createdBy })
+    .all();
 
   if (result.length > 1) {
     throw new Error("updated more than one lobby!");
@@ -126,15 +127,17 @@ async function updateLobbyStatus(args: {
   return result.length === 1 ? result[0] : undefined;
 }
 
-async function insertMoves(args: { lobbyId: number; moves: number[] }) {
+function insertMoves(args: { lobbyId: number; moves: number[] }) {
   const { lobbyId, moves } = args;
-  await db.insert(Move).values(
-    moves.map((position, i) => ({
-      lobbyId,
-      ordering: i + 1,
-      position: position + 1,
-    }))
-  );
+  db.insert(Move)
+    .values(
+      moves.map((position, i) => ({
+        lobbyId,
+        ordering: i + 1,
+        position: position + 1,
+      }))
+    )
+    .run();
 }
 
 class CustomRollbackError extends Error {}
@@ -177,7 +180,7 @@ async function forfeitActiveLobby(
         winnerMark = "X";
       }
 
-      const lobby = await updateLobbyStatus({
+      const lobby = updateLobbyStatus({
         id: lobbyId,
         fromStatus: "active",
         toStatus: "finished",
@@ -214,7 +217,7 @@ async function joinWaitingLobby(
 ): Promise<JoinResult> {
   try {
     return await tx(async () => {
-      const lobby = await updateLobbyStatus({
+      const lobby = updateLobbyStatus({
         id: lobbyId,
         fromStatus: "waiting",
         toStatus: "active",
@@ -287,15 +290,12 @@ export default new Elysia({ prefix: "/api" })
             userId,
             status: "finished",
           })!;
-          await Promise.all([
-            insertGame.execute({
-              lobbyId,
-              playerX: computerIdX,
-              playerO: computerIdO,
-            }),
-            insertMoves({ lobbyId, moves }),
-          ]);
-          insertFinishedLobby.run({ id: lobbyId });
+          await insertGame.execute({
+            lobbyId,
+            playerX: computerIdX,
+            playerO: computerIdO,
+          });
+          insertMoves({ lobbyId, moves });
           insertFinishedLobby.run({ id: lobbyId, winner });
         });
       } else if (computerIdX || computerIdO) {
@@ -306,7 +306,7 @@ export default new Elysia({ prefix: "/api" })
             userId,
             status: "active",
           })!;
-          await insertGame.execute({
+          insertGame.run({
             lobbyId,
             playerX: computerIdX ?? userId,
             playerO: computerIdO ?? userId,
