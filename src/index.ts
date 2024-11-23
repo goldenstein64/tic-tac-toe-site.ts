@@ -15,7 +15,7 @@ import sessionApi from "./routes/session-api";
 import debug from "./routes/debug";
 import { intString } from "./types";
 
-const app = new Elysia({ name: "app" })
+const app = new Elysia({ name: "App" })
   .use(debug())
   .use(html())
   .use(jwtAuth())
