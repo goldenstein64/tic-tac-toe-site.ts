@@ -110,7 +110,7 @@ export function LobbiesHead() {
 export async function UserConfig() {
   return (
     <div>
-      <button hx-delete="/api/session" hx-swap="none">
+      <button type="button" hx-delete="/api/session" hx-swap="none">
         Log out
       </button>
     </div>
@@ -126,7 +126,7 @@ export function WaitingLobbyItem({
   return (
     <tr>
       <td>
-        <button hx-delete="/api/lobby" hx-vals={{ id: lobbyId }}>
+        <button type="button" hx-delete="/api/lobby" hx-vals={{ id: lobbyId }}>
           Forget
         </button>
       </td>
@@ -168,10 +168,14 @@ export function ActiveLobbyItem({
   return (
     <tr>
       <td>
-        <button hx-on:click={`location.href="/game?id=${lobbyId}"`}>
+        <button
+          type="button"
+          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+        >
           Resume
         </button>
         <button
+          type="button"
           hx-patch="/api/lobby"
           hx-vals={{ id: lobbyId, action: "forfeit" }}
         >
@@ -218,7 +222,11 @@ export function AvailableLobbyItem({
   return (
     <tr>
       <td>
-        <button hx-patch="/api/lobby" hx-vals={{ id: lobbyId, action: "join" }}>
+        <button
+          type="button"
+          hx-patch="/api/lobby"
+          hx-vals={{ id: lobbyId, action: "join" }}
+        >
           Join
         </button>
       </td>
@@ -266,7 +274,10 @@ export function FinishedLobbyItem({
   return (
     <tr>
       <td>
-        <button hx-on:click={`location.href="/game?id=${lobbyId}"`}>
+        <button
+          type="button"
+          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+        >
           View
         </button>
       </td>
@@ -307,7 +318,9 @@ export async function LobbiesBody({ user }: LobbiesProps) {
     <body>
       <DebugPanel />
       <h1>tic-tac-toe-site</h1>
-      <button hx-on:click="location.href='/new-lobby'">New Lobby</button>
+      <button type="button" hx-on:click="location.href='/new-lobby'">
+        New Lobby
+      </button>
       <UserConfig />
       <h2>Waiting Games</h2>
       <WaitingLobbies userId={userId} />
