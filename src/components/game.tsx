@@ -106,7 +106,8 @@ export function ActiveGameButton({
     <button
       type="button"
       class="game-button"
-      hx-swap="outerHTML"
+      hx-post="/api/game-move"
+      hx-swap="none"
       hx-vals={{ id: lobbyId, position: position }}
       disabled={disabled}
     >
@@ -123,12 +124,7 @@ function ActiveGameBoard({ lobby }: { lobby: SelectLobby }) {
   );
 
   return (
-    <ol
-      class="game-board"
-      hx-post="/api/game-move"
-      hx-swap="innerHTML"
-      sse-swap="board"
-    >
+    <ol class="game-board" hx-swap="innerHTML" sse-swap="board">
       {range(9).map((i) => {
         const ordering = moves.get(i + 1);
         const mark = ordering ? orderingToMark(ordering) : undefined;
