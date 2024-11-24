@@ -8,9 +8,7 @@ export function DebugPanel() {
       <h3>Debug Panel</h3>
       <form hx-post="/debug/user" hx-swap="none">
         <input type="text" name="username" />
-        <button type="submit" class="btn">
-          Get User
-        </button>
+        <button type="submit">Get User</button>
       </form>
     </div>
   );

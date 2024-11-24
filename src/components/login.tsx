@@ -17,7 +17,7 @@ function LoginBody() {
   return (
     <body>
       <DebugPanel />
-      <button hx-on:click="location.href='/login/discord'" class="btn">
+      <button hx-on:click="location.href='/login/discord'">
         Sign in with Discord
       </button>
     </body>

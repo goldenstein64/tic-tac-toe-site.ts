@@ -110,7 +110,7 @@ export function LobbiesHead() {
 export async function UserConfig() {
   return (
     <div>
-      <button class="btn" hx-delete="/api/session" hx-swap="none">
+      <button hx-delete="/api/session" hx-swap="none">
         Log out
       </button>
     </div>
@@ -126,7 +126,7 @@ export function WaitingLobbyItem({
   return (
     <tr>
       <td>
-        <button class="btn" hx-delete="/api/lobby" hx-vals={{ id: lobbyId }}>
+        <button hx-delete="/api/lobby" hx-vals={{ id: lobbyId }}>
           Forget
         </button>
       </td>
@@ -168,11 +168,10 @@ export function ActiveLobbyItem({
   return (
     <tr>
       <td>
-        <button class="btn" hx-on:click={`location.href="/game?id=${lobbyId}"`}>
+        <button hx-on:click={`location.href="/game?id=${lobbyId}"`}>
           Resume
         </button>
         <button
-          class="btn"
           hx-patch="/api/lobby"
           hx-vals={{ id: lobbyId, action: "forfeit" }}
         >
@@ -219,11 +218,7 @@ export function AvailableLobbyItem({
   return (
     <tr>
       <td>
-        <button
-          class="btn"
-          hx-patch="/api/lobby"
-          hx-vals={{ id: lobbyId, action: "join" }}
-        >
+        <button hx-patch="/api/lobby" hx-vals={{ id: lobbyId, action: "join" }}>
           Join
         </button>
       </td>
@@ -271,7 +266,7 @@ export function FinishedLobbyItem({
   return (
     <tr>
       <td>
-        <button class="btn" hx-on:click={`location.href="/game?id=${lobbyId}"`}>
+        <button hx-on:click={`location.href="/game?id=${lobbyId}"`}>
           View
         </button>
       </td>
@@ -312,9 +307,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
     <body>
       <DebugPanel />
       <h1>tic-tac-toe-site</h1>
-      <button class="btn" hx-on:click="location.href='/new-lobby'">
-        New Lobby
-      </button>
+      <button hx-on:click="location.href='/new-lobby'">New Lobby</button>
       <UserConfig />
       <h2>Waiting Games</h2>
       <WaitingLobbies userId={userId} />
