@@ -133,7 +133,7 @@ function orderingToMark(ordering: number): Mark {
 
 type EventProps = { event?: string; data: string };
 function event({ event = "message", data }: EventProps): string {
-  return `event: ${event}\ndata: ${data}`;
+  return `event: ${event}\ndata: ${data}\n\n`;
 }
 
 export default new Elysia({ prefix: "/api" })
