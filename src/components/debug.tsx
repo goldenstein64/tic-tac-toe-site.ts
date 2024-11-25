@@ -4,7 +4,14 @@ export function DebugPanel() {
   if (Bun.env.NODE_ENV !== "development") return null;
 
   return (
-    <div style="border-width: 1px; border-style: solid; border-color: black; padding: 5px; margin: 5px">
+    <div
+      style="
+        border: 0px none transparent;
+        padding: 5px;
+        margin: 5px;
+        background-color: white;
+      "
+    >
       <h3>Debug Panel</h3>
       <form hx-post="/debug/user" hx-swap="none">
         <input type="text" name="username" />
