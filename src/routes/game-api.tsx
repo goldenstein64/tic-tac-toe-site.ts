@@ -136,34 +136,52 @@ function event({ event = "message", data }: EventProps): string {
   return `event: ${event}\ndata: ${data}\n\n`;
 }
 
+function GameButtons({
+  lobbyId,
+  board,
+  disabled,
+}: {
+  lobbyId: number;
+  board: Board;
+  disabled?: boolean;
+}) {
+  return (
+    <>
+      {board.data.map((mark, i) => (
+        <ActiveGameButton
+          disabled={disabled}
+          lobbyId={lobbyId}
+          position={i + 1}
+        >
+          {mark}
+        </ActiveGameButton>
+      ))}
+    </>
+  );
+}
+
 export default new Elysia({ prefix: "/api" })
   .use(html())
   .use(jwtAuth())
   .resolve(({ user }) => ({ user: user! }))
   .post(
     "/game-move",
-    ({ body: { id: lobbyId, position }, set, user }) => {
+    ({ body: { id: lobbyId, position }, user }) => {
       const { id: userId } = user;
       const result = selectMaxOrdering.get({ lobbyId });
       const ordering = (result?.ordering ?? 0) + 1;
       const mark = orderingToMark(ordering);
 
       const hasUser = selectPlayerInGameByIdMark(mark, { lobbyId, userId });
-      if (!hasUser) return error(403);
+      if (!hasUser) return error("Forbidden");
 
       insertMove.run({ lobbyId, ordering, position });
-      const state = gameStates.get(lobbyId)!;
-      if (!state.board.canMark(position - 1)) return error(401);
+      const state = gameStates.get(lobbyId);
+      if (!state) return error("Unauthorized");
+      if (!state.board.canMark(position - 1)) return error("Unauthorized");
 
       state.board.setMark(position - 1, mark);
       state.emit("new-move", ordering);
-
-      set.headers["Content-Type"] = "text/html";
-      return (
-        <ActiveGameButton disabled lobbyId={lobbyId} position={position}>
-          {mark}
-        </ActiveGameButton>
-      );
     },
     {
       body: t.Object({
@@ -177,7 +195,7 @@ export default new Elysia({ prefix: "/api" })
     "/game-move",
     async function* ({ query: { id: lobbyId }, set, user: { id: userId } }) {
       const players = selectGamePlayers.get({ lobbyId });
-      if (!players) return error(404);
+      if (!players) return error("Not Found");
 
       set.headers["X-Accel-Buffering"] = "no";
       set.headers["Cache-Control"] = "no-cache";
@@ -206,35 +224,42 @@ export default new Elysia({ prefix: "/api" })
           const [ordering] = args;
           const mark = orderingToMark(ordering);
 
-          const nextTurn = orderingToMark(ordering + 1);
-          // disable one player's buttons, and enable the other's
-          const isClientsTurn = userIsX === (nextTurn === "X");
-          yield event({
-            event: "board",
-            data: await (
-              <>
-                {board.data.map((mark, i) => (
-                  <ActiveGameButton
-                    disabled={!(isClientPlaying && isClientsTurn && !mark)}
-                    lobbyId={lobbyId}
-                    position={i + 1}
-                  >
-                    {mark}
-                  </ActiveGameButton>
-                ))}
-              </>
-            ),
-          });
-
-          if (board.won(mark)) {
-            yield event({ event: "winner", data: mark });
-            break;
-          } else if (board.full()) {
-            yield event({ event: "winner", data: "no one" });
-            break;
+          // update the board
+          const endResult = board.ended(mark);
+          if (endResult) {
+            yield event({
+              event: "board",
+              data: await (
+                <GameButtons disabled board={board} lobbyId={lobbyId} />
+              ),
+            });
+            yield event({
+              event: "winner",
+              data: endResult.winner ?? "no one",
+            });
+          } else {
+            const nextTurn = orderingToMark(ordering + 1);
+            const isClientsTurn = userIsX === (nextTurn === "X");
+            const disabled = !isClientPlaying || !isClientsTurn || !!mark;
+            yield event({
+              event: "board",
+              data: await (
+                <GameButtons
+                  board={board}
+                  disabled={disabled}
+                  lobbyId={lobbyId}
+                />
+              ),
+            });
           }
         } else if (name === "ended") {
           const [winnerMark] = args;
+          event({
+            event: "board",
+            data: await (
+              <GameButtons disabled lobbyId={lobbyId} board={board} />
+            ),
+          });
           yield event({ event: "winner", data: winnerMark });
           break;
         }
