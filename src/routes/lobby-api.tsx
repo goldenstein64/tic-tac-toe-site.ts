@@ -132,13 +132,7 @@ function updateLobbyStatus(args: {
 function insertMoves(args: { lobbyId: number; moves: number[] }) {
   const { lobbyId, moves } = args;
   db.insert(Move)
-    .values(
-      moves.map((position, i) => ({
-        lobbyId,
-        ordering: i,
-        position: position,
-      }))
-    )
+    .values(moves.map((position, i) => ({ lobbyId, ordering: i, position })))
     .run();
 }
 
