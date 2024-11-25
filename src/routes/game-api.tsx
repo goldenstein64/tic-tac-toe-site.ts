@@ -156,6 +156,17 @@ function GameButtons({
   );
 }
 
+const events = ["new-move", "ended"] as const;
+const gameMoveListeners = (
+  emitter: EventEmitter<{
+    message: GameStateEventsArrays;
+  }>
+) =>
+  events.map(
+    (evt) =>
+      [evt, (...args: any) => emitter.emit("message", evt, args)] as const
+  );
+
 export default new Elysia({ prefix: "/api" })
   .use(html())
   .use(jwtAuth())
@@ -208,13 +219,12 @@ export default new Elysia({ prefix: "/api" })
         message: GameStateEventsArrays;
       }>();
 
-      for (const evt of ["new-move", "ended"] as const)
-        state.on(evt, (...args: any) => emitter.emit("message", evt, args));
+      const listeners = gameMoveListeners(emitter);
+      for (const [evt, listener] of listeners) state.on(evt, listener);
 
-      for await (const [name, args] of on(
-        emitter,
-        "message"
-      ) as AsyncIterableIterator<GameStateEventsArrays>) {
+      type EmitterIterator = AsyncIterableIterator<GameStateEventsArrays>;
+      const onMessage = on(emitter, "message") as EmitterIterator;
+      for await (const [name, args] of onMessage) {
         // would be more troublesome as a switch btw
         if (name === "new-move") {
           const [ordering] = args;
@@ -260,6 +270,8 @@ export default new Elysia({ prefix: "/api" })
           break;
         }
       }
+
+      for (const [evt, listener] of listeners) state.off(evt, listener);
     },
     { query: t.Object({ id: intString }) }
   );
