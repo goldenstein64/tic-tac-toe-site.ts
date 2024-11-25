@@ -7,7 +7,7 @@ import Elysia, { error, t } from "elysia";
 import { and, eq, or, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
 
-import { GameState, gameStates } from "./game-api";
+import { gameStates } from "./game-api";
 import { intString } from "../types";
 import { db, tx, typePrepared } from "../db";
 import { FinishedLobby, Game, Lobby, Move } from "../db/schema";

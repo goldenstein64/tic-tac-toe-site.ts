@@ -4,7 +4,7 @@ import { EventEmitter, on } from "node:events";
 import { Elysia, error, t } from "elysia";
 import { Board } from "@goldenstein64/tic-tac-toe/lib";
 import html, { Html } from "@elysiajs/html";
-import { and, eq, max, sql } from "drizzle-orm";
+import { eq, max, sql } from "drizzle-orm";
 
 import { db, typePrepared } from "../db";
 import { intString } from "../types";
