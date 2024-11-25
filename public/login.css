@@ -1,3 +1,27 @@
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-image: linear-gradient(45deg, lightblue, lightgreen);
+}
+
 body > button {
-  margin: auto auto;
+  margin: auto;
+  display: block;
+  align-content: center;
+}
+
+#discord-sign-in {
+  background-color: #5865f2;
+  background-image: none;
+  color: white;
+  border: 0px none transparent;
+}
+
+#discord-sign-in > img {
+  aspect-ratio: calc(619 / 469);
+  margin-left: 5px;
+  height: 14px;
+  object-fit: contain;
+  width: fit-content;
 }
