@@ -108,7 +108,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
     }
 
     this.on("new-move", async (ordering) => {
-      const nextTurn = orderingToMark(ordering);
+      const nextTurn = orderingToMark(ordering + 1);
       const nextComputer = this.computers.get(nextTurn);
       if (!nextComputer) return;
 
