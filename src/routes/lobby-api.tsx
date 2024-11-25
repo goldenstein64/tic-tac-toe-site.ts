@@ -115,18 +115,12 @@ function updateLobbyStatus(args: {
   fromStatus: LobbyStatus;
 }) {
   const { id, toStatus, fromStatus } = args;
-  const result = db
+  return db
     .update(Lobby)
     .set({ status: toStatus })
     .where(and(eq(Lobby.id, id), eq(Lobby.status, fromStatus)))
     .returning({ status: Lobby.status, createdBy: Lobby.createdBy })
-    .all();
-
-  if (result.length > 1) {
-    throw new Error("updated more than one lobby!");
-  }
-
-  return result.length === 1 ? result[0] : undefined;
+    .get();
 }
 
 function insertMoves(args: { lobbyId: number; moves: number[] }) {
@@ -243,10 +237,7 @@ async function joinWaitingLobby(
       // add a Game and ActiveLobby row
       insertGame.run({ lobbyId, playerX, playerO });
 
-      // add a new game state
-      const state = new GameState(lobbyId, playerX, playerO);
-      state.once("ended", () => gameStates.delete(lobbyId));
-      gameStates.set(lobbyId, state);
+      // a new game state will be created when needed
 
       return { success: true };
     });
