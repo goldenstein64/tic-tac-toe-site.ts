@@ -245,7 +245,10 @@ async function joinWaitingLobby(
       // add a new game state to the map
       const state = new GameState(lobbyId, playerX, playerO);
       gameStates.set(lobbyId, state);
-      state.once("ended", () => gameStates.delete(lobbyId));
+      state.once("ended", () => {
+        state.removeAllListeners();
+        gameStates.delete(lobbyId);
+      });
 
       return { success: true };
     });
