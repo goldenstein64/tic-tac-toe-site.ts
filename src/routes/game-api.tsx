@@ -40,38 +40,14 @@ const insertMove = typePrepared(
   _placeholders as { lobbyId: number; ordering: number; position: number }
 );
 
-const selectPlayerInGameByIdMark = (() => {
-  function prepareSelect(mark: Mark) {
-    const playerColumn = mark === "X" ? Game.playerX : Game.playerO;
-    return typePrepared(
-      db
-        .select({ id: playerColumn })
-        .from(Game)
-        .where(
-          and(
-            eq(Game.lobbyId, sql.placeholder("lobbyId")),
-            eq(playerColumn, sql.placeholder("userId"))
-          )
-        )
-        .prepare(),
-      _placeholders as { lobbyId: number; userId: number }
-    );
-  }
-
-  const selectPlayerXInGameById = prepareSelect("X");
-  const selectPlayerOInGameById = prepareSelect("O");
-
-  return (mark: Mark, args: { lobbyId: number; userId: number }) => {
-    switch (mark) {
-      case "X":
-        return selectPlayerXInGameById.get(args);
-      case "O":
-        return selectPlayerOInGameById.get(args);
-      default:
-        return assertNever(mark);
-    }
-  };
-})();
+const selectMoves = typePrepared(
+  db
+    .select({ ordering: Move.ordering, position: Move.position })
+    .from(Move)
+    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);
 
 const selectGamePlayers = typePrepared(
   db
@@ -107,6 +83,15 @@ export class GameState extends EventEmitter<GameStateEvents> {
       this.computers.set("O", computerOFactory());
     }
 
+    for (const { position, ordering } of selectMoves.all({ lobbyId })) {
+      const mark = orderingToMark(ordering);
+      this.board.setMark(position, mark);
+    }
+
+    this.once("ended", () => {
+      this.removeAllListeners();
+    });
+
     this.on("new-move", async (ordering) => {
       const nextTurn = orderingToMark(ordering + 1);
       const nextComputer = this.computers.get(nextTurn);
@@ -128,7 +113,19 @@ export class GameState extends EventEmitter<GameStateEvents> {
   }
 }
 
-export const gameStates = new Map<number, GameState>();
+class GameStates extends Map<number, GameState> {
+  getOrCreate(lobbyId: number, playerX: number, playerO: number): GameState {
+    let state = this.get(lobbyId);
+    if (!state) {
+      state = new GameState(lobbyId, playerX, playerO);
+      state.once("ended", () => this.delete(lobbyId));
+      this.set(lobbyId, state);
+    }
+    return state;
+  }
+}
+
+export const gameStates = new GameStates();
 
 export function orderingToMark(ordering: number): Mark {
   return ordering % 2 === 0 ? "X" : "O";
@@ -176,21 +173,21 @@ export default new Elysia({ prefix: "/api" })
   .resolve(({ user }) => ({ user: user! }))
   .post(
     "/game-move",
-    ({ body: { id: lobbyId, position }, user }) => {
-      const { id: userId } = user;
-      const result = selectMaxOrdering.get({ lobbyId });
-      const ordering = (result?.ordering ?? -1) + 1;
-      const mark = orderingToMark(ordering);
+    ({ body: { id: lobbyId, position }, user: { id: userId } }) => {
+      const players = selectGamePlayers.get({ lobbyId });
+      if (!players) return error("Not Found");
+      const { playerX, playerO } = players;
+      if (playerX !== userId && playerO !== userId)
+        return error("Unauthorized");
 
-      const hasUser = selectPlayerInGameByIdMark(mark, { lobbyId, userId });
-      if (!hasUser) return error("Forbidden");
-
-      insertMove.run({ lobbyId, ordering, position });
-      const state = gameStates.get(lobbyId);
-      if (!state) return error("Unauthorized");
+      const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
       if (!state.board.canMark(position)) return error("Unauthorized");
 
+      const maxOrderResult = selectMaxOrdering.get({ lobbyId });
+      const ordering = (maxOrderResult?.ordering ?? -1) + 1;
+      const mark = orderingToMark(ordering);
       state.board.setMark(position, mark);
+      insertMove.run({ lobbyId, ordering, position });
       state.emit("new-move", ordering);
     },
     {
@@ -212,7 +209,7 @@ export default new Elysia({ prefix: "/api" })
       set.headers["Content-Type"] = "text/event-stream";
 
       const { playerX, playerO } = players;
-      const state = gameStates.get(lobbyId)!;
+      const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
       const board = state.board;
       const userIsX = userId === playerX;
       const userIsO = userId === playerO;

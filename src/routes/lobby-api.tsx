@@ -191,8 +191,9 @@ async function forfeitActiveLobby(
       insertFinishedLobby.run({ id: lobbyId, winner });
 
       const state = gameStates.get(lobbyId);
-      if (state === undefined) throw new Error("state was undefined!");
-      state.emit("ended", winnerMark);
+      if (state) {
+        state.emit("ended", winnerMark);
+      }
 
       return { success: true };
     });
@@ -242,13 +243,10 @@ async function joinWaitingLobby(
       // add a Game and ActiveLobby row
       insertGame.run({ lobbyId, playerX, playerO });
 
-      // add a new game state to the map
+      // add a new game state
       const state = new GameState(lobbyId, playerX, playerO);
+      state.once("ended", () => gameStates.delete(lobbyId));
       gameStates.set(lobbyId, state);
-      state.once("ended", () => {
-        state.removeAllListeners();
-        gameStates.delete(lobbyId);
-      });
 
       return { success: true };
     });
