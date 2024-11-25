@@ -112,6 +112,9 @@ export class GameState extends EventEmitter<GameStateEvents> {
       const nextComputer = this.computers.get(nextTurn);
       if (!nextComputer) return;
 
+      const thisTurn = orderingToMark(ordering);
+      if (this.board.ended(thisTurn)) return;
+
       // this is not a race, we want the computer to return its move after a
       // minimum of one second
       const [position] = await Promise.all([
