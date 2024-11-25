@@ -1,15 +1,9 @@
-button,
-input[type="button"] {
-  background-image: linear-gradient(#e8e8e8, #cccccc);
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 4px;
-  color: #000000;
-  padding: 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
+:root {
+  color-scheme: light dark;
+  --x-primary-color: light-dark(rgb(110, 27, 61), rgb(253, 179, 209));
+  --x-secondary-color: light-dark(rgb(253, 179, 209), rgb(110, 27, 61));
+  --o-primary-color: light-dark(rgb(23, 88, 67), rgb(158, 255, 223));
+  --o-secondary-color: light-dark(rgb(158, 255, 223), rgb(23, 88, 67));
 }
 
 * {
@@ -18,4 +12,33 @@ input[type="button"] {
 
 body {
   margin: 0px;
+}
+
+button,
+input[type="button"] {
+  background-image: linear-gradient(
+    light-dark(#efefef, #444444),
+    light-dark(#e5e5e5, #292929)
+  );
+  border: 1px solid rgb(127, 127, 127);
+  border-radius: 4px;
+  color: light-dark(black, white);
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+#debug-panel {
+  border: 0px none transparent;
+  padding: 20px;
+  margin: 5px auto;
+  background-color: light-dark(white, black);
+  align-content: start;
+  border-radius: 4px;
+}
+
+#debug-panel > form.get-user > button[type="submit"] {
+  margin-left: 5px;
 }

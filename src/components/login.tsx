@@ -17,14 +17,16 @@ function LoginBody() {
   return (
     <body>
       <DebugPanel />
-      <button
-        id="discord-sign-in"
-        type="button"
-        hx-on:click="location.href='/login/discord'"
-      >
-        Sign in with Discord
-        <img src="/public/discord-mark-white.png" width="619" height="469" />
-      </button>
+      <section>
+        <button
+          id="discord-sign-in"
+          type="button"
+          hx-on:click="location.href='/login/discord'"
+        >
+          Sign in with Discord
+          <img src="/public/discord-mark-white.png" width="619" height="469" />
+        </button>
+      </section>
     </body>
   );
 }
