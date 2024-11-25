@@ -135,8 +135,8 @@ function insertMoves(args: { lobbyId: number; moves: number[] }) {
     .values(
       moves.map((position, i) => ({
         lobbyId,
-        ordering: i + 1,
-        position: position + 1,
+        ordering: i,
+        position: position,
       }))
     )
     .run();

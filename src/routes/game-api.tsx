@@ -108,7 +108,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
     }
 
     this.on("new-move", async (ordering) => {
-      const nextTurn = orderingToMark(ordering + 1);
+      const nextTurn = orderingToMark(ordering);
       const nextComputer = this.computers.get(nextTurn);
       if (!nextComputer) return;
 
@@ -119,16 +119,16 @@ export class GameState extends EventEmitter<GameStateEvents> {
         delay(1000),
       ]);
       this.board.setMark(position, nextTurn);
-      insertMove.run({ lobbyId, ordering: ordering + 1, position });
-      this.emit("new-move", ordering + 1);
+      insertMove.run({ lobbyId, ordering: ordering, position });
+      this.emit("new-move", ordering);
     });
   }
 }
 
 export const gameStates = new Map<number, GameState>();
 
-function orderingToMark(ordering: number): Mark {
-  return ordering % 2 === 1 ? "X" : "O";
+export function orderingToMark(ordering: number): Mark {
+  return ordering % 2 === 0 ? "X" : "O";
 }
 
 type EventProps = { event?: string; data: string };
@@ -148,11 +148,7 @@ function GameButtons({
   return (
     <>
       {board.data.map((mark, i) => (
-        <ActiveGameButton
-          disabled={disabled}
-          lobbyId={lobbyId}
-          position={i + 1}
-        >
+        <ActiveGameButton disabled={disabled} lobbyId={lobbyId} position={i}>
           {mark}
         </ActiveGameButton>
       ))}
@@ -169,7 +165,7 @@ export default new Elysia({ prefix: "/api" })
     ({ body: { id: lobbyId, position }, user }) => {
       const { id: userId } = user;
       const result = selectMaxOrdering.get({ lobbyId });
-      const ordering = (result?.ordering ?? 0) + 1;
+      const ordering = (result?.ordering ?? -1) + 1;
       const mark = orderingToMark(ordering);
 
       const hasUser = selectPlayerInGameByIdMark(mark, { lobbyId, userId });
@@ -178,9 +174,9 @@ export default new Elysia({ prefix: "/api" })
       insertMove.run({ lobbyId, ordering, position });
       const state = gameStates.get(lobbyId);
       if (!state) return error("Unauthorized");
-      if (!state.board.canMark(position - 1)) return error("Unauthorized");
+      if (!state.board.canMark(position)) return error("Unauthorized");
 
-      state.board.setMark(position - 1, mark);
+      state.board.setMark(position, mark);
       state.emit("new-move", ordering);
     },
     {

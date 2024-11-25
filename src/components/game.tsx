@@ -126,10 +126,10 @@ function ActiveGameBoard({ lobby }: { lobby: SelectLobby }) {
   return (
     <ol class="game-board" hx-swap="innerHTML" sse-swap="board">
       {range(9).map((i) => {
-        const ordering = moves.get(i + 1);
+        const ordering = moves.get(i);
         const mark = ordering ? orderingToMark(ordering) : undefined;
         return (
-          <ActiveGameButton lobbyId={lobbyId} position={i + 1}>
+          <ActiveGameButton lobbyId={lobbyId} position={i}>
             {mark}
           </ActiveGameButton>
         );
@@ -172,7 +172,7 @@ function DormantGameBoard({ lobby }: { lobby: SelectLobby }) {
   return (
     <ol class="game-board">
       {range(9).map((i) => {
-        const ordering = moves.get(i + 1);
+        const ordering = moves.get(i);
         const mark = ordering ? orderingToMark(ordering) : undefined;
         return <DormantGameButton>{mark}</DormantGameButton>;
       })}
