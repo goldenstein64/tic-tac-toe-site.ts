@@ -84,7 +84,7 @@ const selectGamePlayers = typePrepared(
 
 type GameStateEvents = {
   "new-move": [ordering: number];
-  ended: [winner: Mark];
+  ended: [winner: Mark | undefined];
 };
 
 type GameStateEventsArrays = {
@@ -243,6 +243,7 @@ export default new Elysia({ prefix: "/api" })
               event: "winner",
               data: endResult.winner ?? "no one",
             });
+            state.emit("ended", endResult.winner);
           } else {
             const nextTurn = orderingToMark(ordering + 1);
             const isClientsTurn = userIsX === (nextTurn === "X");
@@ -266,7 +267,7 @@ export default new Elysia({ prefix: "/api" })
               <GameButtons disabled lobbyId={lobbyId} board={board} />
             ),
           });
-          yield event({ event: "winner", data: winnerMark });
+          yield event({ event: "winner", data: winnerMark ?? "no one" });
           break;
         }
       }
