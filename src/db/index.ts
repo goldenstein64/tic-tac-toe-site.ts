@@ -5,7 +5,10 @@ import { sql } from "drizzle-orm";
 import * as schema from "./schema";
 import Elysia from "elysia";
 
-const bunDB = new Database("game.db");
+const bunDB =
+  Bun.env.NODE_ENV === "test"
+    ? new Database("./test/game.db")
+    : new Database("./game.db");
 
 export const db = drizzle(bunDB, { schema });
 db.run(sql`PRAGMA journal_mode = WAL;`);

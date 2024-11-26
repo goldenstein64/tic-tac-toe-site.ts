@@ -2,26 +2,31 @@ import Database from "bun:sqlite";
 import * as schema from "../src/db/schema";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { $ } from "bun";
+import * as path from "node:path";
 
 const { IsComputer, User } = schema;
 
-console.log("deleting db...");
+const dbFolder = process.argv[2] ?? ".";
+const dbPath = path.resolve(dbFolder, "game.db");
+const drizzleConfig = path.resolve(dbFolder, "drizzle.config.ts");
+
+console.log(`deleting ${dbPath}...`);
 {
   const results = await Promise.allSettled([
-    $`rm game.db`,
-    $`rm game.db-shm`,
-    $`rm game.db-wal`,
+    $`rm ${dbPath}`,
+    $`rm ${dbPath}-shm`,
+    $`rm ${dbPath}-wal`,
   ]);
   if (results.some(({ status }) => status === "rejected")) {
     console.error("some files couldn't be deleted!");
   }
 }
 
-console.log("generating db...");
-Bun.spawnSync({ cmd: ["drizzle-kit", "push"], stdout: "inherit" });
+console.log(`generating ${dbPath}...`);
+await $`drizzle-kit push --config ${drizzleConfig}`;
 
 console.log("writing initial data...");
-const db = drizzle(new Database("game.db"), { schema });
+const db = drizzle(new Database(dbPath), { schema });
 
 // UTC, 24-hour time
 const easyCreated = new Date(Date.UTC(2024, 3, 6, 1, 47)); // 2024/3/6 1:47
