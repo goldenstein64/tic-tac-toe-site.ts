@@ -26,7 +26,7 @@ export default () =>
             jwtRefresh,
           }) => {
             const access = await jwtAccess.verify(cookieAccess.value);
-            if (access) return error(204);
+            if (access) return error("No Content");
 
             const refresh = await jwtRefresh.verify(cookieRefresh.value);
             if (refresh) {
@@ -37,7 +37,7 @@ export default () =>
                 .get()!;
 
               if (refreshKey === refresh.refreshKey) {
-                return error(204);
+                return error("No Content");
               }
             }
 
