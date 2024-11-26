@@ -146,6 +146,7 @@ async function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
  */
 export default () =>
   new Elysia()
+    .decorate("discord", discord)
     .use(jwtAuth)
     .use(
       oauth2({
@@ -156,9 +157,13 @@ export default () =>
         ],
       })
     )
-    .get("/login/discord", ({ oauth2 }) =>
-      oauth2.redirect("Discord", ["identify", "email"])
+    /** redirects the user to the Discord auth page */
+    .get(
+      "/login/discord",
+      async ({ oauth2 }) =>
+        await oauth2.redirect("Discord", ["identify", "email"])
     )
+
     .get(
       "/login/discord/callback",
       async ({
@@ -231,5 +236,4 @@ export default () =>
         // redirect the user back to the home page
         return redirect("/");
       }
-    )
-    .decorate("discord", discord);
+    );
