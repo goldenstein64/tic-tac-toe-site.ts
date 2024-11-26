@@ -29,10 +29,10 @@ console.log("writing initial data...");
 const db = drizzle(new Database(dbPath), { schema });
 
 // UTC, 24-hour time
-const easyCreated = new Date(Date.UTC(2024, 3, 6, 1, 47)); // 2024/3/6 1:47
-const mediumCreated = new Date(Date.UTC(2023, 8, 4, 22, 35)); // 2023/8/4 22:35
-const hardCreated = new Date(Date.UTC(2023, 8, 7, 1, 23)); // 2023/8/7 1:23
-const debugCreated = new Date(Date.UTC(2024, 11, 16, 3, 5)); // 2024/11/16 3:05
+const easyCreated = new Date(Date.UTC(2024, 3 - 1, 6, 1, 47)); // 2024/3/6 1:47
+const mediumCreated = new Date(Date.UTC(2023, 8 - 1, 4, 22, 35)); // 2023/8/4 22:35
+const hardCreated = new Date(Date.UTC(2023, 7, 8 - 1, 1, 23)); // 2023/8/7 1:23
+const debugCreated = new Date(Date.UTC(2024, 11 - 1, 16, 3, 5)); // 2024/11/16 3:05
 
 const refreshKey = 1;
 const insertComputerUsers = db
