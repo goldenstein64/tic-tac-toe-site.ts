@@ -13,17 +13,24 @@ export const idToComputerFactory = new Map<number, () => Player>()
 
 export type ComputerId = 1 | 2 | 3;
 
+export class NotComputerError extends Error {
+  constructor(readonly mark: Mark, playerId: number) {
+    super(`${mark} (${playerId}) is not a computer!`);
+    this.mark = mark;
+  }
+}
+
 export default async function (
   playerX: ComputerId,
   playerO: ComputerId
 ): Promise<[number[], Mark | null]> {
   const computerFactoryX = idToComputerFactory.get(playerX);
   if (computerFactoryX === undefined) {
-    throw new Error("X is not a computer!");
+    throw new NotComputerError("X", playerX);
   }
   const computerFactoryO = idToComputerFactory.get(playerO);
   if (computerFactoryO === undefined) {
-    throw new Error("O is not a computer!");
+    throw new NotComputerError("O", playerO);
   }
 
   const players: [Player, Player] = [computerFactoryX(), computerFactoryO()];

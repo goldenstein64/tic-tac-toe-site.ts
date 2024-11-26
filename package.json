@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@libsql/client": "^0.14.0",
+    "@sinclair/typebox": "^0.32.34",
     "bun-types": "latest",
     "discord-api-types": "^0.37.108",
     "drizzle-kit": "^0.28.1",
