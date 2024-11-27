@@ -1,18 +1,31 @@
 import { customType, integer } from "drizzle-orm/sqlite-core";
 
-type UnionOf<S extends string[]> = S extends [
-  infer Str extends string,
-  ...infer Rest extends string[]
+type UnionOf<A extends unknown[]> = A extends [
+  infer Str extends unknown,
+  ...infer Rest extends unknown[]
 ]
   ? Str | UnionOf<Rest>
-  : never;
+  : A extends []
+  ? never
+  : A extends (infer T)[]
+  ? T
+  : unknown;
+
+type IndexUnionOf<A extends unknown[]> = A extends [
+  unknown,
+  ...infer Rest extends unknown[]
+]
+  ? Rest extends { length: infer N extends number }
+    ? N | IndexUnionOf<Rest>
+    : never
+  : A extends []
+  ? never
+  : number;
 
 export type InferEnum<T> = T extends ReturnType<
   typeof customType<{
-    data: infer S extends string;
-    driverData: number;
-    notNull: true;
-    default: true;
+    data: infer S;
+    driverData: infer _;
   }>
 >
   ? S
@@ -20,29 +33,26 @@ export type InferEnum<T> = T extends ReturnType<
 
 export function enumType<S extends string[]>(values: S) {
   type ConvertedData = UnionOf<S>;
-  type DriverData = number;
-  const fromMap = new Map<DriverData, ConvertedData>();
-  const toMap = new Map<ConvertedData, DriverData>();
+  type DriverData = IndexUnionOf<S>;
+  const fromMap = values;
+  const toMap = {} as { [_ in ConvertedData]: DriverData };
   for (const [key, value] of values.entries()) {
-    fromMap.set(key as DriverData, value as ConvertedData);
-    toMap.set(value as ConvertedData, key as DriverData);
+    toMap[value as ConvertedData] = key as DriverData;
   }
   return customType<{
     data: ConvertedData;
     driverData: DriverData;
-    notNull: true;
-    default: true;
   }>({
     dataType: () => "integer",
     fromDriver(key) {
-      const value = fromMap.get(key);
+      const value = fromMap[key] as ConvertedData;
       if (value === undefined) {
         throw new Error(`invalid internal enum '${value}'`);
       }
       return value;
     },
     toDriver(value) {
-      const key = toMap.get(value);
+      const key = toMap[value];
       if (key === undefined) {
         throw new Error(`invalid external enum '${key}'`);
       }
