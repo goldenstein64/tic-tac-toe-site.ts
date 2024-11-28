@@ -10,10 +10,10 @@ import jwtAuth, {
   REFRESH_COOKIE_OPTS,
 } from "./jwt-auth";
 import { DiscordUser, User } from "../db/schema";
-import { db, tx } from "../db";
+import { db, tx, typePrepared } from "../db";
 import { eq, SQL, sql, TransactionRollbackError } from "drizzle-orm";
 
-type SQLProps<T extends object> = {
+type SQLProps<T extends Record<string, unknown>> = {
   [K in keyof T]: T[K] | SQL<T[K]>;
 };
 
@@ -44,76 +44,60 @@ export const discord = {
   },
 } as const;
 
-const selectDiscordUserByIdSql = db
-  .select({ userId: DiscordUser.userId, refreshKey: User.refreshKey })
-  .from(DiscordUser)
-  .innerJoin(User, eq(User.id, DiscordUser.userId))
-  .where(eq(DiscordUser.discordId, sql.placeholder("discordId")))
-  .prepare();
-const selectUserByDiscordId = async (args: SQLProps<{ discordId: string }>) => {
-  const users = await selectDiscordUserByIdSql.execute(args);
-  if (users.length > 1) {
-    throw new Error("selected more than one user by discord id!");
-  }
+const _placeholders: any = undefined;
 
-  return users.length === 1 ? users[0] : undefined;
-};
+const selectDiscordUserById = typePrepared(
+  db
+    .select({ userId: DiscordUser.userId, refreshKey: User.refreshKey })
+    .from(DiscordUser)
+    .innerJoin(User, eq(User.id, DiscordUser.userId))
+    .where(eq(DiscordUser.discordId, sql.placeholder("discordId")))
+    .prepare(),
+  _placeholders as SQLProps<{ discordId: string }>
+);
 
-const insertUserSql = db
-  .insert(User)
-  .values({ username: sql.placeholder("username"), refreshKey: 1 })
-  .returning({ userId: User.id, refreshKey: User.refreshKey })
-  .prepare();
-const insertUser = async (args: SQLProps<{ username: string }>) => {
-  const users = await insertUserSql.execute(args);
-  if (users.length !== 1) {
-    throw new Error("did not insert exactly one user!");
-  }
+const insertUser = typePrepared(
+  db
+    .insert(User)
+    .values({ username: sql.placeholder("username"), refreshKey: 1 })
+    .returning({ userId: User.id, refreshKey: User.refreshKey })
+    .prepare(),
+  _placeholders as SQLProps<{ username: string }>
+);
 
-  return users[0];
-};
-
-const insertDiscordUserSql = db
-  .insert(DiscordUser)
-  .values({
-    discordId: sql.placeholder("discordId"),
-    userId: sql.placeholder("userId"),
-    accessToken: sql.placeholder("accessToken"),
-    refreshToken: sql.placeholder("refreshToken"),
-    expiresAt: sql.placeholder("expiresAt"),
-  })
-  .prepare();
-const insertDiscordUser = async (
-  args: SQLProps<{
+const insertDiscordUser = typePrepared(
+  db
+    .insert(DiscordUser)
+    .values({
+      discordId: sql.placeholder("discordId"),
+      userId: sql.placeholder("userId"),
+      accessToken: sql.placeholder("accessToken"),
+      refreshToken: sql.placeholder("refreshToken"),
+      expiresAt: sql.placeholder("expiresAt"),
+    })
+    .prepare(),
+  _placeholders as SQLProps<{
     discordId: string;
     userId: number;
     accessToken: string;
     refreshToken: string;
     expiresAt: Date;
   }>
-) => {
-  await insertDiscordUserSql.execute(args);
-};
+);
 
-const updateDiscordUser = async ({
+const updateDiscordUser = ({
   discordId,
-  accessToken,
-  refreshToken,
-  expiresAt,
+  ...values
 }: SQLProps<{
   discordId: string;
   accessToken: string;
   refreshToken: string;
   expiresAt: Date;
 }>) => {
-  await db
-    .update(DiscordUser)
-    .set({
-      accessToken,
-      refreshToken,
-      expiresAt,
-    })
-    .where(eq(DiscordUser.discordId, discordId));
+  db.update(DiscordUser)
+    .set(values)
+    .where(eq(DiscordUser.discordId, discordId))
+    .run();
 };
 
 async function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
@@ -122,15 +106,15 @@ async function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
   const refreshToken = tokens.refreshToken();
   const expiresAt = new Date(Date.now() + tokens.accessTokenExpiresInSeconds());
 
-  const { userId, refreshKey } = await insertUser({
+  const { userId, refreshKey } = insertUser.get({
     username: userInfo.global_name ?? userInfo.username,
-  });
+  })!;
 
   if (userId === undefined) {
     throw new Error("exactly one user was not inserted!");
   }
 
-  await insertDiscordUser({
+  insertDiscordUser.run({
     discordId,
     userId,
     accessToken,
@@ -196,7 +180,7 @@ export default () =>
         try {
           await tx(async () => {
             const discordId = userInfo.id;
-            const user = await selectUserByDiscordId({ discordId });
+            const user = selectDiscordUserById.get({ discordId });
 
             if (user) {
               // this user already exists, update their entry
