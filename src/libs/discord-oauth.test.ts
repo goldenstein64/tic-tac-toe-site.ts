@@ -4,53 +4,52 @@ import {
 } from "discord-api-types/v10";
 
 import { describe, it, expect } from "bun:test";
-import HttpRequestMock from "http-request-mock";
+import fetchMock from "fetch-mock";
 
 import discordOauthPlugin from "./discord-oauth";
 import { db } from "../db";
 import { DiscordUser } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-const mocker = HttpRequestMock.setupForUnitTest("all");
-
 const DAYS = 60 * 60 * 24;
 
-mocker.mock({
-  url: "discord.com",
-});
-
-mocker.post("https://discord.com/api/oauth2/token", () =>
-  JSON.stringify({
-    access_token: "ACCESS_TOKEN",
-    token_type: "Bearer",
-    expires_in: 7 * DAYS,
-    refresh_token: "REFRESH_TOKEN",
-    scope: "identify email",
-  })
-);
-
-mocker.get("https://discord.com/api/v10/users/@me", () =>
-  JSON.stringify({
-    id: "DISCORD_USER_ID",
-    username: "DiscordDebugUser",
-    discriminator: "DiscordDiscriminator",
-    global_name: "DiscordGlobalDebugUser",
-    avatar: "DiscordAvatar",
-    bot: false,
-    system: false,
-    mfa_enabled: true,
-    banner: "DiscordBanner",
-    accent_color: 0xffffff, // white
-    locale: "en-us",
-    verified: true,
-    email: "user@debug.com",
-    flags: undefined,
-    premium_type: UserPremiumType.None,
-    public_flags: undefined,
-    avatar_decoration: undefined,
-    avatar_decoration_data: null,
-  } as DiscordAPIUser)
-);
+fetchMock
+  .mockGlobal()
+  .route(
+    "https://discord.com/api/oauth2/token",
+    {
+      access_token: "ACCESS_TOKEN",
+      token_type: "Bearer",
+      expires_in: 7 * DAYS,
+      refresh_token: "REFRESH_TOKEN",
+      scope: "identify email",
+    },
+    { method: "POST" }
+  )
+  .route(
+    "https://discord.com/api/v10/users/@me",
+    {
+      id: "DISCORD_USER_ID",
+      username: "DiscordDebugUser",
+      discriminator: "DiscordDiscriminator",
+      global_name: "DiscordGlobalDebugUser",
+      avatar: "DiscordAvatar",
+      bot: false,
+      system: false,
+      mfa_enabled: true,
+      banner: "DiscordBanner",
+      accent_color: 0xffffff, // white
+      locale: "en-us",
+      verified: true,
+      email: "user@debug.com",
+      flags: undefined,
+      premium_type: UserPremiumType.None,
+      public_flags: undefined,
+      avatar_decoration: undefined,
+      avatar_decoration_data: null,
+    } as DiscordAPIUser,
+    { method: "GET" }
+  );
 
 const discordOauth = discordOauthPlugin();
 

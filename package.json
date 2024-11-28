@@ -21,8 +21,8 @@
     "drizzle-typebox": "^0.1.1",
     "elysia": "^1.1.25",
     "elysia-oauth2": "^1.3.0",
+    "fetch-mock": "^12.2.0",
     "htmx.org": "^1.9.12",
-    "http-request-mock": "^2.0.2",
     "mitt": "^3.0.1"
   },
   "overrides": {
