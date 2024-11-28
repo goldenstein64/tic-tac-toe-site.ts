@@ -1,4 +1,4 @@
-import { SignJWT } from "jose";
+import { JWTHeaderParameters, SignJWT, jwtVerify } from "jose";
 
 const encoder = new TextEncoder();
 const accessSecret = encoder.encode(Bun.env.JWT_ACCESS_SECRET);
@@ -14,4 +14,12 @@ export function signRefresh(payload: { userId: number; refreshKey: number }) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .sign(refreshSecret);
+}
+
+export function verifyAccess(signed: string) {
+  return jwtVerify(signed, accessSecret);
+}
+
+export function verifyRefresh(signed: string) {
+  return jwtVerify(signed, refreshSecret);
 }
