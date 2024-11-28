@@ -1,8 +1,12 @@
 import { User, Game, Lobby } from "../src/db/schema";
-import prodInitData from "../game.db-data";
+import { db } from "../src/db";
+import prodInitialData from "../game.db-data";
+import { DataConfig } from "../scripts/reset-db";
 
-export default async function writeInitialData(dbPath: string) {
-  const db = await prodInitData(dbPath);
+export default async function testInitialData(config: DataConfig) {
+  prodInitialData(config);
+
+  const { quiet = false } = config;
 
   // UTC, 24-hour time
   const debugCreated = new Date(Date.UTC(2024, 11 - 1, 16, 3, 5)); // 2024/11/16 3:05
@@ -15,8 +19,8 @@ export default async function writeInitialData(dbPath: string) {
     refreshKey,
   });
 
-  console.log(insertDebugUser.toSQL());
-  await insertDebugUser;
+  if (!quiet) console.log(insertDebugUser.toSQL());
+  insertDebugUser.run();
 
   const insertDebugLobby = db.insert(Lobby).values({
     id: 1,
@@ -24,8 +28,8 @@ export default async function writeInitialData(dbPath: string) {
     status: "active",
   });
 
-  console.log(insertDebugLobby.toSQL());
-  await insertDebugLobby;
+  if (!quiet) console.log(insertDebugLobby.toSQL());
+  insertDebugLobby.run();
 
   const insertDebugGame = db.insert(Game).values({
     lobbyId: 1,
@@ -33,6 +37,6 @@ export default async function writeInitialData(dbPath: string) {
     playerO: 1, // easy computer
   });
 
-  console.log(insertDebugGame.toSQL());
-  await insertDebugGame;
+  if (!quiet) console.log(insertDebugGame.toSQL());
+  insertDebugGame.run();
 }

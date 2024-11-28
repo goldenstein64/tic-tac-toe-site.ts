@@ -1,12 +1,9 @@
-import { drizzle } from "drizzle-orm/bun-sqlite";
-import { Database } from "bun:sqlite";
+import type { DataConfig } from "./scripts/reset-db";
+
 import { User, IsComputer } from "./src/db/schema";
+import { db } from "./src/db";
 
-import * as schema from "./src/db/schema";
-
-export default async function writeInitialData(dbPath: string) {
-  const db = drizzle(new Database(dbPath), { schema });
-
+export default function prodInitialData({ quiet = false }: DataConfig) {
   // UTC, 24-hour time
   const easyCreated = new Date(Date.UTC(2024, 3 - 1, 6, 1, 47)); // 2024/3/6 1:47
   const mediumCreated = new Date(Date.UTC(2023, 8 - 1, 4, 22, 35)); // 2023/8/4 22:35
@@ -19,16 +16,15 @@ export default async function writeInitialData(dbPath: string) {
     { id: 3, username: "HardComputer", createdAt: hardCreated, refreshKey },
   ]);
 
-  console.log(insertComputerUsers.toSQL());
-  await insertComputerUsers;
+  if (!quiet) console.log(insertComputerUsers.toSQL());
+  insertComputerUsers.run();
 
   const insertComputerSet = db
     .insert(IsComputer)
-    .values([{ userId: 1 }, { userId: 2 }, { userId: 3 }])
-    .onConflictDoNothing();
+    .values([{ userId: 1 }, { userId: 2 }, { userId: 3 }]);
 
-  console.log(insertComputerSet.toSQL());
-  await insertComputerSet;
+  if (!quiet) console.log(insertComputerSet.toSQL());
+  insertComputerSet.run();
 
   return db;
 }

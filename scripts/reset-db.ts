@@ -1,6 +1,8 @@
 import { $ } from "bun";
 import path from "node:path";
 
+export type DataConfig = { quiet?: boolean };
+
 const dbFolder = process.argv[2] ?? ".";
 const dbPath = path.resolve(dbFolder, "game.db");
 const drizzleConfig = path.resolve(dbFolder, "drizzle.config.ts");
