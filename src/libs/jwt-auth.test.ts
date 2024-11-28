@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db";
 import jwtAuth from "./jwt-auth";
 import { User } from "../db/schema";
-import { getAccessCookie } from "../../test/util";
+import { signAccess } from "../../test/util";
 
 const debugUserId = 4;
 const debugUser = JSON.parse(
@@ -28,21 +28,21 @@ describe("jwt-auth", () => {
   });
 
   it("resolves user to null if cookie is invalid", async () => {
-    const response = await testApp.handle(
-      new Request("http://localhost/user", {
-        headers: await getAccessCookie(-1),
-      })
-    );
+    const request = new Request("http://localhost/user", {
+      headers: { Cookie: `access=${await signAccess({ userId: -1 })}` },
+    });
+
+    const response = await testApp.handle(request);
 
     expect(await response.json()).toBeNull();
   });
 
   it("resolves user to an object if cookie is valid", async () => {
-    const response = await testApp.handle(
-      new Request("http://localhost/user", {
-        headers: await getAccessCookie(4),
-      })
-    );
+    const request = new Request("http://localhost/user", {
+      headers: { Cookie: `access=${await signAccess({ userId: 4 })}` },
+    });
+
+    const response = await testApp.handle(request);
 
     expect(await response.json()).toEqual(debugUser);
   });

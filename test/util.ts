@@ -1,14 +1,17 @@
 import { SignJWT } from "jose";
 
 const encoder = new TextEncoder();
-const accessKey = encoder.encode(Bun.env.JWT_ACCESS_SECRET);
+const accessSecret = encoder.encode(Bun.env.JWT_ACCESS_SECRET);
+const refreshSecret = encoder.encode(Bun.env.JWT_REFRESH_SECRET);
 
-export function getAccessToken(userId: number) {
-  return new SignJWT({ userId })
+export function signAccess(payload: { userId: number }) {
+  return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
-    .sign(accessKey);
+    .sign(accessSecret);
 }
 
-export async function getAccessCookie(userId: number): Promise<Headers> {
-  return new Headers({ Cookie: `access=${await getAccessToken(userId)}` });
+export function signRefresh(payload: { userId: number; refreshKey: number }) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .sign(refreshSecret);
 }
