@@ -8,6 +8,14 @@ const dbPath = path.resolve(dbFolder, "game.db");
 const drizzleConfig = path.resolve(dbFolder, "drizzle.config.ts");
 const initialData = Bun.file(path.resolve(dbFolder, "game.db-data.ts"));
 
+const productionDbPath = path.resolve("./game.db");
+if (dbPath === productionDbPath) {
+  const choice = confirm(
+    "This will reset ALL data in the production database. Are you sure?"
+  );
+  if (!choice) process.exit(0);
+}
+
 console.log(`deleting ${dbPath}...`);
 {
   const results = await Promise.allSettled([
