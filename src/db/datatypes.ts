@@ -64,10 +64,18 @@ export function enumType<S extends string[]>(values: S) {
 export const lobbyStatus = enumType(["waiting", "active", "finished"] as const);
 export type LobbyStatus = InferEnum<typeof lobbyStatus>;
 
-export function number<S extends string>(name: S) {
-  return integer(name, { mode: "number" });
+export function number<S extends string>(name?: S) {
+  if (name) {
+    return integer(name, { mode: "number" });
+  } else {
+    return integer({ mode: "number" });
+  }
 }
 
-export function timestamp<S extends string>(name: S) {
-  return integer(name, { mode: "timestamp" });
+export function timestamp<S extends string>(name?: S) {
+  if (name) {
+    return integer(name, { mode: "timestamp" });
+  } else {
+    return integer({ mode: "timestamp" });
+  }
 }

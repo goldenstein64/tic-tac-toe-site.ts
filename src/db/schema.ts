@@ -17,19 +17,19 @@ export type SelectUser = InferSelectModel<typeof User>;
 export type InsertUser = InferInsertModel<typeof User>;
 
 export const DiscordUser = createTable("DiscordUser", {
-  discordId: text("discordId").primaryKey(),
-  userId: number("userId")
+  discordId: text().primaryKey(),
+  userId: number()
     .notNull()
     .references(() => User.id),
-  accessToken: text("accessToken").notNull(),
-  refreshToken: text("refreshToken").notNull(),
-  expiresAt: timestamp("expiresAt").notNull(),
+  accessToken: text().notNull(),
+  refreshToken: text().notNull(),
+  expiresAt: timestamp().notNull(),
 });
 export type SelectDiscordUser = InferSelectModel<typeof DiscordUser>;
 export type InsertDiscordUser = InferInsertModel<typeof DiscordUser>;
 
 export const IsComputer = createTable("IsComputer", {
-  userId: number("userId")
+  userId: number()
     .primaryKey()
     .references(() => User.id),
 });
@@ -37,34 +37,34 @@ export type SelectIsComputer = InferSelectModel<typeof IsComputer>;
 export type InsertIsComputer = InferInsertModel<typeof IsComputer>;
 
 export const Lobby = createTable("Lobby", {
-  id: number("id").primaryKey({ autoIncrement: true }),
-  createdBy: number("createdBy")
+  id: number().primaryKey({ autoIncrement: true }),
+  createdBy: number()
     .notNull()
     .references(() => User.id),
-  createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
-  status: lobbyStatus("status").notNull().default("waiting"),
+  createdAt: timestamp().notNull().default(UNIX_EPOCH),
+  status: lobbyStatus().notNull().default("waiting"),
 });
 export type SelectLobby = InferSelectModel<typeof Lobby>;
 export type InsertLobby = InferInsertModel<typeof Lobby>;
 
 export const FinishedLobby = createTable("FinishedLobby", {
-  id: number("id")
+  id: number()
     .primaryKey()
     .references(() => Lobby.id),
-  finishedAt: timestamp("finishedAt").notNull().default(UNIX_EPOCH),
-  winner: number("winner").references(() => User.id),
+  finishedAt: timestamp().notNull().default(UNIX_EPOCH),
+  winner: number().references(() => User.id),
 });
 export type SelectFinishedLobby = InferSelectModel<typeof FinishedLobby>;
 export type InsertFinishedLobby = InferInsertModel<typeof FinishedLobby>;
 
 export const Game = createTable("Game", {
-  lobbyId: number("lobbyId")
+  lobbyId: number()
     .primaryKey()
     .references(() => Lobby.id),
-  playerX: number("playerX")
+  playerX: number()
     .notNull()
     .references(() => User.id),
-  playerO: number("playerO")
+  playerO: number()
     .notNull()
     .references(() => User.id),
 });
@@ -74,11 +74,11 @@ export type InsertGame = InferInsertModel<typeof Game>;
 export const Move = createTable(
   "Move",
   {
-    lobbyId: number("lobbyId")
+    lobbyId: number()
       .notNull()
       .references(() => Lobby.id),
-    ordering: number("ordering").notNull(),
-    position: number("position").notNull(),
+    ordering: number().notNull(),
+    position: number().notNull(),
   },
   (Move) => ({
     primaryKey: primaryKey({ columns: [Move.lobbyId, Move.ordering] }),
