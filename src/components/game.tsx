@@ -15,10 +15,7 @@ import {
   User,
 } from "../db/schema";
 import { DebugPanel } from "./debug";
-
-function orderingToMark(ordering: number): Mark {
-  return ordering % 2 === 1 ? "X" : "O";
-}
+import { orderingToMark } from "../libs/run-game";
 
 const _placeholders: any = undefined;
 

@@ -11,7 +11,7 @@ import { intString } from "../types";
 import { Game, Move } from "../db/schema";
 import { ActiveGameButton } from "../components/game";
 import jwtAuth from "../libs/jwt-auth";
-import { idToComputerFactory } from "../libs/run-game";
+import { idToComputerFactory, orderingToMark } from "../libs/run-game";
 import { setTimeout as delay } from "timers/promises";
 import { Player } from "@goldenstein64/tic-tac-toe/lib/player";
 
@@ -126,10 +126,6 @@ class GameStates extends Map<number, GameState> {
 }
 
 export const gameStates = new GameStates();
-
-export function orderingToMark(ordering: number): Mark {
-  return ordering % 2 === 0 ? "X" : "O";
-}
 
 type EventProps = { event?: string; data: string };
 function event({ event = "message", data }: EventProps): string {

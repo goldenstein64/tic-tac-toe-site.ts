@@ -13,8 +13,15 @@ export const idToComputerFactory = new Map<number, () => Player>()
 
 export type ComputerId = 1 | 2 | 3;
 
+export function orderingToMark(ordering: number): Mark {
+  return ordering % 2 === 0 ? "X" : "O";
+}
+
 export class NotComputerError extends Error {
-  constructor(readonly mark: Mark, playerId: number) {
+  constructor(
+    readonly mark: Mark,
+    playerId: number
+  ) {
     super(`${mark} (${playerId}) is not a computer!`);
     this.mark = mark;
   }
