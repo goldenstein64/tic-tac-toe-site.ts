@@ -22,8 +22,7 @@
     "elysia": "^1.1.25",
     "elysia-oauth2": "^1.3.0",
     "fetch-mock": "^12.2.0",
-    "htmx.org": "^1.9.12",
-    "mitt": "^3.0.1"
+    "htmx.org": "^1.9.12"
   },
   "overrides": {
     "@sinclair/typebox": "0.32.34"
