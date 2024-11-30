@@ -1,9 +1,8 @@
-import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
+import type { Board, Mark } from "@goldenstein64/tic-tac-toe/lib";
 
 import { Html } from "@elysiajs/html";
 import { eq, sql } from "drizzle-orm";
 
-import { range } from "../util/range";
 import { db, typePrepared } from "../db";
 import {
   FinishedLobby,
@@ -16,6 +15,9 @@ import {
 } from "../db/schema";
 import { DebugPanel } from "./debug";
 import { orderingToMark } from "../libs/run-game";
+
+const COLUMN_LABELS = ["left", "center", "right"] as const;
+const ROW_LABELS = ["Top", "Middle", "Bottom"] as const;
 
 const _placeholders: any = undefined;
 
@@ -90,6 +92,7 @@ type GameButtonProps = {
   disabled?: boolean;
   lobbyId: number;
   position: number;
+  ariaLabel: string;
   children?: Mark;
 };
 
@@ -98,41 +101,107 @@ export function ActiveGameButton({
   lobbyId,
   position,
   children: mark,
+  ariaLabel: label,
 }: GameButtonProps) {
   const hxVals = JSON.stringify({ id: lobbyId, position });
   return (
     <button
       type="button"
-      class="game-button"
       hx-post="/api/game-move"
       hx-swap="none"
       hx-vals={hxVals}
-      disabled={disabled}
+      disabled={disabled || Boolean(mark)}
+      aria-label={label}
     >
       {mark}
     </button>
   );
 }
 
-function ActiveGameBoard({ lobby }: { lobby: SelectLobby }) {
-  const lobbyId = lobby.id;
+type GameRowProps = {
+  lobbyId: number;
+  start: number;
+  moves: Map<number, number>;
+  ariaLabel: string;
+  disabled?: boolean;
+};
+
+function ActiveGameRow({
+  lobbyId,
+  start,
+  moves,
+  ariaLabel: rowLabel,
+  disabled,
+}: GameRowProps) {
+  const buttons = COLUMN_LABELS.map((colLabel, i) => {
+    const ordering = moves.get(i + start);
+    const mark = ordering ? orderingToMark(ordering) : undefined;
+    return (
+      <td>
+        <ActiveGameButton
+          lobbyId={lobbyId}
+          position={i + start}
+          ariaLabel={`${rowLabel}-${colLabel}`}
+          disabled={disabled}
+        >
+          {mark}
+        </ActiveGameButton>
+      </td>
+    );
+  });
+  return <tr>{buttons}</tr>;
+}
+
+type ActiveGameRowsProps = {
+  lobbyId: number;
+  board: Board;
+  disabled?: boolean;
+};
+
+export function ActiveGameRows({
+  lobbyId,
+  board,
+  disabled,
+}: ActiveGameRowsProps) {
+  const moves = new Map<number, number>(
+    board.data
+      .entries()
+      .filter((entry): entry is [number, Mark] => entry[1] !== undefined)
+      .map(([pos, mark]) => [pos, mark === "X" ? 0 : 1] as const)
+  );
+  return (
+    <>
+      {ROW_LABELS.map((label, i) => (
+        <ActiveGameRow
+          lobbyId={lobbyId}
+          start={i * 3}
+          moves={moves}
+          ariaLabel={label}
+          disabled={disabled}
+        />
+      ))}
+    </>
+  );
+}
+
+function ActiveGameBoard({ lobby: { id: lobbyId } }: { lobby: SelectLobby }) {
   const movesArray = selectGameMoves.all({ lobbyId });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
   );
-
   return (
-    <ol class="game-board" hx-swap="innerHTML" sse-swap="board">
-      {range(9).map((i) => {
-        const ordering = moves.get(i);
-        const mark = ordering ? orderingToMark(ordering) : undefined;
-        return (
-          <ActiveGameButton lobbyId={lobbyId} position={i}>
-            {mark}
-          </ActiveGameButton>
-        );
-      })}
-    </ol>
+    <table class="game-board">
+      <tbody hx-swap="innerHTML" sse-swap="board">
+        {ROW_LABELS.map((label, i) => (
+          <ActiveGameRow
+            lobbyId={lobbyId}
+            start={i * 3}
+            moves={moves}
+            ariaLabel={label}
+          />
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -144,7 +213,7 @@ function ActiveGameMain({ lobby }: { lobby: SelectLobby }) {
       hx-ext="sse"
       sse-connect={`/api/game-move?id=${lobbyId}`}
     >
-      <h3>
+      <h3 id="lobby-winner">
         Winner: <span sse-swap="winner" />
       </h3>
 
@@ -153,11 +222,45 @@ function ActiveGameMain({ lobby }: { lobby: SelectLobby }) {
   );
 }
 
-function DormantGameButton({ children: mark }: { children?: Mark }) {
+type DormantGameButtonProps = { children?: Mark; ariaLabel: string };
+
+function DormantGameButton({
+  children: mark,
+  ariaLabel,
+}: DormantGameButtonProps) {
   return (
-    <button type="button" class="game-button" disabled>
+    <button type="button" disabled aria-label={ariaLabel}>
       {mark}
     </button>
+  );
+}
+
+type DormantGameRowProps = {
+  start: number;
+  moves: Map<number, number>;
+  ariaLabel: string;
+};
+
+function DormantGameRow({
+  start,
+  moves,
+  ariaLabel: rowLabel,
+}: DormantGameRowProps) {
+  return (
+    <tr>
+      {COLUMN_LABELS.map((colLabel, i) => {
+        const ordering = moves.get(i + start);
+        const mark =
+          ordering !== undefined ? orderingToMark(ordering) : undefined;
+        return (
+          <td>
+            <DormantGameButton ariaLabel={`${rowLabel}-${colLabel}`}>
+              {mark}
+            </DormantGameButton>
+          </td>
+        );
+      })}
+    </tr>
   );
 }
 
@@ -168,13 +271,15 @@ function DormantGameBoard({ lobby }: { lobby: SelectLobby }) {
   );
 
   return (
-    <ol class="game-board">
-      {range(9).map((i) => {
-        const ordering = moves.get(i);
-        const mark = ordering ? orderingToMark(ordering) : undefined;
-        return <DormantGameButton>{mark}</DormantGameButton>;
-      })}
-    </ol>
+    <table class="game-board">
+      <tbody>
+        {ROW_LABELS.map((label, i) => {
+          return (
+            <DormantGameRow start={i * 3} moves={moves} ariaLabel={label} />
+          );
+        })}
+      </tbody>
+    </table>
   );
 }
 
@@ -192,7 +297,7 @@ function DormantGameMain({ lobby }: { lobby: SelectLobby }) {
   }
   return (
     <main>
-      <h3>Winner: {winnerName}</h3>
+      <h3 id="lobby-winner">Winner: {winnerName}</h3>
 
       <DormantGameBoard lobby={lobby} />
     </main>
@@ -233,6 +338,7 @@ export function GameBody({ lobbyId, user }: GameHtmlProps) {
     <body>
       <DebugPanel />
       <h1>tic-tac-toe-site</h1>
+      <h3 id="lobby-status">Status: {lobby.status}</h3>
       <PlayerInfo user={user} />
       <GameMain lobby={lobby} />
       <PlayerInfo user={opponent} />

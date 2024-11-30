@@ -9,15 +9,13 @@ import { eq, max, sql } from "drizzle-orm";
 import { db, typePrepared } from "../db";
 import { intString } from "../types";
 import { Game, Move } from "../db/schema";
-import { ActiveGameButton } from "../components/game";
+import { ActiveGameRows } from "../components/game";
 import jwtAuth from "../libs/jwt-auth";
 import { idToComputerFactory, orderingToMark } from "../libs/run-game";
 import { setTimeout as delay } from "timers/promises";
 import { Player } from "@goldenstein64/tic-tac-toe/lib/player";
 
 const _placeholders: any = undefined;
-
-declare function assertNever(value: never): never;
 
 const selectMaxOrdering = typePrepared(
   db
@@ -71,7 +69,11 @@ export class GameState extends EventEmitter<GameStateEvents> {
   readonly board: Board = new Board();
   readonly computers: Map<Mark, Player | undefined> = new Map();
 
-  constructor(readonly lobbyId: number, playerX: number, playerO: number) {
+  constructor(
+    readonly lobbyId: number,
+    playerX: number,
+    playerO: number
+  ) {
     super();
     const computerXFactory = idToComputerFactory.get(playerX);
     if (computerXFactory) {
@@ -130,30 +132,6 @@ export const gameStates = new GameStates();
 type EventProps = { event?: string; data: string };
 function event({ event = "message", data }: EventProps): string {
   return `event: ${event}\ndata: ${data}\n\n`;
-}
-
-function GameButtons({
-  lobbyId,
-  board,
-  disabled,
-}: {
-  lobbyId: number;
-  board: Board;
-  disabled?: boolean;
-}) {
-  return (
-    <>
-      {board.data.map((mark, i) => (
-        <ActiveGameButton
-          disabled={disabled || Boolean(mark)}
-          lobbyId={lobbyId}
-          position={i}
-        >
-          {mark}
-        </ActiveGameButton>
-      ))}
-    </>
-  );
 }
 
 const events = ["new-move", "ended"] as const;
@@ -236,7 +214,7 @@ export default new Elysia({ prefix: "/api" })
             yield event({
               event: "board",
               data: await (
-                <GameButtons disabled board={board} lobbyId={lobbyId} />
+                <ActiveGameRows lobbyId={lobbyId} board={board} disabled />
               ),
             });
             yield event({
@@ -251,10 +229,10 @@ export default new Elysia({ prefix: "/api" })
             yield event({
               event: "board",
               data: await (
-                <GameButtons
+                <ActiveGameRows
+                  lobbyId={lobbyId}
                   board={board}
                   disabled={disabled}
-                  lobbyId={lobbyId}
                 />
               ),
             });
@@ -264,7 +242,7 @@ export default new Elysia({ prefix: "/api" })
           event({
             event: "board",
             data: await (
-              <GameButtons disabled lobbyId={lobbyId} board={board} />
+              <ActiveGameRows lobbyId={lobbyId} board={board} disabled />
             ),
           });
           yield event({ event: "winner", data: winnerMark ?? "no one" });

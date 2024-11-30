@@ -1,12 +1,47 @@
-.game-board {
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  grid-template-columns: 1fr 1fr 1fr;
-  width: 400px;
-  margin-left: auto;
-  margin-right: auto;
+h3#lobby-status {
+  float: clear;
 }
 
-.game-button {
-  aspect-ratio: 1;
+aside:first-of-type {
+  float: left;
+}
+
+aside:last-of-type {
+  float: right;
+}
+
+.game-board {
+  width: 400px;
+  height: 400px;
+  margin-left: auto;
+  margin-right: auto;
+
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.game-board tr {
+  box-sizing: border-box;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid light-dark(black, white);
+  }
+}
+
+.game-board td {
+  padding: 0px;
+
+  &:not(:last-child) {
+    border-right: 1px solid light-dark(black, white);
+  }
+}
+
+.game-board button {
+  width: 100%;
+  height: 100%;
+  border: 0px solid transparent;
+
+  &:disabled {
+    background: transparent;
+  }
 }

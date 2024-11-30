@@ -16,7 +16,7 @@ body {
 
 button,
 input[type="button"] {
-  background-image: linear-gradient(
+  background: linear-gradient(
     light-dark(#efefef, #444444),
     light-dark(#e5e5e5, #292929)
   );
@@ -28,6 +28,13 @@ input[type="button"] {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
+}
+
+button:disabled {
+  background: linear-gradient(
+    light-dark(#d1d1d1, #646464),
+    light-dark(#bdbdbd, #474747)
+  );
 }
 
 #debug-panel {

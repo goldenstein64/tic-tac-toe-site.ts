@@ -1,0 +1,279 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`game.tsx matches waiting lobby 1`] = `
+"<html
+  ><head
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><script src="/public/htmx.min.js"></script
+    ><script src="/public/htmx-ext-sse.js"></script
+    ><link rel="stylesheet" href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/game.css" /></head
+  ><body
+    ><header
+      ><h1>tic-tac-toe-site</h1
+      ><h3 id="lobby-status">Status: waiting</h3></header
+    ><main
+      ><aside>DebugUser</aside
+      ><main
+        ><h3 id="lobby-winner">Winner: </h3
+        ><table class="game-board"
+          ><tbody
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Top-left"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Top-center"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Top-right"
+                ></button></td></tr
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Middle-left"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Middle-center"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Middle-right"
+                ></button></td></tr
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Bottom-left"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Bottom-center"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Bottom-right"
+                ></button></td></tr></tbody></table></main
+      ><aside></aside></main></body
+></html>
+"
+`;
+
+exports[`game.tsx matches active lobby 1`] = `
+"<html
+  ><head
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><script src="/public/htmx.min.js"></script
+    ><script src="/public/htmx-ext-sse.js"></script
+    ><link rel="stylesheet" href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/game.css" /></head
+  ><body
+    ><header
+      ><h1>tic-tac-toe-site</h1
+      ><h3 id="lobby-status">Status: active</h3></header
+    ><main
+      ><aside>DebugUser</aside
+      ><main hx-trigger="load" hx-ext="sse" sse-connect="/api/game-move?id=2"
+        ><h3 id="lobby-winner">Winner: <span sse-swap="winner"></span></h3
+        ><table class="game-board"
+          ><tbody hx-swap="innerHTML" sse-swap="board"
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":0}'
+                  aria-label="Top-left"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":1}'
+                  aria-label="Top-center"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":2}'
+                  aria-label="Top-right"
+                ></button></td></tr
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":3}'
+                  disabled=""
+                  aria-label="Middle-left"
+                  >O</button
+                ></td
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":4}'
+                  disabled=""
+                  aria-label="Middle-center"
+                  >O</button
+                ></td
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":5}'
+                  disabled=""
+                  aria-label="Middle-right"
+                  >X</button
+                ></td
+              ></tr
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":6}'
+                  disabled=""
+                  aria-label="Bottom-left"
+                  >X</button
+                ></td
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":7}'
+                  aria-label="Bottom-center"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  hx-post="/api/game-move"
+                  hx-swap="none"
+                  hx-vals='{"id":2,"position":8}'
+                  disabled=""
+                  aria-label="Bottom-right"
+                  >O</button
+                ></td
+              ></tr
+            ></tbody
+          ></table
+        ></main
+      ><aside>HardComputer</aside></main
+    ></body
+  ></html
+>
+"
+`;
+
+exports[`game.tsx matches finished lobby 1`] = `
+"<html
+  ><head
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><script src="/public/htmx.min.js"></script
+    ><script src="/public/htmx-ext-sse.js"></script
+    ><link rel="stylesheet" href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/game.css" /></head
+  ><body
+    ><header
+      ><h1>tic-tac-toe-site</h1
+      ><h3 id="lobby-status">Status: finished</h3></header
+    ><main
+      ><aside>DebugUser</aside
+      ><main
+        ><h3 id="lobby-winner">Winner: DebugUser</h3
+        ><table class="game-board"
+          ><tbody
+            ><tr
+              ><td
+                ><button type="button" disabled="" aria-label="Top-left"
+                  >X</button
+                ></td
+              ><td
+                ><button type="button" disabled="" aria-label="Top-center"
+                  >X</button
+                ></td
+              ><td
+                ><button type="button" disabled="" aria-label="Top-right"
+                  >X</button
+                ></td
+              ></tr
+            ><tr
+              ><td
+                ><button type="button" disabled="" aria-label="Middle-left"
+                  >O</button
+                ></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Middle-center"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Middle-right"
+                ></button></td></tr
+            ><tr
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Bottom-left"
+                ></button></td
+              ><td
+                ><button
+                  type="button"
+                  disabled=""
+                  aria-label="Bottom-center"
+                ></button></td
+              ><td
+                ><button type="button" disabled="" aria-label="Bottom-right"
+                  >O</button
+                ></td
+              ></tr
+            ></tbody
+          ></table
+        ></main
+      ><aside>EasyComputer</aside></main
+    ></body
+  ></html
+>
+"
+`;
