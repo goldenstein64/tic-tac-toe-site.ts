@@ -33,7 +33,7 @@
     "@sinclair/typebox": "^0.32.34",
     "bun-types": "latest",
     "cookie": "^1.0.2",
-    "discord-api-types": "^0.37.109",
+    "discord-api-types": "^0.37.110",
     "drizzle-kit": "^0.28.1",
     "typed-htmx": "^0.3.1"
   },
