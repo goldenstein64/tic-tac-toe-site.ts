@@ -7,7 +7,7 @@ export function DebugPanel() {
     <div id="debug-panel">
       <h3>Debug Panel</h3>
       <form class="get-user" hx-post="/debug/user" hx-swap="none">
-        <input type="text" name="username" />
+        <input type="text" name="usernameQuery" />
         <button type="submit">Get User</button>
       </form>
     </div>
