@@ -1,12 +1,10 @@
-import {
-  UserPremiumType,
-  type RESTGetAPICurrentUserResult as DiscordAPIUser,
-} from "discord-api-types/v10";
+import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-types/v10";
 
 import { describe, it, expect } from "bun:test";
 import fetchMock from "fetch-mock";
 import { parse as parseCookie } from "cookie";
 import { eq } from "drizzle-orm";
+import { UserPremiumType } from "discord-api-types/v10";
 
 import discordOauthPlugin from "./discord-oauth";
 import { db } from "../db";
