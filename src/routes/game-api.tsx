@@ -148,7 +148,11 @@ function GameButtons({
   return (
     <>
       {board.data.map((mark, i) => (
-        <ActiveGameButton disabled={disabled} lobbyId={lobbyId} position={i}>
+        <ActiveGameButton
+          disabled={disabled || Boolean(mark)}
+          lobbyId={lobbyId}
+          position={i}
+        >
           {mark}
         </ActiveGameButton>
       ))}
@@ -247,7 +251,7 @@ export default new Elysia({ prefix: "/api" })
           } else {
             const nextTurn = orderingToMark(ordering + 1);
             const isClientsTurn = userIsX === (nextTurn === "X");
-            const disabled = !isClientPlaying || !isClientsTurn || !!mark;
+            const disabled = !isClientPlaying || !isClientsTurn;
             yield event({
               event: "board",
               data: await (
