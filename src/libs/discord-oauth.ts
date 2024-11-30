@@ -184,7 +184,7 @@ export default () =>
 
             if (user) {
               // this user already exists, update their entry
-              await updateDiscordUser({
+              updateDiscordUser({
                 discordId,
                 accessToken,
                 refreshToken,
