@@ -3,12 +3,16 @@ import path from "node:path";
 
 export type DataConfig = { quiet?: boolean };
 
-const dbFolder = process.argv[2] ?? ".";
-const dbPath = path.resolve(dbFolder, "game.db");
-const drizzleConfig = path.resolve(dbFolder, "drizzle.config.ts");
-const initialData = Bun.file(path.resolve(dbFolder, "game.db-data.ts"));
+const environment = process.argv[2] ?? "development";
+Bun.env.NODE_ENV = environment;
+const dbPath = path.resolve("db", environment, "game.db");
+const drizzleConfig = path.resolve("db", environment, "drizzle.config.ts");
 
-const productionDbPath = path.resolve("./game.db");
+const initialData = Bun.file(
+  path.resolve("db", environment, "game.db-data.ts")
+);
+
+const productionDbPath = path.resolve("./db/production/game.db");
 if (dbPath === productionDbPath) {
   const choice = confirm(
     "This will reset ALL data in the production database. Are you sure?"
@@ -24,7 +28,7 @@ console.log(`deleting ${dbPath}...`);
     $`rm ${dbPath}-wal`,
   ]);
   if (results.some(({ status }) => status === "rejected")) {
-    console.error("some files couldn't be deleted!");
+    console.warn("some files couldn't be deleted!");
   }
 }
 

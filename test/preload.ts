@@ -1,5 +1,5 @@
 import { db } from "../src/db";
-import testInitialData from "./game.db-data";
+import testInitialData from "../db/test/game.db-data";
 import * as schema from "../src/db/schema";
 import { Table, is } from "drizzle-orm";
 

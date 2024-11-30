@@ -5,10 +5,10 @@ import { sql } from "drizzle-orm";
 import * as schema from "./schema";
 import Elysia from "elysia";
 
-const bunDB =
-  Bun.env.NODE_ENV === "test"
-    ? new Database("./test/game.db")
-    : new Database("./game.db");
+if (Bun.env.NODE_ENV === undefined) {
+  throw new Error("NODE_ENV is undefined!");
+}
+const bunDB = new Database(`./db/${Bun.env.NODE_ENV}/game.db`);
 
 export const db = drizzle(bunDB, { schema });
 db.run(sql`PRAGMA journal_mode = WAL;`);

@@ -1,8 +1,8 @@
-import type { DataConfig } from "./scripts/reset-db";
+import type { DataConfig } from "../../scripts/reset-db";
 
-import { User, IsComputer } from "./src/db/schema";
-import { db } from "./src/db";
-import runSqlBuilder from "./scripts/util/run-sql-builder";
+import { User, IsComputer } from "../../src/db/schema";
+import { db } from "../../src/db";
+import runSqlBuilder from "../../scripts/util/run-sql-builder";
 
 export default function prodInitialData({ quiet = false }: DataConfig) {
   const runSql = runSqlBuilder(quiet);
@@ -29,6 +29,4 @@ export default function prodInitialData({ quiet = false }: DataConfig) {
   runSql(
     db.insert(IsComputer).values([{ userId: 1 }, { userId: 2 }, { userId: 3 }])
   );
-
-  return db;
 }
