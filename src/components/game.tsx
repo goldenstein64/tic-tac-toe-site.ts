@@ -97,18 +97,19 @@ type GameButtonProps = {
 };
 
 export function ActiveGameButton({
-  disabled,
+  disabled = false,
   lobbyId,
   position,
   children: mark,
 }: GameButtonProps) {
+  const hxVals = JSON.stringify({ id: lobbyId, position });
   return (
     <button
       type="button"
       class="game-button"
       hx-post="/api/game-move"
       hx-swap="none"
-      hx-vals={{ id: lobbyId, position: position }}
+      hx-vals={hxVals}
       disabled={disabled}
     >
       {mark}
