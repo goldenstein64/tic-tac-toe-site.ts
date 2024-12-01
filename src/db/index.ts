@@ -3,7 +3,6 @@ import { Database } from "bun:sqlite";
 import { sql } from "drizzle-orm";
 
 import * as schema from "./schema";
-import Elysia from "elysia";
 
 if (Bun.env.NODE_ENV === undefined) {
   throw new Error("NODE_ENV is undefined!");
@@ -67,7 +66,3 @@ export function typePrepared<P extends BasePlaceholders, T>(
     PreparedStmt<P, T>
   : PreparedVoidStmt<P>;
 }
-
-export const plugin = new Elysia({ name: "Database" })
-  .decorate("db", db)
-  .decorate("tx", tx);
