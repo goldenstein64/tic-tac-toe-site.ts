@@ -87,7 +87,7 @@ export default () =>
 
         // by this point, we can refresh the user's access token
         cookieAccess.set({
-          value: jwtAccess.sign({
+          value: await jwtAccess.sign({
             userId,
             exp: Math.floor(Date.now() / 1000) + ACCESS_MAX_AGE,
           }),
