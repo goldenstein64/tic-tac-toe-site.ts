@@ -3,17 +3,17 @@ import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
 import { EventEmitter, on } from "node:events";
 import { Elysia, error, t } from "elysia";
 import { Board } from "@goldenstein64/tic-tac-toe/lib";
+import { Player } from "@goldenstein64/tic-tac-toe/lib/player";
 import html, { Html } from "@elysiajs/html";
 import { eq, max, sql } from "drizzle-orm";
+import { setTimeout as delay } from "timers/promises";
 
 import { db, typePrepared } from "../db";
-import { intString } from "../types";
 import { Game, Move } from "../db/schema";
-import { GameRows } from "../components/game-active";
 import jwtAuth from "../libs/jwt-auth";
 import { idToComputerFactory, orderingToMark } from "../libs/run-game";
-import { setTimeout as delay } from "timers/promises";
-import { Player } from "@goldenstein64/tic-tac-toe/lib/player";
+import { intString } from "../types";
+import { GameRows } from "../components/game-active";
 
 const _placeholders: any = undefined;
 

@@ -1,5 +1,6 @@
 import Elysia, { t } from "elysia";
 import swagger from "@elysiajs/swagger";
+import { eq } from "drizzle-orm";
 
 import jwtAuth, {
   ACCESS_COOKIE_OPTS,
@@ -9,7 +10,6 @@ import jwtAuth, {
 } from "../libs/jwt-auth";
 import { db } from "../db";
 import { User } from "../db/schema";
-import { eq } from "drizzle-orm";
 
 export default () =>
   Bun.env.NODE_ENV !== "development" ?

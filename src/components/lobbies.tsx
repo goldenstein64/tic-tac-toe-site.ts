@@ -1,9 +1,10 @@
 import type { SelectUser } from "../db/schema";
 
 import { Html } from "@elysiajs/html";
-import { FinishedLobby, Game, Lobby, User } from "../db/schema";
-import { db, typePrepared } from "../db";
 import { eq, sql, aliasedTable, and, ne } from "drizzle-orm";
+
+import { db, typePrepared } from "../db";
+import { FinishedLobby, Game, Lobby, User } from "../db/schema";
 import { DebugPanel } from "./debug";
 
 const _placeholders: any = undefined;

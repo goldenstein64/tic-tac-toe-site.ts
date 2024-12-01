@@ -1,8 +1,8 @@
-import type { DataConfig } from "../../scripts/reset-db";
+import type { DataConfig } from "#/scripts/reset-db";
 
-import { User, IsComputer } from "../../src/db/schema";
-import { db } from "../../src/db";
-import runSqlBuilder from "../../scripts/util/run-sql-builder";
+import { db } from "#/src/db";
+import { User, IsComputer } from "#/src/db/schema";
+import runSqlBuilder from "#/scripts/util";
 
 export default function prodInitialData({ quiet = false }: DataConfig) {
   const runSql = runSqlBuilder(quiet);

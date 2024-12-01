@@ -1,1 +1,1 @@
-export { default } from "./db/production/drizzle.config";
+export { default } from "#/db/production/drizzle.config";

@@ -1,7 +1,9 @@
-import { Html } from "@elysiajs/html";
 import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
+
+import { Html } from "@elysiajs/html";
 import { eq, sql } from "drizzle-orm";
 
+import { db, typePrepared } from "../db";
 import {
   FinishedLobby,
   Move,
@@ -10,6 +12,7 @@ import {
   User,
 } from "../db/schema";
 import { orderingToMark } from "../libs/run-game";
+import { DebugPanel } from "./debug";
 import { COLUMN_LABELS, ROW_LABELS } from "./game-active";
 import {
   PlayerInfo,
@@ -17,8 +20,6 @@ import {
   selectUserById,
   selectPlayersInGame,
 } from "./game-base";
-import { db, typePrepared } from "../db";
-import { DebugPanel } from "./debug";
 
 const _placeholders: any = undefined;
 

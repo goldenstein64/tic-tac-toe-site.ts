@@ -5,12 +5,12 @@ import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { format } from "prettier";
 
 import DormantGameHtml from "./game-dormant";
 import ActiveGameHtml from "./game-active";
 import { db } from "../db";
 import { Lobby, User } from "../db/schema";
-import { format } from "prettier";
 
 const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
 

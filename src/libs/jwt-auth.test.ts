@@ -3,9 +3,9 @@ import Elysia from "elysia";
 import { eq } from "drizzle-orm";
 
 import { db } from "../db";
-import jwtAuth from "./jwt-auth";
 import { User } from "../db/schema";
-import { signAccess } from "../../test/util";
+import jwtAuth from "./jwt-auth";
+import { signAccess } from "#/test/util";
 
 const debugUserId = 4;
 const debugUser = JSON.parse(

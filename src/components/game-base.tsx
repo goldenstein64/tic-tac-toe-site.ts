@@ -1,8 +1,8 @@
 import { Html } from "@elysiajs/html";
-
-import { Game, SelectUser, User } from "../db/schema";
-import { db, typePrepared } from "../db";
 import { eq, sql } from "drizzle-orm";
+
+import { db, typePrepared } from "../db";
+import { Game, SelectUser, User } from "../db/schema";
 
 const _placeholders: any = undefined;
 

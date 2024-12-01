@@ -1,4 +1,5 @@
 import { Html } from "@elysiajs/html";
+
 import { DebugPanel } from "./debug";
 
 function LoginHead() {

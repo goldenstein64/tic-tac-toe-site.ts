@@ -5,8 +5,8 @@ import { eq, sql } from "drizzle-orm";
 
 import { db, typePrepared } from "../db";
 import { SelectLobby, Move, SelectUser } from "../db/schema";
-import { DebugPanel } from "./debug";
 import { orderingToMark } from "../libs/run-game";
+import { DebugPanel } from "./debug";
 import {
   GameHead,
   PlayerInfo,

@@ -1,8 +1,9 @@
-import { User, Game, Lobby, FinishedLobby, Move } from "../../src/db/schema";
-import { db } from "../../src/db";
+import { db } from "#/src/db";
+import { User, Game, Lobby, FinishedLobby, Move } from "#/src/db/schema";
+import { DataConfig } from "#/scripts/reset-db";
+import runSqlBuilder from "#/scripts/util";
+
 import prodInitialData from "../production/game.db-data";
-import { DataConfig } from "../../scripts/reset-db";
-import runSqlBuilder from "../../scripts/util/run-sql-builder";
 
 export default async function testInitialData(config: DataConfig) {
   prodInitialData(config);

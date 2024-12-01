@@ -1,8 +1,8 @@
-import { db } from "../src/db";
-import { DiscordUser } from "../src/db/schema";
 import { Discord } from "elysia-oauth2";
-
 import { eq, gt } from "drizzle-orm";
+
+import { db } from "#/src/db";
+import { DiscordUser } from "#/src/db/schema";
 
 const discord = new Discord(
   Bun.env.DISCORD_CLIENT_ID,

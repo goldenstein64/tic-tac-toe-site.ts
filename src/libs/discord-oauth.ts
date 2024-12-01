@@ -2,16 +2,16 @@ import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-
 
 import Elysia, { redirect } from "elysia";
 import { oauth2, Discord, OAuth2Tokens } from "elysia-oauth2";
+import { eq, SQL, sql, TransactionRollbackError } from "drizzle-orm";
 
+import { db, tx, typePrepared } from "../db";
+import { DiscordUser, User } from "../db/schema";
 import jwtAuth, {
   ACCESS_MAX_AGE,
   REFRESH_MAX_AGE,
   ACCESS_COOKIE_OPTS,
   REFRESH_COOKIE_OPTS,
 } from "./jwt-auth";
-import { DiscordUser, User } from "../db/schema";
-import { db, tx, typePrepared } from "../db";
-import { eq, SQL, sql, TransactionRollbackError } from "drizzle-orm";
 
 type SQLProps<T extends Record<string, unknown>> = {
   [K in keyof T]: T[K] | SQL<T[K]>;

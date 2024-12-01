@@ -10,7 +10,7 @@ import discordOauthPlugin from "./discord-oauth";
 import { db } from "../db";
 import { DiscordUser } from "../db/schema";
 import { ACCESS_MAX_AGE, REFRESH_MAX_AGE } from "./jwt-auth";
-import { verifyAccess, verifyRefresh } from "../../test/util";
+import { verifyAccess, verifyRefresh } from "#/test/util";
 
 const DAYS = 60 * 60 * 24;
 

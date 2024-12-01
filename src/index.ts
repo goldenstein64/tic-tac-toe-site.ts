@@ -1,6 +1,7 @@
 import { Elysia, error, redirect, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
+import { eq, sql } from "drizzle-orm";
 
 import ActiveGameHtml from "./components/game-active";
 import DormantGameHtml from "./components/game-dormant";
@@ -8,16 +9,17 @@ import LobbiesHtml from "./components/lobbies";
 import LoginHtml from "./components/login";
 
 import jwtAuth from "./libs/jwt-auth";
+import discordOAuth from "./libs/discord-oauth";
+
+import { intString } from "./types";
+
+import { db, typePrepared } from "./db";
+import { Lobby } from "./db/schema";
 
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
-import discordOAuth from "./libs/discord-oauth";
 import sessionApi from "./routes/session-api";
 import debug from "./routes/debug";
-import { intString } from "./types";
-import { db, typePrepared } from "./db";
-import { Lobby } from "./db/schema";
-import { eq, sql } from "drizzle-orm";
 
 const _placeholders: any = undefined;
 

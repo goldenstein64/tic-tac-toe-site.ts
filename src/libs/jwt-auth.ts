@@ -1,8 +1,9 @@
 import jwt from "@elysiajs/jwt";
 import Elysia, { t } from "elysia";
+import { eq, sql, InferSelectModel } from "drizzle-orm";
+
 import { db, typePrepared } from "../db";
 import { User } from "../db/schema";
-import { eq, sql, InferSelectModel } from "drizzle-orm";
 
 declare module "bun" {
   interface Env {

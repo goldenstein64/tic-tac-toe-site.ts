@@ -9,6 +9,9 @@
     "reset-db": "bun run scripts/reset-db.ts",
     "clean-db": "bun run scripts/clean-db.ts"
   },
+  "imports": {
+    "#/*": "./*"
+  },
   "dependencies": {
     "@elysiajs/eden": "^1.1.3",
     "@elysiajs/html": "^1.1.1",
