@@ -6,16 +6,17 @@ import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
-import GameHtml from "./game";
+import DormantGameHtml from "./game-dormant";
+import ActiveGameHtml from "./game-active";
 import { db } from "../db";
-import { User } from "../db/schema";
+import { Lobby, User } from "../db/schema";
 import { format } from "prettier";
 
 const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
 
-const WAITING_LOBBY_ID = 1;
-const ACTIVE_LOBBY_ID = 2;
-const FINISHED_LOBBY_ID = 3;
+const waitingLobby = db.select().from(Lobby).where(eq(Lobby.id, 1)).get()!;
+const activeLobby = db.select().from(Lobby).where(eq(Lobby.id, 2)).get()!;
+const finishedLobby = db.select().from(Lobby).where(eq(Lobby.id, 3)).get()!;
 
 declare const happyDOM: DetachedWindowAPI;
 
@@ -33,7 +34,7 @@ describe("game.tsx", () => {
 
   it("matches waiting lobby", async () => {
     document.write(
-      await (<GameHtml lobbyId={WAITING_LOBBY_ID} user={debugUser} />)
+      await (<DormantGameHtml lobby={waitingLobby} user={debugUser} />)
     );
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
@@ -41,7 +42,7 @@ describe("game.tsx", () => {
 
   it("matches active lobby", async () => {
     document.write(
-      await (<GameHtml lobbyId={ACTIVE_LOBBY_ID} user={debugUser} />)
+      await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
     );
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
@@ -49,7 +50,7 @@ describe("game.tsx", () => {
 
   it("matches finished lobby", async () => {
     document.write(
-      await (<GameHtml lobbyId={FINISHED_LOBBY_ID} user={debugUser} />)
+      await (<DormantGameHtml lobby={finishedLobby} user={debugUser} />)
     );
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();

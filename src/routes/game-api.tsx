@@ -9,7 +9,7 @@ import { eq, max, sql } from "drizzle-orm";
 import { db, typePrepared } from "../db";
 import { intString } from "../types";
 import { Game, Move } from "../db/schema";
-import { ActiveGameRows } from "../components/game";
+import { GameRows } from "../components/game-active";
 import jwtAuth from "../libs/jwt-auth";
 import { idToComputerFactory, orderingToMark } from "../libs/run-game";
 import { setTimeout as delay } from "timers/promises";
@@ -214,7 +214,7 @@ export default new Elysia({ prefix: "/api" })
             yield event({
               event: "board",
               data: await (
-                <ActiveGameRows lobbyId={lobbyId} board={board} disabled />
+                <GameRows lobbyId={lobbyId} board={board} disabled />
               ),
             });
             yield event({
@@ -229,11 +229,7 @@ export default new Elysia({ prefix: "/api" })
             yield event({
               event: "board",
               data: await (
-                <ActiveGameRows
-                  lobbyId={lobbyId}
-                  board={board}
-                  disabled={disabled}
-                />
+                <GameRows lobbyId={lobbyId} board={board} disabled={disabled} />
               ),
             });
           }
@@ -241,9 +237,7 @@ export default new Elysia({ prefix: "/api" })
           const [winnerMark] = args;
           event({
             event: "board",
-            data: await (
-              <ActiveGameRows lobbyId={lobbyId} board={board} disabled />
-            ),
+            data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
           });
           yield event({ event: "winner", data: winnerMark ?? "no one" });
           break;

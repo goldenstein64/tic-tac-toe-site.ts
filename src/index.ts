@@ -1,8 +1,9 @@
-import { Elysia, redirect, t } from "elysia";
+import { Elysia, error, redirect, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
 
-import GameHtml from "./components/game";
+import ActiveGameHtml from "./components/game-active";
+import DormantGameHtml from "./components/game-dormant";
 import LobbiesHtml from "./components/lobbies";
 import LoginHtml from "./components/login";
 
@@ -14,6 +15,19 @@ import discordOAuth from "./libs/discord-oauth";
 import sessionApi from "./routes/session-api";
 import debug from "./routes/debug";
 import { intString } from "./types";
+import { db, typePrepared } from "./db";
+import { Lobby } from "./db/schema";
+import { eq, sql } from "drizzle-orm";
+
+const _placeholders: any = undefined;
+
+const selectLobbyById = typePrepared(
+  db
+    .select()
+    .from(Lobby)
+    .where(eq(Lobby.id, sql.placeholder("lobbyId"))),
+  _placeholders as { lobbyId: number }
+);
 
 const app = new Elysia({ name: "App" })
   .use(debug())
@@ -35,7 +49,12 @@ const app = new Elysia({ name: "App" })
   .get(
     "/game",
     ({ query: { id: lobbyId }, user }) => {
-      return GameHtml({ lobbyId, user });
+      const lobby = selectLobbyById.get({ lobbyId });
+      return (
+        !lobby ? error("Not Found")
+        : lobby.status === "active" ? ActiveGameHtml({ lobby, user })
+        : DormantGameHtml({ lobby, user })
+      );
     },
     { query: t.Object({ id: intString }) }
   )

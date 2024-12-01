@@ -2,46 +2,63 @@ h3#lobby-status {
   float: clear;
 }
 
+main {
+  display: grid;
+
+  grid: auto-flow / 1fr 2fr 1fr;
+}
+
 aside:first-of-type {
-  float: left;
+  margin-left: 20px;
+  margin-right: auto;
 }
 
 aside:last-of-type {
-  float: right;
+  margin-left: auto;
+  margin-right: 20px;
 }
 
 .game-board {
-  width: 400px;
-  height: 400px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 30vw;
+  max-height: 90vh;
+  aspect-ratio: 1;
+  margin: 0 auto;
 
   table-layout: fixed;
   border-collapse: collapse;
-}
 
-.game-board tr {
-  box-sizing: border-box;
+  & tr {
+    box-sizing: border-box;
 
-  &:not(:last-child) {
-    border-bottom: 1px solid light-dark(black, white);
+    &:not(:last-child) {
+      border-bottom: 1px solid light-dark(black, white);
+    }
   }
-}
 
-.game-board td {
-  padding: 0px;
+  & td {
+    padding: 0px;
 
-  &:not(:last-child) {
-    border-right: 1px solid light-dark(black, white);
+    &:not(:last-child) {
+      border-right: 1px solid light-dark(black, white);
+    }
   }
-}
 
-.game-board button {
-  width: 100%;
-  height: 100%;
-  border: 0px solid transparent;
+  & button {
+    width: 100%;
+    height: 100%;
+    border: 0px solid transparent;
+    font-size: 60pt;
 
-  &:disabled {
-    background: transparent;
+    &:disabled {
+      background: transparent;
+    }
+
+    &.mark-x {
+      color: var(--x-primary-color);
+    }
+
+    &.mark-o {
+      color: var(--o-primary-color);
+    }
   }
 }
