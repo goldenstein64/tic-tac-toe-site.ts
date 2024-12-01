@@ -1,6 +1,6 @@
 import jwt from "@elysiajs/jwt";
 import Elysia, { t } from "elysia";
-import { db } from "../db";
+import { db, typePrepared } from "../db";
 import { User } from "../db/schema";
 import { eq, sql, InferSelectModel } from "drizzle-orm";
 
@@ -27,20 +27,16 @@ export const REFRESH_COOKIE_OPTS = {
   sameSite: "lax",
 } as const;
 
-const selectUserByIdSql = db
-  .select()
-  .from(User)
-  .where(eq(User.id, sql.placeholder("userId")))
-  .prepare();
-type User = InferSelectModel<typeof User>;
-async function selectUserById(args: { userId: number }) {
-  const result = await selectUserByIdSql.execute(args);
-  if (result.length > 1) {
-    throw new Error("selected more than one user!");
-  }
+const _placeholders: any = undefined;
 
-  return result.length === 1 ? result[0] : undefined;
-}
+const selectUserById = typePrepared(
+  db
+    .select()
+    .from(User)
+    .where(eq(User.id, sql.placeholder("userId")))
+    .prepare(),
+  _placeholders as { userId: number }
+);
 
 export default () =>
   new Elysia({ name: "JWTAuth" })
@@ -68,7 +64,7 @@ export default () =>
         // check whether they're already logged in
         const access = await jwtAccess.verify(cookieAccess.value);
         if (access) {
-          const user = await selectUserById({ userId: access.userId });
+          const user = selectUserById.get({ userId: access.userId });
           return user ? { user } : { user: null };
         }
 
@@ -78,7 +74,7 @@ export default () =>
 
         const { userId, refreshKey } = refresh;
 
-        const user = await selectUserById({ userId });
+        const user = selectUserById.get({ userId });
 
         if (!user || refreshKey !== user.refreshKey) {
           // user wasn't found or their refresh key didn't match :(
