@@ -1,15 +1,14 @@
-export default (() => {
-  type stmt = { toSQL(): any; run(): void };
-  function runSqlPrint(stmt: stmt) {
-    console.log(stmt.toSQL());
-    stmt.run();
-  }
+type stmt = { toSQL(): any; run(): void };
 
-  function runSqlNoPrint(stmt: stmt) {
-    stmt.run();
-  }
+function runSqlPrint(stmt: stmt) {
+  console.log(stmt.toSQL());
+  stmt.run();
+}
 
-  return function runSqlBuilder(quiet: boolean) {
-    return quiet ? runSqlNoPrint : runSqlPrint;
-  };
-})();
+function runSqlNoPrint(stmt: stmt) {
+  stmt.run();
+}
+
+export default function runSqlBuilder(quiet: boolean) {
+  return quiet ? runSqlNoPrint : runSqlPrint;
+}
