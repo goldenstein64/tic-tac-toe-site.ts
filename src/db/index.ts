@@ -63,9 +63,9 @@ export function typePrepared<P extends BasePlaceholders, T>(
     | PreparedVoidStmt<Record<string, unknown>>,
   _placeholders: P
 ): PreparedStmt<P, T> | PreparedVoidStmt<P> {
-  return stmt as typeof stmt extends PreparedStmt<Record<string, unknown>, T>
-    ? PreparedStmt<P, T>
-    : PreparedVoidStmt<P>;
+  return stmt as typeof stmt extends PreparedStmt<Record<string, unknown>, T> ?
+    PreparedStmt<P, T>
+  : PreparedVoidStmt<P>;
 }
 
 export const plugin = new Elysia({ name: "Database" })

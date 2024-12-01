@@ -1,34 +1,30 @@
 import { customType, integer } from "drizzle-orm/sqlite-core";
 
-type UnionOf<A extends unknown[]> = A extends [
-  infer Str extends unknown,
-  ...infer Rest extends unknown[]
-]
-  ? Str | UnionOf<Rest>
-  : A extends []
-  ? never
-  : A extends (infer T)[]
-  ? T
+type UnionOf<A extends unknown[]> =
+  A extends [infer Str extends unknown, ...infer Rest extends unknown[]] ?
+    Str | UnionOf<Rest>
+  : A extends [] ? never
+  : A extends (infer T)[] ? T
   : unknown;
 
-type IndexUnionOf<A extends unknown[]> = A extends [
-  unknown,
-  ...infer Rest extends unknown[]
-]
-  ? Rest extends { length: infer N extends number }
-    ? N | IndexUnionOf<Rest>
+type IndexUnionOf<A extends unknown[]> =
+  A extends [unknown, ...infer Rest extends unknown[]] ?
+    Rest extends { length: infer N extends number } ?
+      N | IndexUnionOf<Rest>
     : never
-  : A extends []
-  ? never
+  : A extends [] ? never
   : number;
 
-export type InferEnum<T> = T extends ReturnType<
-  typeof customType<{
-    data: infer S;
-    driverData: infer _;
-  }>
->
-  ? S
+export type InferEnum<T> =
+  T extends (
+    ReturnType<
+      typeof customType<{
+        data: infer S;
+        driverData: infer _;
+      }>
+    >
+  ) ?
+    S
   : never;
 
 export function enumType<S extends string[]>(values: S) {
