@@ -5,7 +5,7 @@ import runSqlBuilder from "#/scripts/util";
 
 import prodInitialData from "../production/game.db-data";
 
-export default async function testInitialData(config: DataConfig) {
+export default function testInitialData(config: DataConfig) {
   prodInitialData(config);
 
   const { quiet = false } = config;
