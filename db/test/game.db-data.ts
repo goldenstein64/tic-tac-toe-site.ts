@@ -13,12 +13,19 @@ export default function testInitialData(config: DataConfig) {
   const runSql = runSqlBuilder(quiet);
 
   runSql(
-    db.insert(User).values({
-      id: 4,
-      username: "DebugUser",
-      createdAt: new Date(Date.UTC(2024, 11 - 1, 16, 8, 5)), // 2024/11/16 8:05
-      refreshKey: 1,
-    })
+    db.insert(User).values([
+      {
+        id: 4,
+        username: "DebugUser",
+        createdAt: new Date(Date.UTC(2024, 11 - 1, 16, 8, 5)), // 2024/11/16 8:05
+        refreshKey: 1,
+      },
+      {
+        id: 5,
+        username: "AnotherDebugUser",
+        createdAt: new Date(Date.UTC(2024, 12 - 1, 2, 7, 5)),
+      },
+    ])
   );
 
   runSql(
@@ -40,6 +47,12 @@ export default function testInitialData(config: DataConfig) {
         createdBy: 4, // debug user
         createdAt: new Date(Date.UTC(2024, 11 - 1, 28, 2, 31)),
         status: "finished",
+      },
+      {
+        id: 3,
+        createdBy: 5, // another debug user
+        createdAt: new Date(Date.UTC(2024, 11 - 1, 28, 2, 31)),
+        status: "waiting",
       },
     ])
   );
