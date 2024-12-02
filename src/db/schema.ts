@@ -9,10 +9,10 @@ import { lobbyStatus, number, timestamp } from "./datatypes";
 import { UNIX_EPOCH } from "./constants";
 
 export const User = createTable("User", {
-  id: number("id").primaryKey({ autoIncrement: true }),
-  username: text("username").notNull(),
-  createdAt: timestamp("createdAt").notNull().default(UNIX_EPOCH),
-  refreshKey: number("refreshKey").notNull(),
+  id: number().primaryKey({ autoIncrement: true }),
+  username: text().notNull(),
+  createdAt: timestamp().notNull().default(UNIX_EPOCH),
+  refreshKey: number().notNull().default(1),
 });
 export type SelectUser = InferSelectModel<typeof User>;
 export type InsertUser = InferInsertModel<typeof User>;

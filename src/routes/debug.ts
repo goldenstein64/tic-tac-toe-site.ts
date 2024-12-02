@@ -25,26 +25,17 @@ export default () =>
           jwtAccess,
           jwtRefresh,
         }) => {
-          const foundUser = db
-            .select()
-            .from(User)
-            .where(eq(User.username, usernameQuery))
-            .get();
-
-          let userId: number;
-          let refreshKey: number;
-          if (foundUser) {
-            userId = foundUser.id;
-            refreshKey = foundUser.refreshKey;
-          } else {
-            const createdUser = db
+          const { userId, refreshKey } =
+            db
+              .select({ userId: User.id, refreshKey: User.refreshKey })
+              .from(User)
+              .where(eq(User.username, usernameQuery))
+              .get() ??
+            db
               .insert(User)
-              .values({ username: usernameQuery, refreshKey: 1 })
-              .returning({ id: User.id })
+              .values({ username: usernameQuery })
+              .returning({ userId: User.id, refreshKey: User.refreshKey })
               .get()!;
-            userId = createdUser.id;
-            refreshKey = 1;
-          }
 
           cookieAccess.set({
             value: await jwtAccess.sign({

@@ -59,7 +59,7 @@ const selectDiscordUserById = typePrepared(
 const insertUser = typePrepared(
   db
     .insert(User)
-    .values({ username: sql.placeholder("username"), refreshKey: 1 })
+    .values({ username: sql.placeholder("username") })
     .returning({ userId: User.id, refreshKey: User.refreshKey })
     .prepare(),
   _placeholders as SQLProps<{ username: string }>
@@ -109,10 +109,6 @@ async function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
   const { userId, refreshKey } = insertUser.get({
     username: userInfo.global_name ?? userInfo.username,
   })!;
-
-  if (userId === undefined) {
-    throw new Error("exactly one user was not inserted!");
-  }
 
   insertDiscordUser.run({
     discordId,

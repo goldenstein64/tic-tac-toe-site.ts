@@ -1,6 +1,6 @@
 import jwt from "@elysiajs/jwt";
 import Elysia, { t } from "elysia";
-import { eq, sql, InferSelectModel } from "drizzle-orm";
+import { eq, sql, InferSelectModel, and } from "drizzle-orm";
 
 import { db, typePrepared } from "../db";
 import { User } from "../db/schema";
@@ -39,6 +39,20 @@ const selectUserById = typePrepared(
   _placeholders as { userId: number }
 );
 
+const selectUserByIdRefreshKey = typePrepared(
+  db
+    .select()
+    .from(User)
+    .where(
+      and(
+        eq(User.id, sql.placeholder("userId")),
+        eq(User.refreshKey, sql.placeholder("refreshKey"))
+      )
+    )
+    .prepare(),
+  _placeholders as { userId: number; refreshKey: number }
+);
+
 export default () =>
   new Elysia({ name: "JWTAuth" })
     .use(
@@ -66,7 +80,7 @@ export default () =>
         const access = await jwtAccess.verify(cookieAccess.value);
         if (access) {
           const user = selectUserById.get({ userId: access.userId });
-          return user ? { user } : { user: null };
+          return { user: user ?? null };
         }
 
         // otherwise, try to refresh the token
@@ -74,15 +88,9 @@ export default () =>
         if (!refresh) return { user: null };
 
         const { userId, refreshKey } = refresh;
+        const user = selectUserByIdRefreshKey.get({ userId, refreshKey });
+        if (!user) return { user: null };
 
-        const user = selectUserById.get({ userId });
-
-        if (!user || refreshKey !== user.refreshKey) {
-          // user wasn't found or their refresh key didn't match :(
-          return { user: null };
-        }
-
-        // by this point, we can refresh the user's access token
         cookieAccess.set({
           value: await jwtAccess.sign({
             userId,
@@ -91,7 +99,6 @@ export default () =>
           ...ACCESS_COOKIE_OPTS,
         });
 
-        // now we can expose them to the rest of the API
         return { user };
       }
     );

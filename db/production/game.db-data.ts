@@ -12,17 +12,11 @@ export default function prodInitialData({ quiet = false }: DataConfig) {
   const mediumCreated = new Date(Date.UTC(2023, 8 - 1, 4, 22, 35)); // 2023/8/4 22:35
   const hardCreated = new Date(Date.UTC(2023, 7, 8 - 1, 1, 23)); // 2023/8/7 1:23
 
-  const refreshKey = 1;
   runSql(
     db.insert(User).values([
-      { id: 1, username: "EasyComputer", createdAt: easyCreated, refreshKey },
-      {
-        id: 2,
-        username: "MediumComputer",
-        createdAt: mediumCreated,
-        refreshKey,
-      },
-      { id: 3, username: "HardComputer", createdAt: hardCreated, refreshKey },
+      { id: 1, username: "EasyComputer", createdAt: easyCreated },
+      { id: 2, username: "MediumComputer", createdAt: mediumCreated },
+      { id: 3, username: "HardComputer", createdAt: hardCreated },
     ])
   );
 
