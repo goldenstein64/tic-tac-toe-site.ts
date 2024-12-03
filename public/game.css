@@ -3,26 +3,16 @@ h3#lobby-status {
 }
 
 main {
-  display: grid;
-
-  grid: auto-flow / 1fr 2fr 1fr;
-}
-
-aside:first-of-type {
-  margin-left: 20px;
-  margin-right: auto;
-}
-
-aside:last-of-type {
-  margin-left: auto;
-  margin-right: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5px 20px;
 }
 
 .game-board {
   width: 30vw;
   max-height: 90vh;
   aspect-ratio: 1;
-  margin: 0 auto;
 
   table-layout: fixed;
   border-collapse: collapse;
