@@ -138,7 +138,7 @@ export function WaitingLobbyItem({
       <td class="actions">
         <button
           type="button"
-          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+          hx-on-click={`location.href="/game?id=${lobbyId}"`}
         >
           View
         </button>
@@ -190,7 +190,7 @@ export function ActiveLobbyItem({
       <td class="actions">
         <button
           type="button"
-          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+          hx-on-click={`location.href="/game?id=${lobbyId}"`}
         >
           View
         </button>
@@ -244,7 +244,7 @@ export function AvailableLobbyItem({
       <td class="actions">
         <button
           type="button"
-          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+          hx-on-click={`location.href="/game?id=${lobbyId}"`}
         >
           View
         </button>
@@ -302,7 +302,7 @@ export function FinishedLobbyItem({
       <td class="actions">
         <button
           type="button"
-          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+          hx-on-click={`location.href="/game?id=${lobbyId}"`}
         >
           View
         </button>
@@ -345,21 +345,21 @@ export async function LobbiesBody({ user }: LobbiesProps) {
       <header>
         <DebugPanel />
         <h1>{SITE_TITLE}</h1>
-        <button type="button" hx-on:click="location.href='/new-lobby'">
+        <button type="button" hx-on-click="location.href='/new-lobby'">
           New Lobby
         </button>
         <UserConfig />
         <nav>
-          <button type="button" hx-on:click="location.hash='#active-games'">
+          <button type="button" hx-on-click="location.hash='#active-games'">
             Active Games
           </button>
-          <button type="button" hx-on:click="location.hash='#available-games'">
+          <button type="button" hx-on-click="location.hash='#available-games'">
             Available Games
           </button>
-          <button type="button" hx-on:click="location.hash='#waiting-games'">
+          <button type="button" hx-on-click="location.hash='#waiting-games'">
             Waiting Games
           </button>
-          <button type="button" hx-on:click="location.hash='#finished-games'">
+          <button type="button" hx-on-click="location.hash='#finished-games'">
             Finished Games
           </button>
         </nav>

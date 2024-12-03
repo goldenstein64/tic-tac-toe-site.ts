@@ -27,7 +27,7 @@ function LoginBody() {
           <button
             id="discord-sign-in"
             type="button"
-            hx-on:click="location.href='/login/discord'"
+            hx-on-click="location.href='/login/discord'"
           >
             Sign in with Discord
             <img
