@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 
 import { db, typePrepared } from "../db";
 import { Game, SelectUser, User } from "../db/schema";
+import { SITE_TITLE } from "../constants";
 
 const _placeholders: any = undefined;
 
@@ -27,6 +28,7 @@ export const selectPlayersInGame = typePrepared(
 export function GameHead() {
   return (
     <head>
+      <title>{SITE_TITLE} - Game</title>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <script src="/public/htmx.min.js" />

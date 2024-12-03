@@ -1,10 +1,12 @@
 import { Html } from "@elysiajs/html";
 
 import { DebugPanel } from "./debug";
+import { SITE_TITLE } from "../constants";
 
 function LoginHead() {
   return (
     <head>
+      <title>{SITE_TITLE} - Login</title>
       <script src="/public/htmx.min.js" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,17 +19,25 @@ function LoginHead() {
 function LoginBody() {
   return (
     <body>
-      <DebugPanel />
-      <section>
-        <button
-          id="discord-sign-in"
-          type="button"
-          hx-on:click="location.href='/login/discord'"
-        >
-          Sign in with Discord
-          <img src="/public/discord-mark-white.png" width="619" height="469" />
-        </button>
-      </section>
+      <header>
+        <DebugPanel />
+      </header>
+      <main>
+        <section>
+          <button
+            id="discord-sign-in"
+            type="button"
+            hx-on:click="location.href='/login/discord'"
+          >
+            Sign in with Discord
+            <img
+              src="/public/discord-mark-white.png"
+              width="619"
+              height="469"
+            />
+          </button>
+        </section>
+      </main>
     </body>
   );
 }

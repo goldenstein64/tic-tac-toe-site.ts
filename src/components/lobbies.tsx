@@ -6,6 +6,7 @@ import { eq, sql, aliasedTable, and, ne } from "drizzle-orm";
 import { db, typePrepared } from "../db";
 import { FinishedLobby, Game, Lobby, User } from "../db/schema";
 import { DebugPanel } from "./debug";
+import { SITE_TITLE } from "../constants";
 
 const _placeholders: any = undefined;
 
@@ -100,6 +101,7 @@ const selectWaitingLobbies = typePrepared(
 export function LobbiesHead() {
   return (
     <head>
+      <title>{SITE_TITLE} - Lobbies</title>
       <script src="/public/htmx.min.js" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -341,7 +343,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
     <body>
       <header>
         <DebugPanel />
-        <h1>tic-tac-toe-site</h1>
+        <h1>{SITE_TITLE}</h1>
         <button type="button" hx-on:click="location.href='/new-lobby'">
           New Lobby
         </button>
