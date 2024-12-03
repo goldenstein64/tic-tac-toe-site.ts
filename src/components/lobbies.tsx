@@ -134,6 +134,12 @@ export function WaitingLobbyItem({
       <td>
         <button
           type="button"
+          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+        >
+          View
+        </button>
+        <button
+          type="button"
           hx-delete="/api/lobby"
           hx-vals={JSON.stringify({ id: lobbyId })}
         >
@@ -182,7 +188,7 @@ export function ActiveLobbyItem({
           type="button"
           hx-on:click={`location.href="/game?id=${lobbyId}"`}
         >
-          Resume
+          View
         </button>
         <button
           type="button"
@@ -232,6 +238,12 @@ export function AvailableLobbyItem({
   return (
     <tr>
       <td>
+        <button
+          type="button"
+          hx-on:click={`location.href="/game?id=${lobbyId}"`}
+        >
+          View
+        </button>
         <button
           type="button"
           hx-patch="/api/lobby"
