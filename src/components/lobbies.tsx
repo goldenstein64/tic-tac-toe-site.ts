@@ -127,7 +127,11 @@ export function WaitingLobbyItem({
   return (
     <tr>
       <td>
-        <button type="button" hx-delete="/api/lobby" hx-vals={{ id: lobbyId }}>
+        <button
+          type="button"
+          hx-delete="/api/lobby"
+          hx-vals={JSON.stringify({ id: lobbyId })}
+        >
           Forget
         </button>
       </td>
@@ -178,7 +182,7 @@ export function ActiveLobbyItem({
         <button
           type="button"
           hx-patch="/api/lobby"
-          hx-vals={{ id: lobbyId, action: "forfeit" }}
+          hx-vals={JSON.stringify({ id: lobbyId, action: "forfeit" })}
         >
           Forfeit
         </button>
@@ -226,7 +230,7 @@ export function AvailableLobbyItem({
         <button
           type="button"
           hx-patch="/api/lobby"
-          hx-vals={{ id: lobbyId, action: "join" }}
+          hx-vals={JSON.stringify({ id: lobbyId, action: "join" })}
         >
           Join
         </button>
