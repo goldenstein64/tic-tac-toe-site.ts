@@ -15,9 +15,10 @@ const { values, positionals } = parseArgs({
     },
   },
 });
-if (positionals.length > 1)
+
+if (positionals.length > 3)
   throw new EvalError(`expected at most 1 argument, got ${positionals.length}`);
-const [environment = "development"] = positionals;
+const [_bun, _script, environment = "development"] = positionals;
 const { confirm: confirmArg = false } = values;
 
 Bun.env.NODE_ENV = environment;
