@@ -1,8 +1,11 @@
 import { Discord } from "elysia-oauth2";
 import { eq, gt } from "drizzle-orm";
+import { parseArgs } from "node:util";
 
 import { db } from "#/src/db";
 import { DiscordUser } from "#/src/db/schema";
+
+parseArgs({ args: process.argv, strict: true });
 
 const discord = new Discord(
   Bun.env.DISCORD_CLIENT_ID,

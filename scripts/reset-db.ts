@@ -1,9 +1,25 @@
 import { $ } from "bun";
 import path from "node:path";
+import { parseArgs } from "node:util";
 
 export type DataConfig = { quiet?: boolean };
 
-const environment = process.argv[2] ?? "development";
+const { values, positionals } = parseArgs({
+  args: process.argv,
+  strict: true,
+  allowPositionals: true,
+  options: {
+    confirm: {
+      type: "boolean",
+      default: false,
+    },
+  },
+});
+if (positionals.length > 1)
+  throw new EvalError(`expected at most 1 argument, got ${positionals.length}`);
+const [environment = "development"] = positionals;
+const { confirm: confirmArg = false } = values;
+
 Bun.env.NODE_ENV = environment;
 const dbPath = path.resolve("db", environment, "game.db");
 const drizzleConfig = path.resolve("db", environment, "drizzle.config.ts");
@@ -13,7 +29,7 @@ const initialData = Bun.file(
 );
 
 const productionDbPath = path.resolve("./db/production/game.db");
-if (dbPath === productionDbPath) {
+if (dbPath === productionDbPath && !confirmArg) {
   const choice = confirm(
     "This will reset ALL data in the production database. Are you sure?"
   );
