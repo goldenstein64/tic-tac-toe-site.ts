@@ -56,14 +56,17 @@ const selectGamePlayers = typePrepared(
   _placeholders as { lobbyId: number }
 );
 
-type GameStateEvents = {
+type GameStateInitialEvents = {
   "new-move": [ordering: number];
   ended: [winner: Mark | undefined];
 };
+const events = ["new-move", "ended"] as const;
 
-type GameStateEventsArrays = {
-  [K in keyof GameStateEvents]: [K, GameStateEvents[K]];
-}[keyof GameStateEvents];
+type GameStateEvents = GameStateInitialEvents & {
+  "move-stream": {
+    [K in keyof GameStateInitialEvents]: [evt: K, GameStateInitialEvents[K]];
+  }[keyof GameStateInitialEvents];
+};
 
 export class GameState extends EventEmitter<GameStateEvents> {
   readonly board: Board = new Board();
@@ -90,9 +93,10 @@ export class GameState extends EventEmitter<GameStateEvents> {
       this.board.setMark(position, mark);
     }
 
-    this.once("ended", () => {
-      this.removeAllListeners();
-    });
+    for (const evt of events)
+      this.on(evt, (...args: any) => this.emit("move-stream", evt, args));
+
+    this.once("ended", () => this.removeAllListeners());
 
     this.on("new-move", async (ordering) => {
       const nextTurn = orderingToMark(ordering + 1);
@@ -133,17 +137,6 @@ type EventProps = { event?: string; data: string };
 function event({ event = "message", data }: EventProps): string {
   return `event: ${event}\ndata: ${data}\n\n`;
 }
-
-const events = ["new-move", "ended"] as const;
-const gameMoveListeners = (
-  emitter: EventEmitter<{
-    message: GameStateEventsArrays;
-  }>
-) =>
-  events.map(
-    (evt) =>
-      [evt, (...args: any) => emitter.emit("message", evt, args)] as const
-  );
 
 export default new Elysia({ prefix: "/api" })
   .use(html())
@@ -193,16 +186,10 @@ export default new Elysia({ prefix: "/api" })
       const userIsO = userId === playerO;
       const isClientPlaying = userIsX || userIsO;
 
-      const emitter = new EventEmitter<{
-        message: GameStateEventsArrays;
-      }>();
-
-      const listeners = gameMoveListeners(emitter);
-      for (const [evt, listener] of listeners) state.on(evt, listener);
-
-      type EmitterIterator = AsyncIterableIterator<GameStateEventsArrays>;
-      const onMessage = on(emitter, "message") as EmitterIterator;
-      for await (const [name, args] of onMessage) {
+      const onMoveStream = on(state, "move-stream") as AsyncIterableIterator<
+        GameStateEvents["move-stream"]
+      >;
+      for await (const [name, args] of onMoveStream) {
         // would be more troublesome as a switch btw
         if (name === "new-move") {
           const [ordering] = args;
@@ -243,8 +230,8 @@ export default new Elysia({ prefix: "/api" })
           break;
         }
       }
-
-      for (const [evt, listener] of listeners) state.off(evt, listener);
     },
-    { query: t.Object({ id: intString }) }
+    {
+      query: t.Object({ id: intString }),
+    }
   );
