@@ -44,6 +44,7 @@ button {
 }
 
 #debug-panel {
+  width: fit-content;
   border: 0px none transparent;
   padding: 20px;
   margin: 5px auto;
