@@ -256,7 +256,7 @@ export default new Elysia({ prefix: "/api" })
   .resolve(({ user }) => ({ user: user! }))
   .patch(
     "/lobby",
-    async ({ query: { id: lobbyId, action }, user: { id: userId } }) => {
+    async ({ body: { id: lobbyId, action }, user: { id: userId } }) => {
       switch (action) {
         case "forfeit":
           return await forfeitActiveLobby(lobbyId, userId);
@@ -264,7 +264,7 @@ export default new Elysia({ prefix: "/api" })
           return await joinWaitingLobby(lobbyId, userId);
       }
     },
-    { query: t.Object({ id: intString, action: LobbyAction }) }
+    { body: t.Object({ id: intString, action: LobbyAction }) }
   )
   .post(
     "/lobby",
