@@ -67,10 +67,11 @@ const selectAvailableLobbies = typePrepared(
   db
     .select({
       lobbyId: Lobby.id,
-      opponent: Lobby.createdBy,
+      opponent: User.username,
       createdAt: Lobby.createdAt,
     })
     .from(Lobby)
+    .innerJoin(User, eq(User.id, Lobby.createdBy))
     .where(
       and(
         eq(Lobby.status, "waiting"),
@@ -229,7 +230,7 @@ export async function ActiveLobbies({ userId }: ActiveLobbiesProps) {
 
 type AvailableLobbyItemProps = {
   lobbyId: number;
-  opponent: number;
+  opponent: string;
   createdAt: Date;
 };
 
