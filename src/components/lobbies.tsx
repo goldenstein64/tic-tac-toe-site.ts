@@ -134,7 +134,7 @@ export function WaitingLobbyItem({
 }: WaitingLobbyItemProps) {
   return (
     <tr>
-      <td>
+      <td class="actions">
         <button
           type="button"
           hx-on:click={`location.href="/game?id=${lobbyId}"`}
@@ -163,7 +163,7 @@ export async function WaitingLobbies({ userId }: WaitingLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td>Actions</td>
+          <td></td>
           <td>Id</td>
           <td>Created At</td>
         </tr>
@@ -186,7 +186,7 @@ export function ActiveLobbyItem({
 }: ActiveLobbyItemProps) {
   return (
     <tr>
-      <td>
+      <td class="actions">
         <button
           type="button"
           hx-on:click={`location.href="/game?id=${lobbyId}"`}
@@ -216,7 +216,7 @@ export async function ActiveLobbies({ userId }: ActiveLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td>Actions</td>
+          <td></td>
           <td>Id</td>
           <td>Player X</td>
           <td>Player O</td>
@@ -240,7 +240,7 @@ export function AvailableLobbyItem({
 }: AvailableLobbyItemProps) {
   return (
     <tr>
-      <td>
+      <td class="actions">
         <button
           type="button"
           hx-on:click={`location.href="/game?id=${lobbyId}"`}
@@ -269,7 +269,7 @@ export async function AvailableLobbies({ userId }: AvailableLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td>Actions</td>
+          <td></td>
           <td>Id</td>
           <td>Created At</td>
           <td>Opponent</td>
@@ -298,7 +298,7 @@ export function FinishedLobbyItem({
 }: FinishedLobbyItemProps) {
   return (
     <tr>
-      <td>
+      <td class="actions">
         <button
           type="button"
           hx-on:click={`location.href="/game?id=${lobbyId}"`}
@@ -324,7 +324,7 @@ export async function FinishedLobbies({ userId }: FinishedLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td>Actions</td>
+          <td></td>
           <td>Id</td>
           <td>Created At</td>
           <td>Finished At</td>

@@ -18,7 +18,8 @@ header {
   }
 
   & > nav {
-    border: 1px solid light-dark(black, white);
+    background: light-dark(white, black);
+    border-radius: 4px;
     margin: 0px auto;
     padding: 10px;
     width: fit-content;
@@ -35,23 +36,44 @@ main {
     margin: 0px auto;
   }
 
+  & section {
+    width: fit-content;
+    margin: 10px auto;
+    padding: 10px;
+  }
+
   & section:not(:target) {
     display: none;
   }
 
   & table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 10px;
     text-align: center;
     width: 50vw;
-    margin: 0px auto;
+    margin: 5px;
 
     & button + button {
       margin-left: 5px;
     }
 
-    & td {
-      border: 1px solid light-dark(black, white);
+    & tbody td {
       padding: 5px;
+      background: light-dark(white, black);
+      border-radius: 4px;
+
+      &.actions {
+        background: transparent;
+        display: block flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0px;
+
+        & > button {
+          flex: 1;
+          height: 100%;
+        }
+      }
     }
   }
 }

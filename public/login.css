@@ -20,7 +20,7 @@ body > main > section {
   align-content: center;
   flex-direction: column;
   padding: 20px 20px;
-  background-color: light-dark(white, black);
+  background: light-dark(white, black);
   border-radius: 4px;
 }
 
