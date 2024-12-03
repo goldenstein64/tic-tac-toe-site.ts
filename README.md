@@ -1,21 +1,25 @@
-# Elysia with Bun runtime
+# tic-tac-toe-site2
 
 ## Outline
 
-- `/`
-  - shows a link to a game creation API
+- `/login`
   - shows an interface for logging in
-    - try logging in with Discord OAuth instead of a "one-day login"
+    - with Discord
+- `/`
+  - redirects to `/login` if unauthorized
+  - shows a link to a game creation API
   - shows a list of lobbies
-    - shows a list of active lobbies
-    - shows a list of waiting lobbies
-    - shows a list of available lobbies
-    - shows a history of past lobbies
+    - that are active
+    - that are waiting for another player (that isn't you) to join
+    - that are waiting for you to join
+    - that are finished
 - `/create-game`
+  - redirects to `/login` if unauthorized
   - shows options for creating a new lobby
     - Player X and Player O types, human or one of three computer difficulties
   - send the user to the newly created lobby once finished
 - `/game`
+  - redirects to `/login` if unauthorized
   - shows an active or finished game
   - uses SSEs to stream the state of the board and control what players can do
   - Whenever a user starts watching the game:
@@ -32,18 +36,26 @@
 
 ## Getting Started
 
-To get started with this template, simply paste this command into your terminal:
+To get started, clone this repo and run this command:
 
 ```bash
-bun create elysia ./elysia-example
+bun install
 ```
 
 ## Development
 
-To start the development server run:
+To start the development server, run:
 
 ```bash
-bun run dev
+bun dev
 ```
 
 Open http://localhost:3000/ with your browser to see the result.
+
+## Deployment
+
+To start the production server, run:
+
+```bash
+bun start
+```
