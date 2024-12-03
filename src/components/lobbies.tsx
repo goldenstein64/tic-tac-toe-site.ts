@@ -110,11 +110,16 @@ export function LobbiesHead() {
 
 export async function UserConfig() {
   return (
-    <div>
-      <button type="button" hx-delete="/api/session" hx-swap="none">
+    <section id="user-config">
+      <button
+        type="button"
+        hx-delete="/api/session"
+        hx-swap="none"
+        hx-on--after-request="location.href='/login'"
+      >
         Log out
       </button>
-    </div>
+    </section>
   );
 }
 
