@@ -104,6 +104,7 @@ export function LobbiesHead() {
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="stylesheet" href="/public/global.css" />
+      <link rel="stylesheet" href="/public/lobbies.css" />
     </head>
   );
 }
@@ -338,20 +339,46 @@ export async function LobbiesBody({ user }: LobbiesProps) {
   const userId = user.id;
   return (
     <body>
-      <DebugPanel />
-      <h1>tic-tac-toe-site</h1>
-      <button type="button" hx-on:click="location.href='/new-lobby'">
-        New Lobby
-      </button>
-      <UserConfig />
-      <h2>Waiting Games</h2>
-      <WaitingLobbies userId={userId} />
-      <h2>Active Games</h2>
-      <ActiveLobbies userId={userId} />
-      <h2>Available Games</h2>
-      <AvailableLobbies userId={userId} />
-      <h2>Finished Games</h2>
-      <FinishedLobbies userId={userId} />
+      <header>
+        <DebugPanel />
+        <h1>tic-tac-toe-site</h1>
+        <button type="button" hx-on:click="location.href='/new-lobby'">
+          New Lobby
+        </button>
+        <UserConfig />
+        <nav>
+          <button type="button" hx-on:click="location.hash='#active-games'">
+            Active Games
+          </button>
+          <button type="button" hx-on:click="location.hash='#available-games'">
+            Available Games
+          </button>
+          <button type="button" hx-on:click="location.hash='#waiting-games'">
+            Waiting Games
+          </button>
+          <button type="button" hx-on:click="location.hash='#finished-games'">
+            Finished Games
+          </button>
+        </nav>
+      </header>
+      <main>
+        <section id="active-games">
+          <h2>Active Games</h2>
+          <ActiveLobbies userId={userId} />
+        </section>
+        <section id="available-games">
+          <h2>Available Games</h2>
+          <AvailableLobbies userId={userId} />
+        </section>
+        <section id="waiting-games">
+          <h2>Waiting Games</h2>
+          <WaitingLobbies userId={userId} />
+        </section>
+        <section id="finished-games">
+          <h2>Finished Games</h2>
+          <FinishedLobbies userId={userId} />
+        </section>
+      </main>
     </body>
   );
 }
