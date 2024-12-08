@@ -169,9 +169,15 @@ export default new Elysia({ prefix: "/api" })
       type: "application/x-www-form-urlencoded",
     }
   )
+  .state("abortController", undefined as undefined | AbortController)
   .get(
     "/game-move",
-    async function* ({ query: { id: lobbyId }, set, user: { id: userId } }) {
+    async function* ({
+      query: { id: lobbyId },
+      set,
+      user: { id: userId },
+      store,
+    }) {
       const players = selectGamePlayers.get({ lobbyId });
       if (!players) return error("Not Found");
 
@@ -186,9 +192,11 @@ export default new Elysia({ prefix: "/api" })
       const userIsO = userId === playerO;
       const isClientPlaying = userIsX || userIsO;
 
-      const onMoveStream = on(state, "move-stream") as AsyncIterableIterator<
-        GameStateEvents["move-stream"]
-      >;
+      const abortController = new AbortController();
+      store.abortController = abortController;
+      const onMoveStream = on(state, "move-stream", {
+        signal: abortController.signal,
+      }) as AsyncIterableIterator<GameStateEvents["move-stream"]>;
       for await (const [name, args] of onMoveStream) {
         // would be more troublesome as a switch btw
         if (name === "new-move") {
@@ -233,5 +241,8 @@ export default new Elysia({ prefix: "/api" })
     },
     {
       query: t.Object({ id: intString }),
+      afterHandle({ store }) {
+        store.abortController?.abort("aborted for await loop");
+      },
     }
   );
