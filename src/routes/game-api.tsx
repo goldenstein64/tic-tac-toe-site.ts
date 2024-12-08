@@ -113,8 +113,8 @@ export class GameState extends EventEmitter<GameStateEvents> {
         delay(1000),
       ]);
       this.board.setMark(position, nextTurn);
-      insertMove.run({ lobbyId, ordering: ordering, position });
-      this.emit("new-move", ordering);
+      insertMove.run({ lobbyId, ordering: ordering + 1, position });
+      this.emit("new-move", ordering + 1);
     });
   }
 }
