@@ -62,7 +62,7 @@ const app = new Elysia({ name: "App" })
   )
   .get("/new-lobby", () => Bun.file("./private/new-lobby.html"))
   .use(staticPlugin())
-  .listen({ port: 3000 });
+  .listen({ port: 3000, idleTimeout: -1 });
 
 export type App = typeof app;
 
