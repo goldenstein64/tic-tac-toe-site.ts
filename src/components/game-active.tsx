@@ -1,7 +1,7 @@
 import type { Board, Mark } from "@goldenstein64/tic-tac-toe/lib";
 
 import { Html } from "@elysiajs/html";
-import { eq, sql } from "drizzle-orm";
+import { eq, max, sql } from "drizzle-orm";
 
 import { db, typePrepared } from "../db";
 import { SelectLobby, Move, SelectUser } from "../db/schema";
@@ -22,6 +22,15 @@ const _placeholders: any = undefined;
 const selectGameMoves = typePrepared(
   db
     .select({ position: Move.position, ordering: Move.ordering })
+    .from(Move)
+    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);
+
+const selectMaxOrdering = typePrepared(
+  db
+    .select({ maxOrdering: max(Move.ordering) })
     .from(Move)
     .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
     .prepare(),
@@ -93,7 +102,13 @@ function GameRow({
   return <tr>{buttons}</tr>;
 }
 
-function GameBoard({ lobby: { id: lobbyId } }: { lobby: SelectLobby }) {
+function GameBoard({
+  lobby: { id: lobbyId },
+  disabled,
+}: {
+  lobby: SelectLobby;
+  disabled?: boolean;
+}) {
   const movesArray = selectGameMoves.all({ lobbyId });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
@@ -107,6 +122,7 @@ function GameBoard({ lobby: { id: lobbyId } }: { lobby: SelectLobby }) {
             start={i * 3}
             moves={moves}
             ariaLabel={label}
+            disabled={disabled}
           />
         ))}
       </tbody>
@@ -146,8 +162,13 @@ type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 
 function GameBody({ lobby, user }: GameBodyProps) {
   const { playerX, playerO } = selectPlayersInGame.get({ lobbyId: lobby.id })!;
+  const userMark = user.id === playerX ? "X" : "O";
   const opponentId = user.id === playerX ? playerO : playerX;
   const opponent = selectUserById.get({ userId: opponentId });
+
+  const maxResult = selectMaxOrdering.get({ lobbyId: lobby.id })!;
+  const maxOrdering: number = maxResult.maxOrdering ?? 0;
+  const nextMark = orderingToMark(maxOrdering + 1);
 
   return (
     <body
@@ -165,7 +186,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
       </header>
       <main>
         <PlayerInfo user={user} />
-        <GameBoard lobby={lobby} />
+        <GameBoard lobby={lobby} disabled={nextMark !== userMark} />
         <PlayerInfo user={opponent} />
       </main>
     </body>
