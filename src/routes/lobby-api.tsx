@@ -154,7 +154,7 @@ async function forfeitActiveLobby(
       const playerResult = selectPlayerInGame.get({ lobbyId, userId });
       if (playerResult === undefined) {
         throw new ResponseError(
-          403,
+          "Forbidden",
           "lobby does not exist or does not contain this user"
         );
       }
@@ -293,6 +293,7 @@ export default new Elysia({ prefix: "/api" })
           });
           insertMoves({ lobbyId, moves });
           insertFinishedLobby.run({ id: lobbyId, winner });
+          set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
         });
       } else if (computerIdX || computerIdO) {
         // only one is a computer, create an active lobby with this user as the
@@ -307,12 +308,13 @@ export default new Elysia({ prefix: "/api" })
             playerX: computerIdX ?? userId,
             playerO: computerIdO ?? userId,
           });
+          set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
         });
       } else {
         // neither are computers, create a waiting lobby with this user waiting
-        insertLobby.run({ userId, status: "waiting" });
+        const { id: lobbyId } = insertLobby.get({ userId, status: "waiting" })!;
+        set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
       }
-      set.headers["HX-Redirect"] = "/";
     },
     { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) }
   )
