@@ -52,6 +52,7 @@ function GameButton({
       hx-vals={hxVals}
       disabled={disabled || Boolean(mark)}
       aria-label={label}
+      class={[mark === "X" && "mark-x", mark === "O" && "mark-o"]}
     >
       {mark}
     </button>
