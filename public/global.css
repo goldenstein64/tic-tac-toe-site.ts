@@ -1,9 +1,18 @@
 :root {
   color-scheme: light dark;
-  --x-primary-color: light-dark(rgb(110, 27, 61), rgb(253, 179, 209));
+  --x-primary-color: light-dark(rgb(172 47 98), rgb(253, 179, 209));
   --x-secondary-color: light-dark(rgb(253, 179, 209), rgb(110, 27, 61));
-  --o-primary-color: light-dark(rgb(23, 88, 67), rgb(158, 255, 223));
+  --o-primary-color: light-dark(rgb(44 154 118), rgb(158, 255, 223));
   --o-secondary-color: light-dark(rgb(158, 255, 223), rgb(23, 88, 67));
+
+  --color-theme1A: rgb(212, 128, 76);
+  --color-theme1B: rgb(93, 152, 135);
+  --color-theme1C: rgb(38, 65, 66);
+  --color-theme1D: rgb(147, 176, 203);
+  --color-theme1D: rgb(78, 51, 48);
+
+  --color-theme-beach1: rgb(91, 204, 213);
+  --color-theme-beach2: #1072c7;
 }
 
 * {
@@ -44,6 +53,7 @@ button {
 }
 
 #debug-panel {
+  display: none;
   width: fit-content;
   border: 0px none transparent;
   padding: 20px;
