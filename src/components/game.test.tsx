@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 import { format } from "prettier";
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
 import DormantGameHtml from "./game-dormant";
 import ActiveGameHtml from "./game-active";
@@ -25,6 +26,9 @@ function getHTML(document: Document): Promise<string> {
     htmlWhitespaceSensitivity: "strict",
   });
 }
+
+beforeEach(() => GlobalRegistrator.register());
+afterEach(() => GlobalRegistrator.unregister());
 
 describe("game.tsx", () => {
   it("matches waiting lobby", async () => {
