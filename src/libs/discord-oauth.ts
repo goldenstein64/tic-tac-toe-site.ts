@@ -1,6 +1,6 @@
 import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-types/v10";
 
-import Elysia, { redirect } from "elysia";
+import Elysia from "elysia";
 import { oauth2, Discord, OAuth2Tokens } from "elysia-oauth2";
 import { eq, SQL, sql, TransactionRollbackError } from "drizzle-orm";
 
@@ -151,6 +151,7 @@ export default () =>
         jwtAccess,
         jwtRefresh,
         cookie: { access: cookieAccess, refresh: cookieRefresh },
+        redirect,
       }) => {
         const tokens = await oauth2.authorize("Discord");
         // the data in Discord's response can be found here:
@@ -214,6 +215,6 @@ export default () =>
         }
 
         // redirect the user back to the home page
-        return redirect("/");
+        return redirect("/", 302);
       }
     );
