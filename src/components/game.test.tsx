@@ -4,7 +4,6 @@ import type DetachedWindowAPI from "happy-dom/lib/window/DetachedWindowAPI";
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { format } from "prettier";
 
 import DormantGameHtml from "./game-dormant";
@@ -28,10 +27,6 @@ function getHTML(document: Document): Promise<string> {
 }
 
 describe("game.tsx", () => {
-  beforeEach(() => GlobalRegistrator.register());
-
-  afterEach(() => GlobalRegistrator.unregister());
-
   it("matches waiting lobby", async () => {
     document.write(
       await (<DormantGameHtml lobby={waitingLobby} user={debugUser} />)
