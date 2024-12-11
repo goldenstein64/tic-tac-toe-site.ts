@@ -1,6 +1,6 @@
 import type { LobbyStatus } from "../db/datatypes";
 import type { Static } from "elysia";
-import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
+import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import html from "@elysiajs/html";
 import Elysia, { error, t } from "elysia";

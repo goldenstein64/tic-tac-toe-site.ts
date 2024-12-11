@@ -1,10 +1,10 @@
-import { Board, Mark } from "@goldenstein64/tic-tac-toe/lib";
+import { Board, Mark } from "@goldenstein64/tic-tac-toe";
 import {
   EasyComputer,
   HardComputer,
   MediumComputer,
   Player,
-} from "@goldenstein64/tic-tac-toe/lib/player";
+} from "@goldenstein64/tic-tac-toe/player";
 
 export const idToComputerFactory = new Map<number, () => Player>()
   .set(1, () => new EasyComputer())

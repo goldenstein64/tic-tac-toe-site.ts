@@ -1,4 +1,4 @@
-import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
+import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import { Html } from "@elysiajs/html";
 import { eq, sql } from "drizzle-orm";
