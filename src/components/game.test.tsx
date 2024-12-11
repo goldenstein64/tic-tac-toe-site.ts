@@ -1,7 +1,15 @@
 /// <reference lib="dom" />
 import type DetachedWindowAPI from "happy-dom/lib/window/DetachedWindowAPI";
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import {
+  describe,
+  it,
+  expect,
+  afterAll,
+  beforeAll,
+  beforeEach,
+  afterEach,
+} from "bun:test";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 import { format } from "prettier";
@@ -27,8 +35,11 @@ function getHTML(document: Document): Promise<string> {
   });
 }
 
-beforeEach(() => GlobalRegistrator.register());
-afterEach(() => GlobalRegistrator.unregister());
+beforeAll(() => GlobalRegistrator.register());
+afterAll(() => GlobalRegistrator.unregister());
+
+beforeEach(() => document.open());
+afterEach(() => document.close());
 
 describe("game.tsx", () => {
   it("matches waiting lobby", async () => {
