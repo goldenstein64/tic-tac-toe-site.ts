@@ -140,8 +140,8 @@ function GameBody({ lobby, user }: GameHtmlProps) {
       </header>
       <main>
         <PlayerInfo user={user} />
-        <GameBoard lobby={lobby} />
         <PlayerInfo user={opponent} />
+        <GameBoard lobby={lobby} />
       </main>
     </body>
   );

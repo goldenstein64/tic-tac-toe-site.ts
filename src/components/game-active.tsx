@@ -186,8 +186,8 @@ function GameBody({ lobby, user }: GameBodyProps) {
       </header>
       <main>
         <PlayerInfo user={user} />
-        <GameBoard lobby={lobby} disabled={nextMark !== userMark} />
         <PlayerInfo user={opponent} />
+        <GameBoard lobby={lobby} disabled={nextMark !== userMark} />
       </main>
     </body>
   );
