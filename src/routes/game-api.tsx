@@ -1,9 +1,9 @@
-import type { Mark } from "@goldenstein64/tic-tac-toe/lib";
+import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import { EventEmitter, on } from "node:events";
 import { Elysia, error, t } from "elysia";
-import { Board } from "@goldenstein64/tic-tac-toe/lib";
-import { Player } from "@goldenstein64/tic-tac-toe/lib/player";
+import { Board } from "@goldenstein64/tic-tac-toe";
+import { Player } from "@goldenstein64/tic-tac-toe/player";
 import html, { Html } from "@elysiajs/html";
 import { eq, max, sql } from "drizzle-orm";
 import { setTimeout as delay } from "timers/promises";
