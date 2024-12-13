@@ -53,14 +53,16 @@ button {
 }
 
 #debug-panel {
-  display: none;
+  /* display: none; */
   width: fit-content;
   border: 0px none transparent;
   padding: 20px;
-  margin: 5px auto;
+  margin: 0px;
   background-color: light-dark(white, black);
   align-content: start;
   border-radius: 4px;
+  position: fixed;
+  top: 5px;
 }
 
 #debug-panel > form.get-user > button[type="submit"] {
