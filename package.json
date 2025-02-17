@@ -28,12 +28,12 @@
     "htmx.org": "^1.9.12"
   },
   "overrides": {
-    "@sinclair/typebox": "0.32.35"
+    "@sinclair/typebox": "0.34.15"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^15.11.7",
     "@libsql/client": "^0.14.0",
-    "@sinclair/typebox": "^0.32.35",
+    "@sinclair/typebox": "^0.34.15",
     "bun-types": "latest",
     "cookie": "^1.0.2",
     "discord-api-types": "^0.37.114",
