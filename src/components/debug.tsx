@@ -5,6 +5,13 @@ export function DebugPanel() {
 
   return (
     <div id="debug-panel">
+      <button
+        type="button"
+        style="float: right"
+        hx-on-click="document.querySelector('#debug-panel').style.display = 'none'"
+      >
+        X
+      </button>
       <h3>Debug Panel</h3>
       <form
         class="get-user"
