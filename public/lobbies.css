@@ -36,10 +36,12 @@ main {
     margin: 0px auto;
   }
 
-  & section {
+  & > section {
     width: fit-content;
     margin: 10px auto;
     padding: 10px;
+    background-color: light-dark(white, black);
+    border-radius: 6px;
   }
 
   & section:not(:target) {
