@@ -16,7 +16,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
       ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: waiting</h3
       ><h3 id="lobby-winner">Winner: </h3></header
     ><main
-      ><aside>DebugUser</aside
+      ><aside>DebugUser</aside><aside></aside
       ><table class="game-board"
         ><tbody
           ><tr
@@ -75,8 +75,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
                 type="button"
                 disabled=""
                 aria-label="Bottom-right"
-              ></button></td></tr></tbody></table
-      ><aside></aside></main></body
+              ></button></td></tr></tbody></table></main></body
 ></html>
 "
 `;
@@ -98,7 +97,7 @@ exports[`game.tsx matches active lobby 1`] = `
       ><h3 id="lobby-winner"
         >Winner: <span sse-swap="winner"></span></h3></header
     ><main
-      ><aside>DebugUser</aside
+      ><aside>DebugUser</aside><aside>HardComputer</aside
       ><table class="game-board"
         ><tbody hx-swap="innerHTML" sse-swap="board"
           ><tr
@@ -198,7 +197,7 @@ exports[`game.tsx matches active lobby 1`] = `
             ></tr
           ></tbody
         ></table
-      ><aside>HardComputer</aside></main
+      ></main
     ></body
   ></html
 >
@@ -221,7 +220,7 @@ exports[`game.tsx matches finished lobby 1`] = `
       ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: finished</h3
       ><h3 id="lobby-winner">Winner: DebugUser</h3></header
     ><main
-      ><aside>DebugUser</aside
+      ><aside>DebugUser</aside><aside>EasyComputer</aside
       ><table class="game-board"
         ><tbody
           ><tr
@@ -295,7 +294,7 @@ exports[`game.tsx matches finished lobby 1`] = `
             ></tr
           ></tbody
         ></table
-      ><aside>EasyComputer</aside></main
+      ></main
     ></body
   ></html
 >
