@@ -162,11 +162,8 @@ export default new Elysia({ prefix: "/api" })
       state.emit("new-move", ordering);
     },
     {
-      body: t.Object({
-        id: intString,
-        position: intString,
-      }),
-      type: "application/x-www-form-urlencoded",
+      body: t.Object({ id: intString, position: intString }),
+      parse: "application/x-www-form-urlencoded",
     }
   )
   .state("abortController", undefined as undefined | AbortController)
