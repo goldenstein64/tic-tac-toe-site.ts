@@ -32,7 +32,7 @@ const selectLobbyById = typePrepared(
 );
 
 const app = new Elysia({ name: "App" })
-  .use(debug())
+  .use(await debug())
   .use(html())
   .use(jwtAuth())
   .use(discordOAuth())

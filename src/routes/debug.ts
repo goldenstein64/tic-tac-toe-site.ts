@@ -11,11 +11,11 @@ import jwtAuth, {
 import { db } from "../db";
 import { User } from "../db/schema";
 
-export default () =>
+export default async () =>
   Bun.env.NODE_ENV !== "development" ?
     new Elysia({ prefix: "/debug", name: "Debug" })
   : new Elysia({ prefix: "/debug", name: "Debug" })
-      .use(swagger({ path: "/debug/swagger" }))
+      .use(await swagger({ path: "/debug/swagger" }))
       .use(jwtAuth())
       .post(
         "/user",
@@ -54,7 +54,5 @@ export default () =>
             ...REFRESH_COOKIE_OPTS,
           });
         },
-        {
-          body: t.Object({ usernameQuery: t.String() }),
-        }
+        { body: t.Object({ usernameQuery: t.String() }) }
       );
