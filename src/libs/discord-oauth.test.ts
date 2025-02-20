@@ -66,12 +66,33 @@ describe("discord-oauth", () => {
     );
   });
 
+  const STATE_REGEX = /^state=(.*?);/;
+
   it("redirects and sets cookies on GET /login/discord/callback", async () => {
-    const requestURL = new URL("http://localhost/login/discord/callback");
-    requestURL.searchParams.append("code", "1234567890");
-    const request = new Request(requestURL);
-    const response = await discordOauth.handle(request);
-    expect(response.status).toBe(302); // Found
+    const setCookieArray = await (async () => {
+      const request = new Request("http://localhost/login/discord");
+      const response = await discordOauth.handle(request);
+      expect(response.status, await response.text()).toBe(302);
+      return response.headers.getSetCookie();
+    })();
+    expect(setCookieArray.length).toBeGreaterThan(0);
+
+    const stateCookie = setCookieArray.find((pred) => STATE_REGEX.test(pred));
+    if (!stateCookie) return expect().fail("state not found!");
+    const state = stateCookie.match(STATE_REGEX)![1];
+
+    const response = await (() => {
+      const requestURL = new URL("http://localhost/login/discord/callback");
+      requestURL.searchParams.append("code", "1234567890");
+      requestURL.searchParams.append("state", state);
+      const request = new Request(requestURL, {
+        headers: new Headers({
+          cookie: setCookieArray.join("; "),
+        }),
+      });
+      return discordOauth.handle(request);
+    })();
+    expect(response.status, await response.text()).toBe(302); // Found
 
     const location = response.headers.get("Location")!;
     expect(location).toEqual("/");
