@@ -186,7 +186,7 @@ async function forfeitActiveLobby(
 
       const state = gameStates.get(lobbyId);
       if (state) {
-        state.emit("ended", winnerMark);
+        state.emit("end", winnerMark);
       }
 
       return { success: true };

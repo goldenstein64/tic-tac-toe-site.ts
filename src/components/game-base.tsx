@@ -1,3 +1,5 @@
+import type { Mark } from "@goldenstein64/tic-tac-toe";
+
 import { Html } from "@elysiajs/html";
 import { eq, sql } from "drizzle-orm";
 
@@ -38,9 +40,14 @@ export function GameHead() {
     </head>
   );
 }
-export function PlayerInfo({ user }: { user?: SelectUser }) {
+export function PlayerInfo({ user, mark }: { user?: SelectUser; mark?: Mark }) {
   if (user) {
-    return <aside>{user.username}</aside>;
+    return (
+      <aside>
+        <p>{user.username}</p>
+        {mark && <p>{mark}</p>}
+      </aside>
+    );
   } else {
     return <aside />;
   }

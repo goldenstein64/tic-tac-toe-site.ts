@@ -112,9 +112,10 @@ export function LobbiesHead() {
   );
 }
 
-export async function UserConfig() {
+export async function UserConfig({ user }: { user: SelectUser }) {
   return (
     <section id="user-config">
+      <span>{user.username} </span>
       <button
         type="button"
         hx-delete="/api/session"
@@ -252,6 +253,8 @@ export function AvailableLobbyItem({
           type="button"
           hx-patch="/api/lobby"
           hx-vals={JSON.stringify({ id: lobbyId, action: "join" })}
+          hx-swap="none"
+          hx-on--after-request={`location.href="/game?id=${lobbyId}"`}
         >
           Join
         </button>
@@ -348,7 +351,7 @@ export async function LobbiesBody({ user }: LobbiesProps) {
         <button type="button" hx-on-click="location.href='/new-lobby'">
           New Lobby
         </button>
-        <UserConfig />
+        <UserConfig user={user} />
         <nav>
           <button type="button" hx-on-click="location.hash='#active-games'">
             Active Games

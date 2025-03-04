@@ -9,11 +9,12 @@ import { eq, max, sql } from "drizzle-orm";
 import { setTimeout as delay } from "timers/promises";
 
 import { db, typePrepared } from "../db";
-import { Game, Move } from "../db/schema";
+import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
 import jwtAuth from "../libs/jwt-auth";
 import { idToComputerFactory, orderingToMark } from "../libs/run-game";
 import { intString } from "../types";
 import { GameRows } from "../components/game-active";
+import { LobbyStatus } from "../db/datatypes";
 
 const _placeholders: any = undefined;
 
@@ -56,11 +57,29 @@ const selectGamePlayers = typePrepared(
   _placeholders as { lobbyId: number }
 );
 
+function updateLobbyStatus({
+  id,
+  status,
+}: {
+  id: number;
+  status: LobbyStatus;
+}) {
+  db.update(Lobby).set({ status: status }).where(eq(Lobby.id, id)).run();
+}
+
+const insertFinishedLobby = typePrepared(
+  db
+    .insert(FinishedLobby)
+    .values({ id: sql.placeholder("id"), winner: sql.placeholder("winner") })
+    .prepare(),
+  _placeholders as { lobbyId: number; winner?: number }
+);
+
 type GameStateInitialEvents = {
   "new-move": [ordering: number];
-  ended: [winner: Mark | undefined];
+  end: [winner: Mark | undefined];
 };
-const events = ["new-move", "ended"] as const;
+const events = ["new-move", "end"] as const;
 
 type GameStateEvents = GameStateInitialEvents & {
   "move-stream": {
@@ -96,7 +115,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
     for (const evt of events)
       this.on(evt, (...args: any) => this.emit("move-stream", evt, args));
 
-    this.once("ended", () => this.removeAllListeners());
+    this.once("end", () => this.removeAllListeners());
 
     this.on("new-move", async (ordering) => {
       const nextTurn = orderingToMark(ordering + 1);
@@ -124,7 +143,7 @@ class GameStates extends Map<number, GameState> {
     let state = this.get(lobbyId);
     if (!state) {
       state = new GameState(lobbyId, playerX, playerO);
-      state.once("ended", () => this.delete(lobbyId));
+      state.once("end", () => this.delete(lobbyId));
       this.set(lobbyId, state);
     }
     return state;
@@ -136,6 +155,59 @@ export const gameStates = new GameStates();
 type EventProps = { event?: string; data: string };
 function event({ event = "message", data }: EventProps): string {
   return `event: ${event}\ndata: ${data}\n\n`;
+}
+
+type MoveStreamContext = {
+  board: Board;
+  userIsX: boolean;
+  isClientPlaying: boolean;
+  lobbyId: number;
+  state: GameState;
+};
+
+async function* onNewMove(
+  { board, userIsX, isClientPlaying, lobbyId, state }: MoveStreamContext,
+  ordering: number
+): AsyncGenerator<string> {
+  const mark = orderingToMark(ordering);
+
+  // update the board
+  const endResult = board.ended(mark);
+  if (endResult) {
+    state.emit("end", endResult.winner);
+    return;
+  }
+
+  const nextTurn = orderingToMark(ordering + 1);
+  const isClientsTurn = userIsX === (nextTurn === "X");
+  const disabled = !isClientPlaying || !isClientsTurn;
+  yield event({
+    event: "board",
+    data: await (
+      <GameRows lobbyId={lobbyId} board={board} disabled={disabled} />
+    ),
+  });
+}
+
+async function* onEnded(
+  { board, lobbyId }: MoveStreamContext,
+  winnerMark: Mark | undefined
+): AsyncGenerator<string> {
+  updateLobbyStatus({ id: lobbyId, status: "finished" });
+  const players = selectGamePlayers.get({ lobbyId })!;
+  insertFinishedLobby.run({
+    lobbyId,
+    winner:
+      winnerMark == "X" ? players.playerX
+      : winnerMark == "O" ? players.playerO
+      : undefined,
+  });
+  yield event({
+    event: "board",
+    data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
+  });
+  yield event({ event: "winner", data: winnerMark ?? "no one" });
+  yield event({ event: "status", data: "finished" });
 }
 
 export default new Elysia({ prefix: "/api" })
@@ -171,8 +243,8 @@ export default new Elysia({ prefix: "/api" })
     "/game-move",
     async function* ({
       query: { id: lobbyId },
-      set,
       user: { id: userId },
+      set,
       store,
     }) {
       const players = selectGamePlayers.get({ lobbyId });
@@ -191,48 +263,25 @@ export default new Elysia({ prefix: "/api" })
 
       const abortController = new AbortController();
       store.abortController = abortController;
+      const moveStreamCtx: MoveStreamContext = {
+        state,
+        board,
+        userIsX,
+        isClientPlaying,
+        lobbyId,
+      };
       const onMoveStream = on(state, "move-stream", {
         signal: abortController.signal,
-      }) as AsyncIterableIterator<GameStateEvents["move-stream"]>;
-      for await (const [name, args] of onMoveStream) {
-        // would be more troublesome as a switch btw
-        if (name === "new-move") {
-          const [ordering] = args;
-          const mark = orderingToMark(ordering);
-
-          // update the board
-          const endResult = board.ended(mark);
-          if (endResult) {
-            yield event({
-              event: "board",
-              data: await (
-                <GameRows lobbyId={lobbyId} board={board} disabled />
-              ),
-            });
-            yield event({
-              event: "winner",
-              data: endResult.winner ?? "no one",
-            });
-            state.emit("ended", endResult.winner);
-          } else {
-            const nextTurn = orderingToMark(ordering + 1);
-            const isClientsTurn = userIsX === (nextTurn === "X");
-            const disabled = !isClientPlaying || !isClientsTurn;
-            yield event({
-              event: "board",
-              data: await (
-                <GameRows lobbyId={lobbyId} board={board} disabled={disabled} />
-              ),
-            });
-          }
-        } else if (name === "ended") {
-          const [winnerMark] = args;
-          event({
-            event: "board",
-            data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
-          });
-          yield event({ event: "winner", data: winnerMark ?? "no one" });
-          break;
+      }) as AsyncIterable<GameStateEvents["move-stream"]>;
+      moveStream: for await (const [name, args] of onMoveStream) {
+        console.log(name);
+        switch (name) {
+          case "new-move":
+            yield* onNewMove(moveStreamCtx, ...args);
+            break;
+          case "end":
+            yield* onEnded(moveStreamCtx, ...args);
+            break moveStream;
         }
       }
     },

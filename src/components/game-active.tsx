@@ -163,6 +163,7 @@ type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 function GameBody({ lobby, user }: GameBodyProps) {
   const { playerX, playerO } = selectPlayersInGame.get({ lobbyId: lobby.id })!;
   const userMark = user.id === playerX ? "X" : "O";
+  const opponentMark = user.id === playerX ? "O" : "X";
   const opponentId = user.id === playerX ? playerO : playerX;
   const opponent = selectUserById.get({ userId: opponentId });
 
@@ -179,14 +180,16 @@ function GameBody({ lobby, user }: GameBodyProps) {
       <header>
         <DebugPanel />
         <h1>tic-tac-toe-site</h1>
-        <h3 id="lobby-status">Status: {lobby.status}</h3>
+        <h3 id="lobby-status">
+          Status: <span sse-swap="status" />
+        </h3>
         <h3 id="lobby-winner">
           Winner: <span sse-swap="winner" />
         </h3>
       </header>
       <main>
-        <PlayerInfo user={user} />
-        <PlayerInfo user={opponent} />
+        <PlayerInfo user={user} mark={userMark} />
+        <PlayerInfo user={opponent} mark={opponentMark} />
         <GameBoard lobby={lobby} disabled={nextMark !== userMark} />
       </main>
     </body>
