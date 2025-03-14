@@ -55,7 +55,7 @@ const app = new Elysia({ name: "App" })
       return (
         !lobby ? error("Not Found")
         : lobby.status === "active" ? ActiveGameHtml({ lobby, user })
-        : DormantGameHtml({ lobby, user })
+        : DormantGameHtml({ lobby })
       );
     },
     { query: t.Object({ id: intString }) }
