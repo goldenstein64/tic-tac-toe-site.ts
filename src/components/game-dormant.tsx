@@ -111,12 +111,16 @@ type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 
 function GameBody({ lobby, user }: GameHtmlProps) {
   let opponent: SelectUser | undefined = undefined;
+  let opponentMark: Mark | undefined = undefined;
+  let userMark: Mark | undefined = undefined;
   if (lobby.status !== "waiting") {
     const { playerX, playerO } = selectPlayersInGame.get({
       lobbyId: lobby.id,
     })!;
     const opponentId = user.id === playerX ? playerO : playerX;
     opponent = selectUserById.get({ userId: opponentId });
+    opponentMark = opponentId === playerX ? "X" : "O";
+    userMark = user.id === playerX ? "X" : "O";
   }
 
   const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
@@ -139,8 +143,8 @@ function GameBody({ lobby, user }: GameHtmlProps) {
         <h3 id="lobby-winner">Winner: {winnerName}</h3>
       </header>
       <main>
-        <PlayerInfo user={user} />
-        <PlayerInfo user={opponent} />
+        <PlayerInfo user={user} mark={userMark} />
+        <PlayerInfo user={opponent} mark={opponentMark} />
         <GameBoard lobby={lobby} />
       </main>
     </body>
