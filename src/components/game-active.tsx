@@ -168,7 +168,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
   const opponent = selectUserById.get({ userId: opponentId });
 
   const maxResult = selectMaxOrdering.get({ lobbyId: lobby.id })!;
-  const maxOrdering: number = maxResult.maxOrdering ?? 0;
+  const maxOrdering: number = maxResult.maxOrdering ?? -1;
   const nextMark = orderingToMark(maxOrdering + 1);
 
   return (
