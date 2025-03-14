@@ -21,7 +21,7 @@
     "@goldenstein64/tic-tac-toe": "link:@goldenstein64/tic-tac-toe",
     "drizzle-orm": "^0.39.3",
     "drizzle-typebox": "^0.3.0",
-    "elysia": "^1.2.23",
+    "elysia": "^1.2.25",
     "elysia-oauth2": "^2.0.0",
     "fetch-mock": "^12.4.0",
     "htmx.org": "^1.9.12"
