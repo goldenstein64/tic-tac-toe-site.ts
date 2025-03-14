@@ -162,10 +162,14 @@ type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 
 function GameBody({ lobby, user }: GameBodyProps) {
   const { playerX, playerO } = selectPlayersInGame.get({ lobbyId: lobby.id })!;
-  const userMark = user.id === playerX ? "X" : "O";
-  const opponentMark = user.id === playerX ? "O" : "X";
-  const opponentId = user.id === playerX ? playerO : playerX;
-  const opponent = selectUserById.get({ userId: opponentId });
+  // TODO: the user may not be playing the game, so don't assume they are Os otherwise
+  const userMark =
+    user.id === playerX ? "X"
+    : user.id === playerO ? "O"
+    : undefined;
+
+  const playerXUser = selectUserById.get({ userId: playerX });
+  const playerOUser = selectUserById.get({ userId: playerO });
 
   const maxResult = selectMaxOrdering.get({ lobbyId: lobby.id })!;
   const maxOrdering: number = maxResult.maxOrdering ?? -1;
@@ -188,8 +192,8 @@ function GameBody({ lobby, user }: GameBodyProps) {
         </h3>
       </header>
       <main>
-        <PlayerInfo user={user} mark={userMark} />
-        <PlayerInfo user={opponent} mark={opponentMark} />
+        <PlayerInfo user={playerXUser} mark="X" />
+        <PlayerInfo user={playerOUser} mark="O" />
         <GameBoard lobby={lobby} disabled={nextMark !== userMark} />
       </main>
     </body>
