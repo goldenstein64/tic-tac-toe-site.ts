@@ -185,7 +185,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
         <DebugPanel />
         <h1>tic-tac-toe-site</h1>
         <h3 id="lobby-status">
-          Status: <span sse-swap="status" />
+          Status: <span sse-swap="status">active</span>
         </h3>
         <h3 id="lobby-winner">
           Winner: <span sse-swap="winner" />
