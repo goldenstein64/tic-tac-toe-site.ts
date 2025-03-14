@@ -104,7 +104,7 @@ async function* onNewMove(
 
 async function* onEnded(
   { board, lobbyId }: MoveStreamContext,
-  winnerMark: Mark | undefined
+  winnerMark: Mark | null
 ): AsyncGenerator<string> {
   updateLobbyStatus({ id: lobbyId, status: "finished" });
   const players = selectGamePlayers.get({ lobbyId })!;

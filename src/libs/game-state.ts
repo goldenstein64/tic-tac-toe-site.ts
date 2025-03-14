@@ -33,7 +33,7 @@ const insertMove = typePrepared(
 
 type GameStateInitialEvents = {
   "new-move": [ordering: number];
-  end: [winner: Mark | undefined];
+  end: [winner: Mark | null];
 };
 
 const events = ["new-move", "end"] as const;
