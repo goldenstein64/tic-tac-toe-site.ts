@@ -48,7 +48,10 @@ function updateLobbyStatus({
 const insertFinishedLobby = typePrepared(
   db
     .insert(FinishedLobby)
-    .values({ id: sql.placeholder("id"), winner: sql.placeholder("winner") })
+    .values({
+      id: sql.placeholder("lobbyId"),
+      winner: sql.placeholder("winner"),
+    })
     .prepare(),
   _placeholders as { lobbyId: number; winner?: number }
 );
