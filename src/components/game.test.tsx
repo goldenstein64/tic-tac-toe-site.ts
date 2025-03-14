@@ -43,9 +43,7 @@ afterEach(() => document.close());
 
 describe("game.tsx", () => {
   it("matches waiting lobby", async () => {
-    document.write(
-      await (<DormantGameHtml lobby={waitingLobby} user={debugUser} />)
-    );
+    document.write(await (<DormantGameHtml lobby={waitingLobby} />));
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
   });
@@ -59,9 +57,7 @@ describe("game.tsx", () => {
   });
 
   it("matches finished lobby", async () => {
-    document.write(
-      await (<DormantGameHtml lobby={finishedLobby} user={debugUser} />)
-    );
+    document.write(await (<DormantGameHtml lobby={finishedLobby} />));
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
 
