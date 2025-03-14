@@ -115,6 +115,8 @@ function GameBody({ lobby }: GameBodyProps) {
   let rightUser: SelectUser | undefined = undefined;
   let rightMark: Mark | undefined = undefined;
   if (lobby.status === "waiting") {
+    leftUser = selectUserById.get({ userId: lobby.createdBy });
+  } else if (lobby.status === "finished") {
     const { playerX, playerO } = selectPlayersInGame.get({
       lobbyId: lobby.id,
     })!;
@@ -122,8 +124,6 @@ function GameBody({ lobby }: GameBodyProps) {
     leftMark = "X";
     rightUser = selectUserById.get({ userId: playerO });
     rightMark = "O";
-  } else if (lobby.status === "finished") {
-    leftUser = selectUserById.get({ userId: lobby.createdBy });
   } else {
     throw new TypeError(
       "attempt to show dormant lobby that is not finished and not waiting"
