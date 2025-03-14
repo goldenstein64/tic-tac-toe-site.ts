@@ -16,7 +16,8 @@ exports[`game.tsx matches waiting lobby 1`] = `
       ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: waiting</h3
       ><h3 id="lobby-winner">Winner: </h3></header
     ><main
-      ><aside>DebugUser</aside><aside></aside
+      ><aside><p>DebugUser</p></aside
+      ><aside></aside
       ><table class="game-board"
         ><tbody
           ><tr
@@ -93,11 +94,13 @@ exports[`game.tsx matches active lobby 1`] = `
       href="/public/game.css" /></head
   ><body hx-trigger="load" hx-ext="sse" sse-connect="/api/game-move?id=2"
     ><header
-      ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: active</h3
+      ><h1>tic-tac-toe-site</h1
+      ><h3 id="lobby-status">Status: <span sse-swap="status">active</span></h3
       ><h3 id="lobby-winner"
         >Winner: <span sse-swap="winner"></span></h3></header
     ><main
-      ><aside>DebugUser</aside><aside>HardComputer</aside
+      ><aside><p>DebugUser</p><p>X</p></aside
+      ><aside><p>HardComputer</p><p>O</p></aside
       ><table class="game-board"
         ><tbody hx-swap="innerHTML" sse-swap="board"
           ><tr
@@ -220,7 +223,8 @@ exports[`game.tsx matches finished lobby 1`] = `
       ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: finished</h3
       ><h3 id="lobby-winner">Winner: DebugUser</h3></header
     ><main
-      ><aside>DebugUser</aside><aside>EasyComputer</aside
+      ><aside><p>DebugUser</p><p>X</p></aside
+      ><aside><p>EasyComputer</p><p>O</p></aside
       ><table class="game-board"
         ><tbody
           ><tr
