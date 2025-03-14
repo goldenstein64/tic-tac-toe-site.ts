@@ -7,13 +7,12 @@ import html, { Html } from "@elysiajs/html";
 import { eq, max, sql } from "drizzle-orm";
 
 import { db, typePrepared } from "../db";
-import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
+import { Game, Move, User } from "../db/schema";
 import jwtAuth from "../libs/jwt-auth";
 import { orderingToMark } from "../libs/run-game";
 import { intString } from "../types";
 import { GameRows } from "../components/game-active";
-import { LobbyStatus } from "../db/datatypes";
-import { GameState, gameStates, GameStateEvents } from "../libs/game-state";
+import { gameStates, GameStateEvents } from "../libs/game-state";
 
 const _placeholders: any = undefined;
 
@@ -35,25 +34,13 @@ const selectGamePlayers = typePrepared(
   _placeholders as { lobbyId: number }
 );
 
-function updateLobbyStatus({
-  id,
-  status,
-}: {
-  id: number;
-  status: LobbyStatus;
-}) {
-  db.update(Lobby).set({ status: status }).where(eq(Lobby.id, id)).run();
-}
-
-const insertFinishedLobby = typePrepared(
+const selectUsernameById = typePrepared(
   db
-    .insert(FinishedLobby)
-    .values({
-      id: sql.placeholder("lobbyId"),
-      winner: sql.placeholder("winner"),
-    })
+    .select({ username: User.username })
+    .from(User)
+    .where(eq(User.id, sql.placeholder("userId")))
     .prepare(),
-  _placeholders as { lobbyId: number; winner?: number }
+  _placeholders as { userId: number }
 );
 
 type EventProps = { event?: string; data: string };
@@ -87,14 +74,16 @@ async function* onEnded(
   { board, lobbyId }: MoveStreamContext,
   winnerMark: Mark | null
 ): AsyncGenerator<string> {
-  updateLobbyStatus({ id: lobbyId, status: "finished" });
-  const players = selectGamePlayers.get({ lobbyId })!;
-  insertFinishedLobby.run({
-    lobbyId,
-    winner:
-      winnerMark == "X" ? players.playerX
-      : winnerMark == "O" ? players.playerO
-      : undefined,
+  const { playerX, playerO } = selectGamePlayers.get({ lobbyId })!;
+
+  yield event({
+    event: "winner",
+    data:
+      winnerMark ?
+        selectUsernameById.get({
+          userId: winnerMark === "X" ? playerX : playerO,
+        })!.username
+      : "no one",
   });
   yield event({
     event: "board",
@@ -129,7 +118,6 @@ export default new Elysia({ prefix: "/api" })
       parse: "application/x-www-form-urlencoded",
     }
   )
-  .state("abortController", undefined as undefined | AbortController)
   .get(
     "/game-move",
     async function* ({ query: { id: lobbyId }, user: { id: userId }, set }) {

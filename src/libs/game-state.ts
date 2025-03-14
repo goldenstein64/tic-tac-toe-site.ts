@@ -6,7 +6,8 @@ import { eq, sql } from "drizzle-orm";
 
 import { idToComputerFactory, orderingToMark } from "./run-game";
 import { db, typePrepared } from "../db";
-import { Move } from "../db/schema";
+import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
+import { LobbyStatus } from "../db/datatypes";
 
 const _placeholders: any = undefined;
 
@@ -30,6 +31,36 @@ const insertMove = typePrepared(
     .prepare(),
   _placeholders as { lobbyId: number; ordering: number; position: number }
 );
+
+const insertFinishedLobby = typePrepared(
+  db
+    .insert(FinishedLobby)
+    .values({
+      id: sql.placeholder("lobbyId"),
+      winner: sql.placeholder("winner"),
+    })
+    .prepare(),
+  _placeholders as { lobbyId: number; winner?: number }
+);
+
+const selectGamePlayers = typePrepared(
+  db
+    .select({ playerX: Game.playerX, playerO: Game.playerO })
+    .from(Game)
+    .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);
+
+function updateLobbyStatus({
+  id,
+  status,
+}: {
+  id: number;
+  status: LobbyStatus;
+}) {
+  db.update(Lobby).set({ status: status }).where(eq(Lobby.id, id)).run();
+}
 
 type GameStateInitialEvents = {
   "new-move": [ordering: number];
@@ -72,6 +103,18 @@ export class GameState extends EventEmitter<GameStateEvents> {
       this.on(evt, (...args: any) => this.emit("move-stream", evt, args));
 
     this.once("end", () => this.removeAllListeners());
+    this.once("end", (winnerMark) => {
+      const { playerX, playerO } = selectGamePlayers.get({ lobbyId })!;
+      const winnerId =
+        winnerMark === "X" ? playerX
+        : winnerMark === "O" ? playerO
+        : undefined;
+      updateLobbyStatus({ id: lobbyId, status: "finished" });
+      insertFinishedLobby.run({
+        lobbyId,
+        winner: winnerId,
+      });
+    });
 
     this.on("new-move", async (ordering) => {
       const nextMark = orderingToMark(ordering + 1);
