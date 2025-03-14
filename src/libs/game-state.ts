@@ -74,17 +74,16 @@ export class GameState extends EventEmitter<GameStateEvents> {
     this.once("end", () => this.removeAllListeners());
 
     this.on("new-move", async (ordering) => {
-      const nextTurn = orderingToMark(ordering + 1);
-      const nextComputer = this.computers.get(nextTurn);
+      const nextMark = orderingToMark(ordering + 1);
+      const nextComputer = this.computers.get(nextMark);
       if (!nextComputer) return;
 
-      const thisTurn = orderingToMark(ordering);
-      if (this.board.ended(thisTurn)) return;
+      if (this.ended(ordering)) return;
 
       // this is not a race, we want the computer to return its move after a
       // minimum of one second
       const [position] = await Promise.all([
-        nextComputer.getMove(this.board, nextTurn),
+        nextComputer.getMove(this.board, nextMark),
         delay(1000),
       ]);
       this.setMark(position, ordering + 1);
@@ -98,7 +97,12 @@ export class GameState extends EventEmitter<GameStateEvents> {
     this.emit("new-move", ordering);
   }
 
-  canMark(position: number) {
+  ended(ordering: number): { winner: Mark | null } | undefined {
+    const mark = orderingToMark(ordering);
+    return this.board.ended(mark);
+  }
+
+  canMark(position: number): boolean {
     return this.board.canMark(position);
   }
 }

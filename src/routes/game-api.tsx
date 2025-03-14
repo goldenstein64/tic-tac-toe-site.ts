@@ -26,18 +26,6 @@ const selectMaxOrdering = typePrepared(
   _placeholders as { lobbyId: number }
 );
 
-const insertMove = typePrepared(
-  db
-    .insert(Move)
-    .values({
-      lobbyId: sql.placeholder("lobbyId"),
-      ordering: sql.placeholder("ordering"),
-      position: sql.placeholder("position"),
-    })
-    .prepare(),
-  _placeholders as { lobbyId: number; ordering: number; position: number }
-);
-
 const selectGamePlayers = typePrepared(
   db
     .select({ playerX: Game.playerX, playerO: Game.playerO })
@@ -198,7 +186,10 @@ export default new Elysia({ prefix: "/api" })
     {
       query: t.Object({ id: intString }),
       afterHandle({ store }) {
-        store.abortController?.abort("aborted for await loop");
+        if (store.abortController) {
+          store.abortController.abort("aborted for await loop");
+          delete store.abortController;
+        }
       },
     }
   );
