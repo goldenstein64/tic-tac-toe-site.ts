@@ -95,6 +95,10 @@ export class GameState extends EventEmitter<GameStateEvents> {
     this.board.setMark(position, mark);
     insertMove.run({ lobbyId: this.lobbyId, ordering, position });
     this.emit("new-move", ordering);
+    const ended = this.ended(ordering);
+    if (ended) {
+      this.emit("end", ended.winner);
+    }
   }
 
   ended(ordering: number): { winner: Mark | null } | undefined {

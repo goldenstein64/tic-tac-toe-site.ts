@@ -66,22 +66,12 @@ type MoveStreamContext = {
   userIsX: boolean;
   isClientPlaying: boolean;
   lobbyId: number;
-  state: GameState;
 };
 
 async function* onNewMove(
-  { board, userIsX, isClientPlaying, lobbyId, state }: MoveStreamContext,
+  { userIsX, isClientPlaying, lobbyId, board }: MoveStreamContext,
   ordering: number
 ): AsyncGenerator<string> {
-  const mark = orderingToMark(ordering);
-
-  // update the board
-  const endResult = board.ended(mark);
-  if (endResult) {
-    state.emit("end", endResult.winner);
-    return;
-  }
-
   const nextTurn = orderingToMark(ordering + 1);
   const isClientsTurn = userIsX === (nextTurn === "X");
   const enabled = isClientPlaying && isClientsTurn;
@@ -142,12 +132,7 @@ export default new Elysia({ prefix: "/api" })
   .state("abortController", undefined as undefined | AbortController)
   .get(
     "/game-move",
-    async function* ({
-      query: { id: lobbyId },
-      user: { id: userId },
-      set,
-      store,
-    }) {
+    async function* ({ query: { id: lobbyId }, user: { id: userId }, set }) {
       const players = selectGamePlayers.get({ lobbyId });
       if (!players) return error("Not Found");
 
@@ -157,25 +142,18 @@ export default new Elysia({ prefix: "/api" })
 
       const { playerX, playerO } = players;
       const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
-      const board = state.board;
       const userIsX = userId === playerX;
-      const userIsO = userId === playerO;
-      const isClientPlaying = userIsX || userIsO;
 
-      const abortController = new AbortController();
-      store.abortController = abortController;
       const moveStreamCtx: MoveStreamContext = {
-        state,
-        board,
+        board: state.board,
         userIsX,
-        isClientPlaying,
+        isClientPlaying: userIsX || userId === playerO,
         lobbyId,
       };
-      const onMoveStream = on(state, "move-stream", {
-        signal: abortController.signal,
-      }) as AsyncIterable<GameStateEvents["move-stream"]>;
+      const onMoveStream = on(state, "move-stream") as AsyncIterable<
+        GameStateEvents["move-stream"]
+      >;
       moveStream: for await (const [name, args] of onMoveStream) {
-        console.log(name);
         switch (name) {
           case "new-move":
             yield* onNewMove(moveStreamCtx, ...args);
@@ -186,13 +164,5 @@ export default new Elysia({ prefix: "/api" })
         }
       }
     },
-    {
-      query: t.Object({ id: intString }),
-      afterHandle({ store }) {
-        if (store.abortController) {
-          store.abortController.abort("aborted for await loop");
-          delete store.abortController;
-        }
-      },
-    }
+    { query: t.Object({ id: intString }) }
   );
