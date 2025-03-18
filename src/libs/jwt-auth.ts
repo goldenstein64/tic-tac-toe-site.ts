@@ -1,9 +1,8 @@
 import jwt from "@elysiajs/jwt";
 import Elysia, { t } from "elysia";
-import { eq, sql, InferSelectModel, and } from "drizzle-orm";
 
-import { db, typePrepared } from "../db";
-import { User } from "../db/schema";
+import { SelectUser } from "../db/schema";
+import { selectUserById, selectUserByIdRefreshKey } from "../db/queries";
 
 declare module "bun" {
   interface Env {
@@ -28,31 +27,6 @@ export const REFRESH_COOKIE_OPTS = {
   sameSite: "lax",
 } as const;
 
-const _placeholders: any = undefined;
-
-const selectUserById = typePrepared(
-  db
-    .select()
-    .from(User)
-    .where(eq(User.id, sql.placeholder("userId")))
-    .prepare(),
-  _placeholders as { userId: number }
-);
-
-const selectUserByIdRefreshKey = typePrepared(
-  db
-    .select()
-    .from(User)
-    .where(
-      and(
-        eq(User.id, sql.placeholder("userId")),
-        eq(User.refreshKey, sql.placeholder("refreshKey"))
-      )
-    )
-    .prepare(),
-  _placeholders as { userId: number; refreshKey: number }
-);
-
 export default () =>
   new Elysia({ name: "JWTAuth" })
     .use(
@@ -75,7 +49,7 @@ export default () =>
         jwtAccess,
         jwtRefresh,
         cookie: { access: cookieAccess, refresh: cookieRefresh },
-      }): Promise<{ user: InferSelectModel<typeof User> | null }> => {
+      }): Promise<{ user: SelectUser | null }> => {
         // check whether they're already logged in
         const access = await jwtAccess.verify(cookieAccess.value);
         if (access) {

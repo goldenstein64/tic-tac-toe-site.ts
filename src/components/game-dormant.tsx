@@ -1,54 +1,19 @@
 import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import { Html } from "@elysiajs/html";
-import { eq, sql } from "drizzle-orm";
 
-import { db, typePrepared } from "../db";
+import { SelectLobby, SelectUser } from "../db/schema";
 import {
-  FinishedLobby,
-  Move,
-  SelectLobby,
-  SelectUser,
-  User,
-} from "../db/schema";
+  selectUserById,
+  selectPlayersInGame,
+  selectGameMoves,
+  selectFinishedLobby,
+  selectUsernameById,
+} from "../db/queries";
 import { orderingToMark } from "../libs/run-game";
 import { DebugPanel } from "./debug";
 import { COLUMN_LABELS, ROW_LABELS } from "./game-active";
-import {
-  PlayerInfo,
-  GameHead,
-  selectUserById,
-  selectPlayersInGame,
-} from "./game-base";
-
-const _placeholders: any = undefined;
-
-const selectGameMoves = typePrepared(
-  db
-    .select({ position: Move.position, ordering: Move.ordering })
-    .from(Move)
-    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-const selectFinishedLobby = typePrepared(
-  db
-    .select()
-    .from(FinishedLobby)
-    .where(eq(FinishedLobby.id, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-const selectUsername = typePrepared(
-  db
-    .select({ username: User.username })
-    .from(User)
-    .where(eq(User.id, sql.placeholder("userId")))
-    .prepare(),
-  _placeholders as { userId: number }
-);
+import { PlayerInfo, GameHead } from "./game-base";
 
 type GameButtonProps = { children?: Mark; ariaLabel: string };
 
@@ -137,7 +102,7 @@ function GameBody({ lobby }: GameBodyProps) {
   if (winnerId === null) {
     winnerName = "no one";
   } else if (winnerId !== undefined) {
-    const winner = selectUsername.get({ userId: winnerId });
+    const winner = selectUsernameById.get({ userId: winnerId });
     winnerName = winner?.username;
   }
 

@@ -2,20 +2,21 @@ import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-
 
 import Elysia from "elysia";
 import { oauth2, Discord, OAuth2Tokens } from "elysia-oauth2";
-import { eq, SQL, sql, TransactionRollbackError } from "drizzle-orm";
+import { TransactionRollbackError } from "drizzle-orm";
 
-import { db, tx, typePrepared } from "../db";
-import { DiscordUser, User } from "../db/schema";
+import { tx } from "../db";
+import {
+  insertUser,
+  insertDiscordUser,
+  selectDiscordUserById,
+  updateDiscordUser,
+} from "../db/queries";
 import jwtAuth, {
   ACCESS_MAX_AGE,
   REFRESH_MAX_AGE,
   ACCESS_COOKIE_OPTS,
   REFRESH_COOKIE_OPTS,
 } from "./jwt-auth";
-
-type SQLProps<T extends Record<string, unknown>> = {
-  [K in keyof T]: T[K] | SQL<T[K]>;
-};
 
 declare module "bun" {
   interface Env {
@@ -44,63 +45,7 @@ export const discord = {
   },
 } as const;
 
-const _placeholders: any = undefined;
-
-const selectDiscordUserById = typePrepared(
-  db
-    .select({ userId: DiscordUser.userId, refreshKey: User.refreshKey })
-    .from(DiscordUser)
-    .innerJoin(User, eq(User.id, DiscordUser.userId))
-    .where(eq(DiscordUser.discordId, sql.placeholder("discordId")))
-    .prepare(),
-  _placeholders as SQLProps<{ discordId: string }>
-);
-
-const insertUser = typePrepared(
-  db
-    .insert(User)
-    .values({ username: sql.placeholder("username") })
-    .returning({ userId: User.id, refreshKey: User.refreshKey })
-    .prepare(),
-  _placeholders as SQLProps<{ username: string }>
-);
-
-const insertDiscordUser = typePrepared(
-  db
-    .insert(DiscordUser)
-    .values({
-      discordId: sql.placeholder("discordId"),
-      userId: sql.placeholder("userId"),
-      accessToken: sql.placeholder("accessToken"),
-      refreshToken: sql.placeholder("refreshToken"),
-      expiresAt: sql.placeholder("expiresAt"),
-    })
-    .prepare(),
-  _placeholders as SQLProps<{
-    discordId: string;
-    userId: number;
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: Date;
-  }>
-);
-
-const updateDiscordUser = ({
-  discordId,
-  ...values
-}: SQLProps<{
-  discordId: string;
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: Date;
-}>) => {
-  db.update(DiscordUser)
-    .set(values)
-    .where(eq(DiscordUser.discordId, discordId))
-    .run();
-};
-
-async function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
+function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
   const discordId = userInfo.id;
   const accessToken = tokens.accessToken();
   const refreshToken = tokens.refreshToken();

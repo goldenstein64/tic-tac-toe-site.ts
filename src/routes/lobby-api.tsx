@@ -1,20 +1,25 @@
-import type { LobbyStatus } from "../db/datatypes";
 import type { Static } from "elysia";
 import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import html from "@elysiajs/html";
 import Elysia, { error, t } from "elysia";
-import { and, eq, or, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
 
 import { gameStates } from "../libs/game-state";
 import { intString } from "../types";
-import { db, tx, typePrepared } from "../db";
-import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
+import { tx } from "../db";
+import {
+  updateLobbyStatus,
+  selectPlayerInGame,
+  insertFinishedLobby,
+  insertGame,
+  insertLobby,
+  insertMoves,
+  selectLobbyByIdStatusCreatedBy,
+  deleteLobbyById,
+} from "../db/queries";
 import runGame from "../libs/run-game";
 import jwtAuth from "../libs/jwt-auth";
-
-const _placeholders: any = undefined;
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
@@ -36,99 +41,6 @@ const PlayerTypeString = t
     }
   })
   .Encode((value: PlayerType) => value.toString());
-
-const selectLobbyByIdStatusCreatedBy = typePrepared(
-  db
-    .select({ id: Lobby.id })
-    .from(Lobby)
-    .where(
-      and(
-        eq(Lobby.id, sql.placeholder("lobbyId")),
-        eq(Lobby.createdBy, sql.placeholder("createdBy")),
-        eq(Lobby.status, sql.placeholder("status"))
-      )
-    )
-    .prepare(),
-  _placeholders as { lobbyId: number; createdBy: number; status: LobbyStatus }
-);
-
-const insertGame = typePrepared(
-  db
-    .insert(Game)
-    .values({
-      lobbyId: sql.placeholder("lobbyId"),
-      playerX: sql.placeholder("playerX"),
-      playerO: sql.placeholder("playerO"),
-    })
-    .prepare(),
-  _placeholders as { lobbyId: number; playerX: number; playerO: number }
-);
-
-const insertLobby = typePrepared(
-  db
-    .insert(Lobby)
-    .values({
-      createdBy: sql.placeholder("userId"),
-      status: sql.placeholder("status"),
-    })
-    .returning({ id: Lobby.id, createdAt: Lobby.createdAt })
-    .prepare(),
-  _placeholders as { userId: number; status: LobbyStatus }
-);
-
-const deleteLobbyById = typePrepared(
-  db
-    .delete(Lobby)
-    .where(eq(Lobby.id, sql.placeholder("id")))
-    .prepare(),
-  _placeholders as { id: number }
-);
-
-const selectPlayerInGame = typePrepared(
-  db
-    .select({ playerX: Game.playerX, playerO: Game.playerO })
-    .from(Game)
-    .where(
-      and(
-        eq(Game.lobbyId, sql.placeholder("lobbyId")),
-        or(
-          eq(Game.playerX, sql.placeholder("userId")),
-          eq(Game.playerO, sql.placeholder("userId"))
-        )
-      )
-    )
-    .prepare(),
-  _placeholders as { lobbyId: number; userId: number }
-);
-
-const insertFinishedLobby = typePrepared(
-  db
-    .insert(FinishedLobby)
-    .values({ id: sql.placeholder("id"), winner: sql.placeholder("winner") })
-    .prepare(),
-  _placeholders as { id: number; winner: number | null }
-);
-
-function updateLobbyStatus(args: {
-  id: number;
-  toStatus: LobbyStatus;
-  fromStatus: LobbyStatus;
-}) {
-  const { id, toStatus, fromStatus } = args;
-  return db
-    .update(Lobby)
-    .set({ status: toStatus })
-    .where(and(eq(Lobby.id, id), eq(Lobby.status, fromStatus)))
-    .returning({ status: Lobby.status, createdBy: Lobby.createdBy })
-    .get();
-}
-
-function insertMoves(args: { lobbyId: number; moves: number[] }) {
-  const { lobbyId, moves } = args;
-  db.insert(Move)
-    .values(moves.map((position, i) => ({ lobbyId, ordering: i, position })))
-    .run();
-}
 
 class CustomRollbackError extends Error {}
 class ResponseError extends Error {
@@ -182,7 +94,7 @@ async function forfeitActiveLobby(
         );
       }
 
-      insertFinishedLobby.run({ id: lobbyId, winner });
+      insertFinishedLobby.run({ lobbyId, winner });
 
       const state = gameStates.get(lobbyId);
       if (state) {
@@ -279,7 +191,7 @@ export default new Elysia({ prefix: "/api" })
         const winner =
           winnerMark === "X" ? computerIdX
           : winnerMark === "O" ? computerIdO
-          : null;
+          : undefined;
 
         await tx(async () => {
           const { id: lobbyId } = insertLobby.get({
@@ -292,7 +204,7 @@ export default new Elysia({ prefix: "/api" })
             playerO: computerIdO,
           });
           insertMoves({ lobbyId, moves });
-          insertFinishedLobby.run({ id: lobbyId, winner });
+          insertFinishedLobby.run({ lobbyId, winner });
           set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
         });
       } else if (computerIdX || computerIdO) {

@@ -2,65 +2,15 @@ import { type Mark, Board } from "@goldenstein64/tic-tac-toe";
 import { Player } from "@goldenstein64/tic-tac-toe/player";
 import { EventEmitter } from "events";
 import { setTimeout as delay } from "timers/promises";
-import { eq, sql } from "drizzle-orm";
 
 import { idToComputerFactory, orderingToMark } from "./run-game";
-import { db, typePrepared } from "../db";
-import { FinishedLobby, Game, Lobby, Move } from "../db/schema";
-import { LobbyStatus } from "../db/datatypes";
-
-const _placeholders: any = undefined;
-
-const selectMoves = typePrepared(
-  db
-    .select({ ordering: Move.ordering, position: Move.position })
-    .from(Move)
-    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-const insertMove = typePrepared(
-  db
-    .insert(Move)
-    .values({
-      lobbyId: sql.placeholder("lobbyId"),
-      ordering: sql.placeholder("ordering"),
-      position: sql.placeholder("position"),
-    })
-    .prepare(),
-  _placeholders as { lobbyId: number; ordering: number; position: number }
-);
-
-const insertFinishedLobby = typePrepared(
-  db
-    .insert(FinishedLobby)
-    .values({
-      id: sql.placeholder("lobbyId"),
-      winner: sql.placeholder("winner"),
-    })
-    .prepare(),
-  _placeholders as { lobbyId: number; winner?: number }
-);
-
-const selectGamePlayers = typePrepared(
-  db
-    .select({ playerX: Game.playerX, playerO: Game.playerO })
-    .from(Game)
-    .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-function updateLobbyStatus({
-  id,
-  status,
-}: {
-  id: number;
-  status: LobbyStatus;
-}) {
-  db.update(Lobby).set({ status: status }).where(eq(Lobby.id, id)).run();
-}
+import {
+  selectMoves,
+  selectGamePlayers,
+  updateLobbyStatus,
+  insertFinishedLobby,
+  insertMove,
+} from "../db/queries";
 
 type GameStateInitialEvents = {
   "new-move": [ordering: number];
@@ -109,7 +59,11 @@ export class GameState extends EventEmitter<GameStateEvents> {
         winnerMark === "X" ? playerX
         : winnerMark === "O" ? playerO
         : undefined;
-      updateLobbyStatus({ id: lobbyId, status: "finished" });
+      updateLobbyStatus({
+        id: lobbyId,
+        fromStatus: "active",
+        toStatus: "finished",
+      });
       insertFinishedLobby.run({
         lobbyId,
         winner: winnerId,

@@ -1,7 +1,6 @@
 import { Elysia, error, redirect, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
-import { eq, sql } from "drizzle-orm";
 
 import ActiveGameHtml from "./components/game-active";
 import DormantGameHtml from "./components/game-dormant";
@@ -13,23 +12,12 @@ import discordOAuth from "./libs/discord-oauth";
 
 import { intString } from "./types";
 
-import { db, typePrepared } from "./db";
-import { Lobby } from "./db/schema";
+import { selectLobbyById } from "./db/queries";
 
 import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
 import sessionApi from "./routes/session-api";
 import debug from "./routes/debug";
-
-const _placeholders: any = undefined;
-
-const selectLobbyById = typePrepared(
-  db
-    .select()
-    .from(Lobby)
-    .where(eq(Lobby.id, sql.placeholder("lobbyId"))),
-  _placeholders as { lobbyId: number }
-);
 
 const app = new Elysia({ name: "App" })
   .use(await debug())

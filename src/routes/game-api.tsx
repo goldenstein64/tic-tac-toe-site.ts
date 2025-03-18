@@ -4,44 +4,17 @@ import { on } from "node:events";
 import { Elysia, error, t } from "elysia";
 import { Board } from "@goldenstein64/tic-tac-toe";
 import html, { Html } from "@elysiajs/html";
-import { eq, max, sql } from "drizzle-orm";
 
-import { db, typePrepared } from "../db";
-import { Game, Move, User } from "../db/schema";
 import jwtAuth from "../libs/jwt-auth";
 import { orderingToMark } from "../libs/run-game";
 import { intString } from "../types";
 import { GameRows } from "../components/game-active";
 import { gameStates, GameStateEvents } from "../libs/game-state";
-
-const _placeholders: any = undefined;
-
-const selectMaxOrdering = typePrepared(
-  db
-    .select({ ordering: max(Move.ordering) })
-    .from(Move)
-    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-const selectGamePlayers = typePrepared(
-  db
-    .select({ playerX: Game.playerX, playerO: Game.playerO })
-    .from(Game)
-    .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-const selectUsernameById = typePrepared(
-  db
-    .select({ username: User.username })
-    .from(User)
-    .where(eq(User.id, sql.placeholder("userId")))
-    .prepare(),
-  _placeholders as { userId: number }
-);
+import {
+  selectGamePlayers,
+  selectMaxOrdering,
+  selectUsernameById,
+} from "../db/queries";
 
 type EventProps = { event?: string; data: string };
 function event({ event = "message", data }: EventProps): string {
@@ -110,7 +83,7 @@ export default new Elysia({ prefix: "/api" })
       if (!state.canMark(position)) return error("Unauthorized");
 
       const maxOrderResult = selectMaxOrdering.get({ lobbyId });
-      const ordering = (maxOrderResult?.ordering ?? -1) + 1;
+      const ordering = (maxOrderResult?.maxOrdering ?? -1) + 1;
       state.setMark(position, ordering);
     },
     {

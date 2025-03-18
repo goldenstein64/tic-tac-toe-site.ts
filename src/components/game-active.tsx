@@ -1,41 +1,20 @@
 import type { Board, Mark } from "@goldenstein64/tic-tac-toe";
 
 import { Html } from "@elysiajs/html";
-import { eq, max, sql } from "drizzle-orm";
 
-import { db, typePrepared } from "../db";
-import { SelectLobby, Move, SelectUser } from "../db/schema";
-import { orderingToMark } from "../libs/run-game";
-import { DebugPanel } from "./debug";
 import {
-  GameHead,
-  PlayerInfo,
+  selectGameMoves,
+  selectMaxOrdering,
   selectPlayersInGame,
   selectUserById,
-} from "./game-base";
+} from "../db/queries";
+import { SelectLobby, SelectUser } from "../db/schema";
+import { orderingToMark } from "../libs/run-game";
+import { DebugPanel } from "./debug";
+import { GameHead, PlayerInfo } from "./game-base";
 
 export const COLUMN_LABELS = ["left", "center", "right"] as const;
 export const ROW_LABELS = ["Top", "Middle", "Bottom"] as const;
-
-const _placeholders: any = undefined;
-
-const selectGameMoves = typePrepared(
-  db
-    .select({ position: Move.position, ordering: Move.ordering })
-    .from(Move)
-    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
-const selectMaxOrdering = typePrepared(
-  db
-    .select({ maxOrdering: max(Move.ordering) })
-    .from(Move)
-    .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
 
 type GameButtonProps = {
   disabled?: boolean;
