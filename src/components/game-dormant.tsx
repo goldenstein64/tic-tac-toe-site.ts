@@ -2,18 +2,10 @@ import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import { Html } from "@elysiajs/html";
 
-import { SelectLobby, SelectUser } from "../db/schema";
-import {
-  selectUserById,
-  selectPlayersInGame,
-  selectGameMoves,
-  selectFinishedLobby,
-  selectUsernameById,
-} from "../db/queries";
+import { SelectLobby } from "../db/schema";
+import { selectGameMoves } from "../db/queries";
 import { orderingToMark } from "../libs/run-game";
-import { DebugPanel } from "./debug";
 import { COLUMN_LABELS, ROW_LABELS } from "./game-active";
-import { PlayerInfo, GameHead } from "./game-base";
 
 type GameButtonProps = { children?: Mark; ariaLabel: string };
 
