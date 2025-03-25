@@ -357,3 +357,12 @@ export const selectFinishedLobby = typePrepared(
     .prepare(),
   _placeholders as { lobbyId: number }
 );
+
+export const selectLobbyStatusById = typePrepared(
+  db
+    .select({ status: Lobby.status })
+    .from(Lobby)
+    .where(eq(Lobby.id, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number }
+);

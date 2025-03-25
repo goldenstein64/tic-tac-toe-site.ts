@@ -17,12 +17,19 @@ import {
   insertMoves,
   selectLobbyByIdStatusCreatedBy,
   deleteLobbyById,
+  selectLobbyStatusById,
 } from "../db/queries";
 import runGame from "../libs/run-game";
 import jwtAuth from "../libs/jwt-auth";
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
+
+const LobbyStatus = t.Union([
+  t.Literal("waiting"),
+  t.Literal("active"),
+  t.Literal("finished"),
+]);
 
 const playerTypeSet = [-1, 1, 2, 3] as const;
 
@@ -166,6 +173,25 @@ export default new Elysia({ prefix: "/api" })
   .use(html())
   .use(jwtAuth())
   .resolve(({ user }) => ({ user: user! }))
+  .get(
+    "/lobby/status",
+    ({ query: { id: lobbyId }, set }) => {
+      const status = selectLobbyStatusById.get({ lobbyId })?.status;
+      if (status === "active") {
+        set.headers["HX-Refresh"] = "true";
+      }
+      return status;
+    },
+    {
+      query: t.Object({ id: intString }),
+      response: t.Union([LobbyStatus, t.Undefined()]),
+      detail: {
+        summary: "returns the status of the lobby with the given id",
+        description:
+          "From HTMX, the page gets refreshed when the status is active.",
+      },
+    }
+  )
   .patch(
     "/lobby",
     async ({ body: { id: lobbyId, action }, user: { id: userId } }) => {

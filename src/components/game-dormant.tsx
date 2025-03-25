@@ -74,53 +74,73 @@ function GameBoard({ lobby }: { lobby: SelectLobby }) {
 
 type GameBodyProps = { lobby: SelectLobby };
 
-function GameBody({ lobby }: GameBodyProps) {
-  let leftUser: SelectUser | undefined = undefined;
-  let leftMark: Mark | undefined = undefined;
-  let rightUser: SelectUser | undefined = undefined;
-  let rightMark: Mark | undefined = undefined;
-  if (lobby.status === "waiting") {
-    leftUser = selectUserById.get({ userId: lobby.createdBy });
-  } else if (lobby.status === "finished") {
-    const { playerX, playerO } = selectPlayersInGame.get({
-      lobbyId: lobby.id,
-    })!;
-    leftUser = selectUserById.get({ userId: playerX });
-    leftMark = "X";
-    rightUser = selectUserById.get({ userId: playerO });
-    rightMark = "O";
-  } else {
-    throw new TypeError(
-      "attempt to show dormant lobby that is not finished and not waiting"
-    );
-  }
-
-  const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
-  const winnerId = finishedLobby?.winner;
-
-  let winnerName: string | undefined = undefined;
-  if (winnerId === null) {
-    winnerName = "no one";
-  } else if (winnerId !== undefined) {
-    const winner = selectUsernameById.get({ userId: winnerId });
-    winnerName = winner?.username;
-  }
-
+function WaitingGameBody({ lobby }: GameBodyProps) {
   return (
     <body>
       <header>
         <DebugPanel />
         <h1>tic-tac-toe-site</h1>
-        <h3 id="lobby-status">Status: {lobby.status}</h3>
-        <h3 id="lobby-winner">Winner: {winnerName}</h3>
+        <h3 id="lobby-status">
+          Status:{" "}
+          <div hx-get="/lobby/status" hx-trigger="every 30s">
+            waiting
+          </div>
+        </h3>
+        <h3 id="lobby-winner">Winner: </h3>
       </header>
       <main>
-        <PlayerInfo user={leftUser} mark={leftMark} />
-        <PlayerInfo user={rightUser} mark={rightMark} />
+        <PlayerInfo
+          user={selectUserById.get({ userId: lobby.createdBy })}
+          mark={undefined}
+        />
+        <PlayerInfo user={undefined} mark={undefined} />
         <GameBoard lobby={lobby} />
       </main>
     </body>
   );
+}
+
+function FinishedGameBody({ lobby }: GameBodyProps) {
+  const { playerX, playerO } = selectPlayersInGame.get({
+    lobbyId: lobby.id,
+  })!;
+  const winnerId = selectFinishedLobby.get({ lobbyId: lobby.id })?.winner;
+  return (
+    <body>
+      <header>
+        <DebugPanel />
+        <h1>tic-tac-toe-site</h1>
+        <h3 id="lobby-status">Status: finished</h3>
+        <h3 id="lobby-winner">
+          Winner:{" "}
+          {winnerId === null ?
+            "no one" // game ended in a tie
+          : winnerId === undefined ?
+            undefined // game hasn't ended
+          : selectUsernameById.get({ userId: winnerId })?.username}
+        </h3>
+      </header>
+      <main>
+        <PlayerInfo user={selectUserById.get({ userId: playerX })} mark="X" />
+        <PlayerInfo user={selectUserById.get({ userId: playerO })} mark="O" />
+        <GameBoard lobby={lobby} />
+      </main>
+    </body>
+  );
+}
+
+function GameBody(props: GameBodyProps) {
+  const { lobby } = props;
+  switch (lobby.status) {
+    case "waiting":
+      return <WaitingGameBody {...props} />;
+    case "finished":
+      return <FinishedGameBody {...props} />;
+    default:
+      throw new TypeError(
+        "attempt to show dormant lobby that is not finished and not waiting"
+      );
+  }
 }
 
 type GameHtmlProps = GameBodyProps;
