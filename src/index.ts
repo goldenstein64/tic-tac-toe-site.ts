@@ -3,7 +3,8 @@ import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
 
 import ActiveGameHtml from "./components/game-active";
-import DormantGameHtml from "./components/game-dormant";
+import WaitingGameHtml from "./components/game-waiting";
+import FinishedGameHtml from "./components/game-finished";
 import LobbiesHtml from "./components/lobbies";
 import LoginHtml from "./components/login";
 
@@ -43,7 +44,9 @@ const app = new Elysia({ name: "App" })
       return (
         !lobby ? error("Not Found")
         : lobby.status === "active" ? ActiveGameHtml({ lobby, user })
-        : DormantGameHtml({ lobby })
+        : lobby.status === "waiting" ? WaitingGameHtml({ lobby })
+        : lobby.status === "finished" ? FinishedGameHtml({ lobby })
+        : error("Not Found")
       );
     },
     { query: t.Object({ id: intString }) }

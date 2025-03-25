@@ -55,7 +55,7 @@ function GameRow({ start, moves, ariaLabel: rowLabel }: GameRowProps) {
   );
 }
 
-function GameBoard({ lobby }: { lobby: SelectLobby }) {
+export function GameBoard({ lobby }: { lobby: SelectLobby }) {
   const movesArray = selectGameMoves.all({ lobbyId: lobby.id });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
@@ -71,87 +71,3 @@ function GameBoard({ lobby }: { lobby: SelectLobby }) {
     </table>
   );
 }
-
-type GameBodyProps = { lobby: SelectLobby };
-
-function WaitingGameBody({ lobby }: GameBodyProps) {
-  return (
-    <body>
-      <header>
-        <DebugPanel />
-        <h1>tic-tac-toe-site</h1>
-        <h3 id="lobby-status">
-          Status:{" "}
-          <div hx-get="/lobby/status" hx-trigger="every 30s">
-            waiting
-          </div>
-        </h3>
-        <h3 id="lobby-winner">Winner: </h3>
-      </header>
-      <main>
-        <PlayerInfo
-          user={selectUserById.get({ userId: lobby.createdBy })}
-          mark={undefined}
-        />
-        <PlayerInfo user={undefined} mark={undefined} />
-        <GameBoard lobby={lobby} />
-      </main>
-    </body>
-  );
-}
-
-function FinishedGameBody({ lobby }: GameBodyProps) {
-  const { playerX, playerO } = selectPlayersInGame.get({
-    lobbyId: lobby.id,
-  })!;
-  const winnerId = selectFinishedLobby.get({ lobbyId: lobby.id })?.winner;
-  return (
-    <body>
-      <header>
-        <DebugPanel />
-        <h1>tic-tac-toe-site</h1>
-        <h3 id="lobby-status">Status: finished</h3>
-        <h3 id="lobby-winner">
-          Winner:{" "}
-          {winnerId === null ?
-            "no one" // game ended in a tie
-          : winnerId === undefined ?
-            undefined // game hasn't ended
-          : selectUsernameById.get({ userId: winnerId })?.username}
-        </h3>
-      </header>
-      <main>
-        <PlayerInfo user={selectUserById.get({ userId: playerX })} mark="X" />
-        <PlayerInfo user={selectUserById.get({ userId: playerO })} mark="O" />
-        <GameBoard lobby={lobby} />
-      </main>
-    </body>
-  );
-}
-
-function GameBody(props: GameBodyProps) {
-  const { lobby } = props;
-  switch (lobby.status) {
-    case "waiting":
-      return <WaitingGameBody {...props} />;
-    case "finished":
-      return <FinishedGameBody {...props} />;
-    default:
-      throw new TypeError(
-        "attempt to show dormant lobby that is not finished and not waiting"
-      );
-  }
-}
-
-type GameHtmlProps = GameBodyProps;
-
-export function GameHtml(props: GameHtmlProps) {
-  return (
-    <html>
-      <GameHead />
-      <GameBody {...props} />
-    </html>
-  );
-}
-
-export default GameHtml;
