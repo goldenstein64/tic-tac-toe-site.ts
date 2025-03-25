@@ -13,7 +13,10 @@ exports[`game.tsx matches waiting lobby 1`] = `
       href="/public/game.css" /></head
   ><body
     ><header
-      ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: waiting</h3
+      ><h1>tic-tac-toe-site</h1
+      ><h3 id="lobby-status"
+        >Status:
+        <div hx-get="/lobby/status" hx-trigger="every 30s">waiting</div></h3
       ><h3 id="lobby-winner">Winner: </h3></header
     ><main
       ><aside><p>DebugUser</p></aside

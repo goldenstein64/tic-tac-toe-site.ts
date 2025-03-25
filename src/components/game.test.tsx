@@ -15,7 +15,8 @@ import { Html } from "@elysiajs/html";
 import { format } from "prettier";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
-import DormantGameHtml from "./game-dormant";
+import WaitingGameHtml from "./game-waiting";
+import FinishedGameHtml from "./game-finished";
 import ActiveGameHtml from "./game-active";
 import { db } from "../db";
 import { Lobby, User } from "../db/schema";
@@ -43,7 +44,7 @@ afterEach(() => document.close());
 
 describe("game.tsx", () => {
   it("matches waiting lobby", async () => {
-    document.write(await (<DormantGameHtml lobby={waitingLobby} />));
+    document.write(await (<WaitingGameHtml lobby={waitingLobby} />));
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
   });
@@ -57,7 +58,7 @@ describe("game.tsx", () => {
   });
 
   it("matches finished lobby", async () => {
-    document.write(await (<DormantGameHtml lobby={finishedLobby} />));
+    document.write(await (<FinishedGameHtml lobby={finishedLobby} />));
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
 
