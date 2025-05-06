@@ -30,20 +30,16 @@ type GameRowProps = {
 
 function GameRow({ start, moves, ariaLabel: rowLabel }: GameRowProps) {
   return (
-    <tr>
+    <>
       {COLUMN_LABELS.map((colLabel, i) => {
         const ordering = moves.get(i + start);
         const mark =
           ordering !== undefined ? orderingToMark(ordering) : undefined;
         return (
-          <td>
-            <GameButton ariaLabel={`${rowLabel}-${colLabel}`}>
-              {mark}
-            </GameButton>
-          </td>
+          <GameButton ariaLabel={`${rowLabel}-${colLabel}`}>{mark}</GameButton>
         );
       })}
-    </tr>
+    </>
   );
 }
 
@@ -54,12 +50,10 @@ export function GameBoard({ lobby }: { lobby: SelectLobby }) {
   );
 
   return (
-    <table class="game-board">
-      <tbody>
-        {ROW_LABELS.map((label, i) => {
-          return <GameRow start={i * 3} moves={moves} ariaLabel={label} />;
-        })}
-      </tbody>
-    </table>
+    <section class="game-board">
+      {ROW_LABELS.map((label, i) => {
+        return <GameRow start={i * 3} moves={moves} ariaLabel={label} />;
+      })}
+    </section>
   );
 }

@@ -62,50 +62,24 @@ function GameRow({
   ariaLabel: rowLabel,
   disabled,
 }: GameRowProps) {
-  const buttons = COLUMN_LABELS.map((colLabel, i) => {
-    const ordering = moves.get(i + start);
-    const mark = ordering !== undefined ? orderingToMark(ordering) : undefined;
-    return (
-      <td>
-        <GameButton
-          lobbyId={lobbyId}
-          position={i + start}
-          ariaLabel={`${rowLabel}-${colLabel}`}
-          disabled={disabled}
-        >
-          {mark}
-        </GameButton>
-      </td>
-    );
-  });
-  return <tr>{buttons}</tr>;
-}
-
-function GameBoard({
-  lobby: { id: lobbyId },
-  disabled,
-}: {
-  lobby: SelectLobby;
-  disabled?: boolean;
-}) {
-  const movesArray = selectGameMoves.all({ lobbyId });
-  const moves = new Map<number, number>(
-    movesArray.map(({ position, ordering }) => [position, ordering])
-  );
   return (
-    <table class="game-board">
-      <tbody hx-swap="innerHTML" sse-swap="board">
-        {ROW_LABELS.map((label, i) => (
-          <GameRow
+    <>
+      {COLUMN_LABELS.map((colLabel, i) => {
+        const ordering = moves.get(i + start);
+        const mark =
+          ordering !== undefined ? orderingToMark(ordering) : undefined;
+        return (
+          <GameButton
             lobbyId={lobbyId}
-            start={i * 3}
-            moves={moves}
-            ariaLabel={label}
+            position={i + start}
+            ariaLabel={`${rowLabel}-${colLabel}`}
             disabled={disabled}
-          />
-        ))}
-      </tbody>
-    </table>
+          >
+            {mark}
+          </GameButton>
+        );
+      })}
+    </>
   );
 }
 
@@ -134,6 +108,32 @@ export function GameRows({ lobbyId, board, disabled }: GameRowsProps) {
         />
       ))}
     </>
+  );
+}
+
+function GameBoard({
+  lobby: { id: lobbyId },
+  disabled,
+}: {
+  lobby: SelectLobby;
+  disabled?: boolean;
+}) {
+  const movesArray = selectGameMoves.all({ lobbyId });
+  const moves = new Map<number, number>(
+    movesArray.map(({ position, ordering }) => [position, ordering])
+  );
+  return (
+    <section class="game-board" hx-swap="innerHTML" sse-swap="board">
+      {ROW_LABELS.map((label, i) => (
+        <GameRow
+          lobbyId={lobbyId}
+          start={i * 3}
+          moves={moves}
+          ariaLabel={label}
+          disabled={disabled}
+        />
+      ))}
+    </section>
   );
 }
 

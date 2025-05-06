@@ -44,26 +44,8 @@ h1 {
   margin: 0px auto;
   aspect-ratio: 1;
 
-  table-layout: fixed;
-  border-collapse: collapse;
-
-  & tr {
-    box-sizing: border-box;
-    aspect-ratio: 3;
-
-    &:not(:last-child) {
-      border-bottom: 12px solid light-dark(gray, white);
-    }
-  }
-
-  & td {
-    padding: 0px;
-    aspect-ratio: 1;
-
-    &:not(:last-child) {
-      border-right: 12px solid light-dark(gray, white);
-    }
-  }
+  display: grid;
+  grid: 1fr 1fr 1fr / 1fr 1fr 1fr;
 
   & button {
     width: 100%;
@@ -72,6 +54,8 @@ h1 {
     font-size: 10vmax;
     font-weight: 800;
     line-height: 0;
+    border-radius: 0;
+    box-sizing: border-box;
 
     &:disabled {
       background: transparent;
