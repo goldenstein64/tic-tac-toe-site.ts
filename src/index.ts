@@ -1,4 +1,4 @@
-import { Elysia, error, redirect, t } from "elysia";
+import { Elysia, redirect, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import html from "@elysiajs/html";
 
@@ -39,14 +39,14 @@ const app = new Elysia({ name: "App" })
   .get("/", ({ user }) => LobbiesHtml({ user }))
   .get(
     "/game",
-    ({ query: { id: lobbyId }, user }) => {
+    ({ query: { id: lobbyId }, user, status }) => {
       const lobby = selectLobbyById.get({ lobbyId });
       return (
-        !lobby ? error("Not Found")
+        !lobby ? status(404)
         : lobby.status === "active" ? ActiveGameHtml({ lobby, user })
         : lobby.status === "waiting" ? WaitingGameHtml({ lobby })
         : lobby.status === "finished" ? FinishedGameHtml({ lobby })
-        : error("Not Found")
+        : status(404)
       );
     },
     { query: t.Object({ id: intString }) }

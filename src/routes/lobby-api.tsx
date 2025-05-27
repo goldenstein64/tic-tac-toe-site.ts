@@ -2,7 +2,7 @@ import type { Static } from "elysia";
 import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import html from "@elysiajs/html";
-import Elysia, { error, t } from "elysia";
+import Elysia, { t, type status } from "elysia";
 import { randomInt } from "node:crypto";
 
 import { gameStates } from "../libs/game-state";
@@ -51,20 +51,21 @@ const PlayerTypeString = t
 
 class CustomRollbackError extends Error {}
 class ResponseError extends Error {
-  errorObject: ReturnType<typeof error>;
+  errorObject: ReturnType<typeof status>;
 
-  constructor(...args: Parameters<typeof error>) {
+  constructor(sts: typeof status, ...args: Parameters<typeof status>) {
     super((args[1] as object).toString());
-    this.errorObject = error(...args);
+    this.errorObject = sts(...args);
   }
 }
 
 type ForfeitResult =
   | { success: true }
   | { success: false; message: string }
-  | ReturnType<typeof error>;
+  | ReturnType<typeof status>;
 
 async function forfeitActiveLobby(
+  sts: typeof status,
   lobbyId: number,
   userId: number
 ): Promise<ForfeitResult> {
@@ -73,6 +74,7 @@ async function forfeitActiveLobby(
       const playerResult = selectPlayerInGame.get({ lobbyId, userId });
       if (playerResult === undefined) {
         throw new ResponseError(
+          sts,
           "Forbidden",
           "lobby does not exist or does not contain this user"
         );
@@ -124,7 +126,7 @@ async function forfeitActiveLobby(
 type JoinResult =
   | { success: true }
   | { success: false; message: string }
-  | ReturnType<typeof error>;
+  | ReturnType<typeof status>;
 
 async function joinWaitingLobby(
   lobbyId: number,
@@ -194,10 +196,10 @@ export default new Elysia({ prefix: "/api" })
   )
   .patch(
     "/lobby",
-    async ({ body: { id: lobbyId, action }, user: { id: userId } }) => {
+    async ({ body: { id: lobbyId, action }, user: { id: userId }, status }) => {
       switch (action) {
         case "forfeit":
-          return await forfeitActiveLobby(lobbyId, userId);
+          return await forfeitActiveLobby(status, lobbyId, userId);
         case "join":
           return await joinWaitingLobby(lobbyId, userId);
       }
@@ -258,7 +260,7 @@ export default new Elysia({ prefix: "/api" })
   )
   .delete(
     "/lobby",
-    async ({ query: { id }, set, user: { id: userId } }) => {
+    async ({ query: { id }, set, user: { id: userId }, status }) => {
       // delete a waiting lobby
       const lobby = selectLobbyByIdStatusCreatedBy.get({
         lobbyId: id,
@@ -267,7 +269,7 @@ export default new Elysia({ prefix: "/api" })
       });
       if (lobby === undefined) {
         // this is not a waiting lobby or it was not created by them
-        return error(403, "not a waiting lobby or not created by user");
+        return status(403, "not a waiting lobby or not created by user");
       }
 
       deleteLobbyById.run({ id });

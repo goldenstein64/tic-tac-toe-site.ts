@@ -1,7 +1,7 @@
 import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import { on } from "node:events";
-import { Elysia, error, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { Board } from "@goldenstein64/tic-tac-toe";
 import html, { Html } from "@elysiajs/html";
 
@@ -72,15 +72,15 @@ export default new Elysia({ prefix: "/api" })
   .resolve(({ user }) => ({ user: user! }))
   .post(
     "/game-move",
-    ({ body: { id: lobbyId, position }, user: { id: userId } }) => {
+    ({ body: { id: lobbyId, position }, user: { id: userId }, status }) => {
       const players = selectGamePlayers.get({ lobbyId });
-      if (!players) return error("Not Found");
+      if (!players) return status("Not Found");
       const { playerX, playerO } = players;
       if (playerX !== userId && playerO !== userId)
-        return error("Unauthorized");
+        return status("Unauthorized");
 
       const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
-      if (!state.canMark(position)) return error("Unauthorized");
+      if (!state.canMark(position)) return status("Unauthorized");
 
       const maxOrderResult = selectMaxOrdering.get({ lobbyId });
       const ordering = (maxOrderResult?.maxOrdering ?? -1) + 1;
@@ -93,9 +93,14 @@ export default new Elysia({ prefix: "/api" })
   )
   .get(
     "/game-move",
-    async function* ({ query: { id: lobbyId }, user: { id: userId }, set }) {
+    async function* ({
+      query: { id: lobbyId },
+      user: { id: userId },
+      set,
+      status,
+    }) {
       const players = selectGamePlayers.get({ lobbyId });
-      if (!players) return error("Not Found");
+      if (!players) return status("Not Found");
 
       set.headers["X-Accel-Buffering"] = "no";
       set.headers["Cache-Control"] = "no-cache";
