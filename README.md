@@ -1,5 +1,7 @@
 # tic-tac-toe-site2
 
+A website lets users play tic-tac-toe against each other online. It keeps a record of saved games and uses Discord OAuth2 to implement game history.
+
 ## Outline
 
 - `/login`
