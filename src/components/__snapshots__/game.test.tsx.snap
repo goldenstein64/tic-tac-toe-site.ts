@@ -21,65 +21,20 @@ exports[`game.tsx matches waiting lobby 1`] = `
     ><main
       ><aside><p>DebugUser</p></aside
       ><aside></aside
-      ><table class="game-board"
-        ><tbody
-          ><tr
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Top-left"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Top-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Top-right"
-              ></button></td></tr
-          ><tr
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Middle-left"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Middle-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Middle-right"
-              ></button></td></tr
-          ><tr
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Bottom-left"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Bottom-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Bottom-right"
-              ></button></td></tr></tbody></table></main></body
+      ><section class="game-board"
+        ><button type="button" disabled="" aria-label="Top-left"></button
+        ><button type="button" disabled="" aria-label="Top-center"></button
+        ><button type="button" disabled="" aria-label="Top-right"></button
+        ><button type="button" disabled="" aria-label="Middle-left"></button
+        ><button type="button" disabled="" aria-label="Middle-center"></button
+        ><button type="button" disabled="" aria-label="Middle-right"></button
+        ><button type="button" disabled="" aria-label="Bottom-left"></button
+        ><button type="button" disabled="" aria-label="Bottom-center"></button
+        ><button
+          type="button"
+          disabled=""
+          aria-label="Bottom-right"
+        ></button></section></main></body
 ></html>
 "
 `;
@@ -104,105 +59,83 @@ exports[`game.tsx matches active lobby 1`] = `
     ><main
       ><aside><p>DebugUser</p><p>X</p></aside
       ><aside><p>HardComputer</p><p>O</p></aside
-      ><table class="game-board"
-        ><tbody hx-swap="innerHTML" sse-swap="board"
-          ><tr
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":0}'
-                disabled=""
-                aria-label="Top-left"
-                class="mark-x"
-                >X</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":1}'
-                aria-label="Top-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":2}'
-                aria-label="Top-right"
-              ></button></td></tr
-          ><tr
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":3}'
-                disabled=""
-                aria-label="Middle-left"
-                class="mark-o"
-                >O</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":4}'
-                disabled=""
-                aria-label="Middle-center"
-                class="mark-o"
-                >O</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":5}'
-                disabled=""
-                aria-label="Middle-right"
-                class="mark-x"
-                >X</button
-              ></td
-            ></tr
-          ><tr
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":6}'
-                disabled=""
-                aria-label="Bottom-left"
-                class="mark-x"
-                >X</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":7}'
-                aria-label="Bottom-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                hx-post="/api/game-move"
-                hx-swap="none"
-                hx-vals='{"id":2,"position":8}'
-                disabled=""
-                aria-label="Bottom-right"
-                class="mark-o"
-                >O</button
-              ></td
-            ></tr
-          ></tbody
-        ></table
+      ><section class="game-board" hx-swap="innerHTML" sse-swap="board"
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":0}'
+          disabled=""
+          aria-label="Top-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":1}'
+          aria-label="Top-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":2}'
+          aria-label="Top-right"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":3}'
+          disabled=""
+          aria-label="Middle-left"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":4}'
+          disabled=""
+          aria-label="Middle-center"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":5}'
+          disabled=""
+          aria-label="Middle-right"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":6}'
+          disabled=""
+          aria-label="Bottom-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":7}'
+          aria-label="Bottom-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals='{"id":2,"position":8}'
+          disabled=""
+          aria-label="Bottom-right"
+          class="mark-o"
+          >O</button
+        ></section
       ></main
     ></body
   ></html
@@ -228,79 +161,34 @@ exports[`game.tsx matches finished lobby 1`] = `
     ><main
       ><aside><p>DebugUser</p><p>X</p></aside
       ><aside><p>EasyComputer</p><p>O</p></aside
-      ><table class="game-board"
-        ><tbody
-          ><tr
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Top-left"
-                class="mark-x"
-                >X</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Top-center"
-                class="mark-x"
-                >X</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Top-right"
-                class="mark-x"
-                >X</button
-              ></td
-            ></tr
-          ><tr
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Middle-left"
-                class="mark-o"
-                >O</button
-              ></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Middle-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Middle-right"
-              ></button></td></tr
-          ><tr
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Bottom-left"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Bottom-center"
-              ></button></td
-            ><td
-              ><button
-                type="button"
-                disabled=""
-                aria-label="Bottom-right"
-                class="mark-o"
-                >O</button
-              ></td
-            ></tr
-          ></tbody
-        ></table
+      ><section class="game-board"
+        ><button type="button" disabled="" aria-label="Top-left" class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          disabled=""
+          aria-label="Top-center"
+          class="mark-x"
+          >X</button
+        ><button type="button" disabled="" aria-label="Top-right" class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          disabled=""
+          aria-label="Middle-left"
+          class="mark-o"
+          >O</button
+        ><button type="button" disabled="" aria-label="Middle-center"></button
+        ><button type="button" disabled="" aria-label="Middle-right"></button
+        ><button type="button" disabled="" aria-label="Bottom-left"></button
+        ><button type="button" disabled="" aria-label="Bottom-center"></button
+        ><button
+          type="button"
+          disabled=""
+          aria-label="Bottom-right"
+          class="mark-o"
+          >O</button
+        ></section
       ></main
     ></body
   ></html
