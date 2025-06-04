@@ -1,8 +1,8 @@
-import type { Mark } from "@goldenstein64/tic-tac-toe";
+import type { Mark, Board } from "@goldenstein64/tic-tac-toe";
+import type { SSEPayload } from "elysia";
 
 import { on } from "node:events";
-import { Elysia, t } from "elysia";
-import { Board } from "@goldenstein64/tic-tac-toe";
+import { Elysia, t, sse } from "elysia";
 import html, { Html } from "@elysiajs/html";
 
 import jwtAuth from "../libs/jwt-auth";
@@ -16,11 +16,6 @@ import {
   selectUsernameById,
 } from "../db/queries";
 
-type EventProps = { event?: string; data: string };
-function event({ event = "message", data }: EventProps): string {
-  return `event: ${event}\ndata: ${data}\n\n`;
-}
-
 type MoveStreamContext = {
   board: Board;
   userIsX: boolean;
@@ -31,11 +26,11 @@ type MoveStreamContext = {
 async function* onNewMove(
   { userIsX, isClientPlaying, lobbyId, board }: MoveStreamContext,
   ordering: number
-): AsyncGenerator<string> {
+): AsyncGenerator<SSEPayload> {
   const nextTurn = orderingToMark(ordering + 1);
   const isClientsTurn = userIsX === (nextTurn === "X");
   const enabled = isClientPlaying && isClientsTurn;
-  yield event({
+  yield sse({
     event: "board",
     data: await (
       <GameRows lobbyId={lobbyId} board={board} disabled={!enabled} />
@@ -46,10 +41,10 @@ async function* onNewMove(
 async function* onEnded(
   { board, lobbyId }: MoveStreamContext,
   winnerMark: Mark | null
-): AsyncGenerator<string> {
+): AsyncGenerator<SSEPayload> {
   const { playerX, playerO } = selectGamePlayers.get({ lobbyId })!;
 
-  yield event({
+  yield sse({
     event: "winner",
     data:
       winnerMark ?
@@ -58,12 +53,12 @@ async function* onEnded(
         })!.username
       : "no one",
   });
-  yield event({
+  yield sse({
     event: "board",
     data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
   });
-  yield event({ event: "winner", data: winnerMark ?? "no one" });
-  yield event({ event: "status", data: "finished" });
+  yield sse({ event: "winner", data: winnerMark ?? "no one" });
+  yield sse({ event: "status", data: "finished" });
 }
 
 export default new Elysia({ prefix: "/api" })
@@ -119,14 +114,14 @@ export default new Elysia({ prefix: "/api" })
       const onMoveStream = on(state, "move-stream") as AsyncIterable<
         GameStateEvents["move-stream"]
       >;
-      moveStream: for await (const [name, args] of onMoveStream) {
+      for await (const [name, args] of onMoveStream) {
         switch (name) {
           case "new-move":
             yield* onNewMove(moveStreamCtx, ...args);
             break;
           case "end":
             yield* onEnded(moveStreamCtx, ...args);
-            break moveStream;
+            return;
         }
       }
     },
