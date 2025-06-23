@@ -1,7 +1,8 @@
 import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-types/v10";
 
 import Elysia from "elysia";
-import { oauth2, Discord, OAuth2Tokens } from "elysia-oauth2";
+import { Discord, OAuth2Tokens } from "arctic";
+import discordOauth2 from "./arctic-discord-oauth2";
 import { TransactionRollbackError } from "drizzle-orm";
 
 import { tx } from "../db";
@@ -73,22 +74,11 @@ export default () =>
   new Elysia()
     .decorate("discord", discord)
     .use(jwtAuth)
-    .use(
-      oauth2({
-        Discord: [
-          Bun.env.DISCORD_CLIENT_ID,
-          Bun.env.DISCORD_CLIENT_SECRET,
-          Bun.env.DISCORD_REDIRECT_URL,
-        ],
-      })
-    )
+    .use(discordOauth2({ provider: discord.oauth2 }))
     /** redirects the user to the Discord auth page */
-    .get(
-      "/login/discord",
-      async ({ oauth2 }) =>
-        await oauth2.redirect("Discord", ["identify", "email"])
+    .get("/login/discord", ({ oauth2 }) =>
+      oauth2.redirect(["identify", "email"])
     )
-
     .get(
       "/login/discord/callback",
       async ({
@@ -98,18 +88,18 @@ export default () =>
         cookie: { access: cookieAccess, refresh: cookieRefresh },
         redirect,
       }) => {
-        const tokens = await oauth2.authorize("Discord");
+        const tokens = await oauth2.authorize();
         // the data in Discord's response can be found here:
         // https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
         /*
-        {
-          "access_token": "6qrZcUqja7812RVdnEKjpzOL4CvHBFG",
-          "token_type": "Bearer",
-          "expires_in": 604800,
-          "refresh_token": "D43f5y0ahjqew82jZ4NViEr2YafMKhue",
-          "scope": "identify"
-        }
-      */
+          {
+            "access_token": "6qrZcUqja7812RVdnEKjpzOL4CvHBFG",
+            "token_type": "Bearer",
+            "expires_in": 604800,
+            "refresh_token": "D43f5y0ahjqew82jZ4NViEr2YafMKhue",
+            "scope": "identify"
+          }
+        */
 
         // associate the access token and refresh token with this user
         const accessToken = tokens.accessToken();

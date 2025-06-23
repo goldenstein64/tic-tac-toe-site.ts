@@ -1,7 +1,13 @@
 import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-types/v10";
 
-import { describe, it, expect } from "bun:test";
-import fetchMock from "fetch-mock";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "bun:test";
 import { parse as parseCookie } from "cookie";
 import { eq } from "drizzle-orm";
 import { UserPremiumType } from "discord-api-types/v10";
@@ -11,38 +17,48 @@ import { db } from "../db";
 import { DiscordUser } from "../db/schema";
 import { ACCESS_MAX_AGE, REFRESH_MAX_AGE } from "./jwt-auth";
 import { verifyAccess, verifyRefresh } from "#/test/util";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
 const DAYS = 60 * 60 * 24;
 
-fetchMock
-  .mockGlobal()
-  .post("https://discord.com/api/oauth2/token", {
-    access_token: "ACCESS_TOKEN",
-    token_type: "Bearer",
-    expires_in: 7 * DAYS,
-    refresh_token: "REFRESH_TOKEN",
-    scope: "identify email",
+const server = setupServer(
+  http.post("https://discord.com/api/oauth2/token", () => {
+    return HttpResponse.json({
+      access_token: "ACCESS_TOKEN",
+      token_type: "Bearer",
+      expires_in: 7 * DAYS,
+      refresh_token: "REFRESH_TOKEN",
+      scope: "identify email",
+    });
+  }),
+  http.get("https://discord.com/api/v10/users/@me", () => {
+    return HttpResponse.json({
+      id: "DISCORD_USER_ID",
+      username: "DiscordDebugUser",
+      discriminator: "DiscordDiscriminator",
+      global_name: "DiscordGlobalDebugUser",
+      avatar: "DiscordAvatar",
+      bot: false,
+      system: false,
+      mfa_enabled: true,
+      banner: "DiscordBanner",
+      accent_color: 0xffffff, // white
+      locale: "en-us",
+      verified: true,
+      email: "user@debug.com",
+      flags: undefined,
+      premium_type: UserPremiumType.None,
+      public_flags: undefined,
+      avatar_decoration: undefined,
+      avatar_decoration_data: null,
+    } as DiscordAPIUser);
   })
-  .get("https://discord.com/api/v10/users/@me", {
-    id: "DISCORD_USER_ID",
-    username: "DiscordDebugUser",
-    discriminator: "DiscordDiscriminator",
-    global_name: "DiscordGlobalDebugUser",
-    avatar: "DiscordAvatar",
-    bot: false,
-    system: false,
-    mfa_enabled: true,
-    banner: "DiscordBanner",
-    accent_color: 0xffffff, // white
-    locale: "en-us",
-    verified: true,
-    email: "user@debug.com",
-    flags: undefined,
-    premium_type: UserPremiumType.None,
-    public_flags: undefined,
-    avatar_decoration: undefined,
-    avatar_decoration_data: null,
-  } as DiscordAPIUser);
+);
+
+beforeAll(() => server.listen());
+beforeEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 const discordOauth = discordOauthPlugin();
 
@@ -113,7 +129,7 @@ describe("discord-oauth", () => {
 
     const cookies = response.headers
       .getAll("Set-Cookie")
-      [Symbol.iterator]()
+      .values()
       .map((value) => parseCookie(value));
 
     for (const cookie of cookies) {
