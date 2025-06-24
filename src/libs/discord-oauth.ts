@@ -104,9 +104,7 @@ export default () =>
         // associate the access token and refresh token with this user
         const accessToken = tokens.accessToken();
         const refreshToken = tokens.refreshToken();
-        const expiresAt = new Date(
-          Date.now() + tokens.accessTokenExpiresInSeconds()
-        );
+        const expiresAt = tokens.accessTokenExpiresAt();
         const userInfo = await discord.userInfo(accessToken);
 
         try {
@@ -126,7 +124,7 @@ export default () =>
 
             // this user doesn't exist yet, create a new entry
             const { userId, refreshKey } =
-              user ?? (await addDiscordUser(userInfo, tokens));
+              user ?? addDiscordUser(userInfo, tokens);
 
             cookieAccess.set({
               value: await jwtAccess.sign({
