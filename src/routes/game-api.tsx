@@ -78,6 +78,7 @@ export default new Elysia({ prefix: "/api" })
       const maxOrderResult = selectMaxOrdering.get({ lobbyId });
       const ordering = (maxOrderResult?.maxOrdering ?? -1) + 1;
       state.setMark(position, ordering);
+      return status("No Content");
     },
     {
       body: t.Object({ id: intString, position: intString }),

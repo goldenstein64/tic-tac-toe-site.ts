@@ -4,11 +4,13 @@
   "scripts": {
     "dev": "NODE_ENV=development bun run",
     "prod": "NODE_ENV=production bun run",
+    "test": "bun test",
     "db": "drizzle-kit",
     "start": "bun run src/index.ts",
     "prestart": "bun run scripts/build.ts",
     "reset-db": "bun run scripts/reset-db.ts",
-    "clean-db": "bun run scripts/clean-db.ts"
+    "clean-db": "bun run scripts/clean-db.ts",
+    "pretest": "bun run reset-db test"
   },
   "imports": {
     "#/*": "./*"
