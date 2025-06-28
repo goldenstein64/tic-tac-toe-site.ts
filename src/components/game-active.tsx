@@ -111,13 +111,9 @@ export function GameRows({ lobbyId, board, disabled }: GameRowsProps) {
   );
 }
 
-function GameBoard({
-  lobby: { id: lobbyId },
-  disabled,
-}: {
-  lobby: SelectLobby;
-  disabled?: boolean;
-}) {
+type GameBoardProps = { lobby: SelectLobby; disabled?: boolean };
+
+function GameBoard({ lobby: { id: lobbyId }, disabled }: GameBoardProps) {
   const movesArray = selectGameMoves.all({ lobbyId });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
