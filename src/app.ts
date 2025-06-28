@@ -25,12 +25,17 @@ export const app = new Elysia({ name: "App" })
   .use(html())
   .use(jwtAuth())
   .use(discordLogin())
-  .get("/login", async ({ user, redirect }) =>
-    user ? redirect("/", 302) : LoginHtml()
-  )
+  .get("/login", async ({ user, redirect }) => {
+    return user ? redirect("/", 302) : LoginHtml();
+  })
   .guard({
     async beforeHandle({ user, path, redirect }) {
-      if (!user && !path.startsWith("/debug") && !path.startsWith("/public")) {
+      if (
+        !user &&
+        !path.startsWith("/debug") &&
+        !path.startsWith("/public") &&
+        path !== "/login"
+      ) {
         return redirect("/login", 302);
       }
     },
