@@ -28,8 +28,7 @@ async function* onNewMove(
   ordering: number
 ): AsyncGenerator<SSEPayload> {
   const nextTurn = orderingToMark(ordering + 1);
-  const isClientsTurn = userIsX === (nextTurn === "X");
-  const enabled = isClientPlaying && isClientsTurn;
+  const enabled = isClientPlaying && userIsX === (nextTurn === "X");
   yield sse({
     event: "board",
     data: await (
@@ -45,6 +44,10 @@ async function* onEnded(
   const { playerX, playerO } = selectGamePlayers.get({ lobbyId })!;
 
   yield sse({
+    event: "board",
+    data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
+  });
+  yield sse({
     event: "winner",
     data:
       winnerMark ?
@@ -53,11 +56,6 @@ async function* onEnded(
         })!.username
       : "no one",
   });
-  yield sse({
-    event: "board",
-    data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
-  });
-  yield sse({ event: "winner", data: winnerMark ?? "no one" });
   yield sse({ event: "status", data: "finished" });
 }
 
