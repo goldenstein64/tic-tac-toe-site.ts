@@ -1,10 +1,10 @@
-import { Board, Mark } from "@goldenstein64/tic-tac-toe";
-import {
+import type { Connection, Mark, Message } from "@goldenstein64/tic-tac-toe";
+import type { Player } from "@goldenstein64/tic-tac-toe/player";
+import Application, {
   EasyComputer,
   HardComputer,
   MediumComputer,
-  Player,
-} from "@goldenstein64/tic-tac-toe/player";
+} from "@goldenstein64/tic-tac-toe";
 
 export const idToComputerFactory = new Map<number, () => Player>()
   .set(1, () => new EasyComputer())
@@ -27,10 +27,21 @@ export class NotComputerError extends Error {
   }
 }
 
+class SilentConnection implements Connection {
+  print(_: Message): Promise<void> {
+    return Promise.resolve();
+  }
+  prompt(_: Message): Promise<string> {
+    throw new Error("prompt not expected");
+  }
+}
+
+type RunResult = Readonly<{ moves: number[]; winner: Mark | null }>;
+
 export default async function (
   playerX: ComputerId,
   playerO: ComputerId
-): Promise<[number[], Mark | null]> {
+): Promise<RunResult> {
   const computerFactoryX = idToComputerFactory.get(playerX);
   if (computerFactoryX === undefined) {
     throw new NotComputerError("X", playerX);
@@ -42,20 +53,17 @@ export default async function (
 
   const players: [Player, Player] = [computerFactoryX(), computerFactoryO()];
   const marks: [Mark, Mark] = ["X", "O"];
-  const board = new Board();
+  const app = new Application(new SilentConnection());
   const moves: number[] = [];
   let currentIndex: 0 | 1 = 0;
-  while (!board.full()) {
-    const currentPlayer = players[currentIndex];
-    const currentMark = marks[currentIndex];
-    const move = await currentPlayer.getMove(board, currentMark);
-    moves.push(move);
-    board.setMark(move, currentMark);
-    if (board.won(currentMark)) {
-      return [moves, currentMark];
+  while (true) {
+    const endedResult = await app.playTurn(
+      players[currentIndex],
+      marks[currentIndex]
+    );
+    if (endedResult) {
+      return { moves, ...endedResult };
     }
     currentIndex = currentIndex === 0 ? 1 : 0;
   }
-
-  return [moves, null];
 }
