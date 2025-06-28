@@ -10,7 +10,7 @@
     "prestart": "bun run scripts/build.ts",
     "reset-db": "bun run scripts/reset-db.ts",
     "clean-db": "bun run scripts/clean-db.ts",
-    "pretest": "bun run reset-db test"
+    "pretest": "NODE_ENV=test bun run reset-db"
   },
   "imports": {
     "#/*": "./*"

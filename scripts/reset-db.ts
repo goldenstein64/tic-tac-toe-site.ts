@@ -4,26 +4,24 @@ import { parseArgs } from "node:util";
 
 export type DataConfig = { quiet?: boolean };
 
-const { values, positionals } = parseArgs({
+const { values } = parseArgs({
   args: process.argv,
   strict: true,
   allowPositionals: true,
   options: {
-    confirm: {
+    force: {
       type: "boolean",
+      short: "f",
       default: false,
     },
   },
 });
+const { force: forceArg = false } = values;
 
-if (positionals.length > 3)
-  throw new EvalError(
-    `expected at most 1 argument, got ${positionals.length - 2}`
-  );
-const [_bun, _script, environment = "development"] = positionals;
-const { confirm: confirmArg = false } = values;
-
-Bun.env.NODE_ENV = environment;
+const environment = Bun.env.NODE_ENV;
+if (environment === undefined) {
+  throw new Error("NODE_ENV is undefined!");
+}
 const dbPath = path.resolve("db", environment, "game.db");
 const drizzleConfig = path.resolve("db", environment, "drizzle.config.ts");
 
@@ -32,11 +30,11 @@ const initialData = Bun.file(
 );
 
 const productionDbPath = path.resolve("./db/production/game.db");
-if (dbPath === productionDbPath && !confirmArg) {
-  const choice = confirm(
-    "This will reset ALL data in the production database. Are you sure?"
+if (dbPath === productionDbPath && !forceArg) {
+  console.warn(
+    "This will reset ALL data in the production database. Run the command again with '--force' flag to confirm."
   );
-  if (!choice) process.exit(0);
+  process.exit(1);
 }
 
 console.log(`deleting ${dbPath}...`);
