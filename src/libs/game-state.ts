@@ -49,8 +49,9 @@ export class GameState extends EventEmitter<GameStateEvents> {
       this.board.setMark(position, mark);
     }
 
-    for (const evt of events)
+    for (const evt of events) {
       this.on(evt, (...args: any) => this.emit("move-stream", evt, args));
+    }
 
     this.once("end", () => this.removeAllListeners());
     this.once("end", (winnerMark) => {
