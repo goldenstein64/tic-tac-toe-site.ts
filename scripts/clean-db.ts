@@ -1,4 +1,4 @@
-import { Discord } from "elysia-oauth2";
+import { Discord } from "arctic";
 import { eq, gt } from "drizzle-orm";
 import { parseArgs } from "node:util";
 

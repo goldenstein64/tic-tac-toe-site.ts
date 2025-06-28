@@ -17,7 +17,9 @@ const { values, positionals } = parseArgs({
 });
 
 if (positionals.length > 3)
-  throw new EvalError(`expected at most 1 argument, got ${positionals.length}`);
+  throw new EvalError(
+    `expected at most 1 argument, got ${positionals.length - 2}`
+  );
 const [_bun, _script, environment = "development"] = positionals;
 const { confirm: confirmArg = false } = values;
 
