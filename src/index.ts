@@ -9,7 +9,7 @@ import LobbiesHtml from "./components/lobbies";
 import LoginHtml from "./components/login";
 
 import jwtAuth from "./libs/jwt-auth";
-import discordOAuth from "./libs/discord-oauth";
+import discordOAuth from "./libs/discord-login";
 
 import { intString } from "./types";
 

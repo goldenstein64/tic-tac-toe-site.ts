@@ -1,30 +1,44 @@
 import * as arctic from "arctic";
 import { ElysiaCookie } from "elysia/dist/cookies";
 import { Elysia } from "elysia";
+import type { RESTGetAPICurrentUserResult } from "discord-api-types/v10";
 
-type DiscordOAuth2Options = {
-  provider: arctic.Discord;
-  cookie?: Omit<Partial<ElysiaCookie>, "value">;
+const MINUTES = 60;
+
+const provider = new arctic.Discord(
+  Bun.env.DISCORD_CLIENT_ID,
+  Bun.env.DISCORD_CLIENT_SECRET,
+  Bun.env.DISCORD_REDIRECT_URL
+);
+
+const cookieDefaults: Partial<ElysiaCookie> = {
+  secure: true,
+  sameSite: "lax",
+  path: "/",
+  httpOnly: true,
+  maxAge: 30 * MINUTES,
 };
 
-export default function discordOAuth2({
-  provider,
-  cookie,
-}: DiscordOAuth2Options) {
-  const cookieDefaults: Partial<ElysiaCookie> = {
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    httpOnly: true,
-    maxAge: 60 * 30,
-    // 30 min
-    ...cookie,
-  };
+async function userInfo(
+  accessToken: string
+): Promise<RESTGetAPICurrentUserResult> {
+  const response = await fetch("https://discord.com/api/v10/users/@me", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+  });
+
+  return await response.json();
+}
+
+export default function discordOAuth2() {
   return new Elysia({ name: "arctic-discord-oauth2-wrapper" })
     .error("OAUTH2_REQUEST_ERROR", arctic.OAuth2RequestError)
     .derive({ as: "scoped" }, ({ cookie, query, redirect }) => {
       return {
-        oauth2: {
+        discord: {
+          userInfo,
           createURL: (scopes: string[]): URL => {
             const state = arctic.generateState();
             cookie["state"].set({

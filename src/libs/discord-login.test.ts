@@ -12,7 +12,7 @@ import { parse as parseCookie } from "cookie";
 import { eq } from "drizzle-orm";
 import { UserPremiumType } from "discord-api-types/v10";
 
-import discordOauthPlugin from "./discord-oauth";
+import discordOauthPlugin from "./discord-login";
 import { db } from "../db";
 import { DiscordUser } from "../db/schema";
 import { ACCESS_MAX_AGE, REFRESH_MAX_AGE } from "./jwt-auth";

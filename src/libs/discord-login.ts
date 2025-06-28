@@ -1,8 +1,8 @@
 import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-types/v10";
 
 import Elysia from "elysia";
-import { Discord, OAuth2Tokens } from "arctic";
-import discordOAuth2 from "./arctic-discord-oauth2";
+import { OAuth2Tokens } from "arctic";
+import discordOAuth2 from "./discord-oauth2";
 import { TransactionRollbackError } from "drizzle-orm";
 
 import { tx } from "../db";
@@ -26,25 +26,6 @@ declare module "bun" {
     DISCORD_REDIRECT_URL: string;
   }
 }
-
-export const discord = {
-  oauth2: new Discord(
-    Bun.env.DISCORD_CLIENT_ID,
-    Bun.env.DISCORD_CLIENT_SECRET,
-    Bun.env.DISCORD_REDIRECT_URL
-  ),
-
-  async userInfo(accessToken: string): Promise<DiscordAPIUser> {
-    const response = await fetch("https://discord.com/api/v10/users/@me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
-      },
-    });
-
-    return await response.json();
-  },
-} as const;
 
 function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
   const discordId = userInfo.id;
@@ -72,23 +53,22 @@ function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
  */
 export default () =>
   new Elysia()
-    .decorate("discord", discord)
     .use(jwtAuth)
-    .use(discordOAuth2({ provider: discord.oauth2 }))
+    .use(discordOAuth2())
     /** redirects the user to the Discord auth page */
-    .get("/login/discord", ({ oauth2 }) =>
-      oauth2.redirect(["identify", "email"])
+    .get("/login/discord", ({ discord }) =>
+      discord.redirect(["identify", "email"])
     )
     .get(
       "/login/discord/callback",
       async ({
-        oauth2,
+        discord,
         jwtAccess,
         jwtRefresh,
         cookie: { access: cookieAccess, refresh: cookieRefresh },
         redirect,
       }) => {
-        const tokens = await oauth2.authorize();
+        const tokens = await discord.authorize();
         // the data in Discord's response can be found here:
         // https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response
         /*
