@@ -1,4 +1,4 @@
-import { JWTHeaderParameters, SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify } from "jose";
 
 const encoder = new TextEncoder();
 const accessSecret = encoder.encode(Bun.env.JWT_ACCESS_SECRET);
