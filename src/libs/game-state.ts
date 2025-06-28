@@ -6,7 +6,7 @@ import { setTimeout as delay } from "timers/promises";
 import { idToComputerFactory, orderingToMark } from "./run-game";
 import {
   selectMoves,
-  selectGamePlayers,
+  selectPlayersInGame,
   updateLobbyStatus,
   insertFinishedLobby,
   insertMove,
@@ -55,7 +55,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
 
     this.once("end", () => this.removeAllListeners());
     this.once("end", (winnerMark) => {
-      const { playerX, playerO } = selectGamePlayers.get({ lobbyId })!;
+      const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
       const winnerId =
         winnerMark === "X" ? playerX
         : winnerMark === "O" ? playerO

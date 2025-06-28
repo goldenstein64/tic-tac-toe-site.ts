@@ -221,15 +221,6 @@ export const insertFinishedLobby = typePrepared(
   _placeholders as { lobbyId: number; winner?: number }
 );
 
-export const selectGamePlayers = typePrepared(
-  db
-    .select({ playerX: Game.playerX, playerO: Game.playerO })
-    .from(Game)
-    .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
-    .prepare(),
-  _placeholders as { lobbyId: number }
-);
-
 export function updateLobbyStatus({
   id,
   toStatus,

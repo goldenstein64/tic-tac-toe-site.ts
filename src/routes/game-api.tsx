@@ -11,7 +11,7 @@ import { intString } from "../types";
 import { GameRows } from "../components/game-active";
 import { gameStates, GameStateEvents } from "../libs/game-state";
 import {
-  selectGamePlayers,
+  selectPlayersInGame,
   selectMaxOrdering,
   selectUsernameById,
 } from "../db/queries";
@@ -41,7 +41,7 @@ async function* onEnded(
   { board, lobbyId }: MoveStreamContext,
   winnerMark: Mark | null
 ): AsyncGenerator<SSEPayload> {
-  const { playerX, playerO } = selectGamePlayers.get({ lobbyId })!;
+  const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
 
   yield sse({
     event: "board",
@@ -66,7 +66,7 @@ export default new Elysia({ prefix: "/api" })
   .post(
     "/game-move",
     ({ body: { id: lobbyId, position }, user: { id: userId }, status }) => {
-      const players = selectGamePlayers.get({ lobbyId });
+      const players = selectPlayersInGame.get({ lobbyId });
       if (!players) return status("Not Found");
       const { playerX, playerO } = players;
       if (playerX !== userId && playerO !== userId)
@@ -92,7 +92,7 @@ export default new Elysia({ prefix: "/api" })
       set,
       status,
     }) {
-      const players = selectGamePlayers.get({ lobbyId });
+      const players = selectPlayersInGame.get({ lobbyId });
       if (!players) return status("Not Found");
 
       set.headers["X-Accel-Buffering"] = "no";
