@@ -1,47 +1,102 @@
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { once } from "node:events";
 
 import gameApi from "./game-api";
 import { signAccess } from "#/test/util";
 import { gameStates, GameState } from "../libs/game-state";
-import { insertGame, insertLobby } from "../db/queries";
+import { deleteLobbyById, insertGame, insertLobby } from "../db/queries";
+import { Game, Move } from "../db/schema";
+import { db } from "../db";
+import { eq } from "drizzle-orm";
 
 const EasyComputer = 1;
 const DebugUser = 4;
+const AnotherDebugUser = 5;
 
 describe("/api/game-move", () => {
   describe("POST", () => {
-    it("works", async () => {
+    let lobbyId: number;
+    beforeAll(() => {
       const lobby = insertLobby.get({ userId: DebugUser, status: "active" })!;
-      expect(lobby).toBeTruthy();
+      expect(lobby).toBeObject();
+      lobbyId = lobby.id;
       insertGame.run({
-        lobbyId: lobby.id,
+        lobbyId: lobbyId,
         playerX: DebugUser,
         playerO: EasyComputer,
       });
+    });
 
-      const state = new GameState(lobby.id, DebugUser, EasyComputer);
-      gameStates.set(lobby.id, state);
-      const body = new URLSearchParams({
-        id: lobby.id.toString(),
-        position: "4",
-      });
-      const request = new Request("http://localhost/api/game-move", {
-        method: "POST",
-        headers: {
-          Cookie: `access=${await signAccess({ userId: DebugUser })}`,
-        },
-        body,
-      });
+    afterAll(() => {
+      db.delete(Move).where(eq(Move.lobbyId, lobbyId)).run();
+      db.delete(Game).where(eq(Game.lobbyId, lobbyId)).run();
+      deleteLobbyById.run({ id: lobbyId });
+    });
+
+    it("works", async () => {
+      const state = new GameState(lobbyId, DebugUser, EasyComputer);
+      gameStates.set(lobbyId, state);
 
       const moveStreamPromise = once(state, "move-stream");
       const newMovePromise = once(state, "new-move");
 
-      const response = await gameApi.handle(request);
+      const response = await gameApi.handle(
+        new Request("http://localhost/api/game-move", {
+          method: "POST",
+          headers: {
+            Cookie: `access=${await signAccess({ userId: DebugUser })}`,
+          },
+          body: new URLSearchParams({ id: String(lobbyId), position: "4" }),
+        })
+      );
       expect(response.status).toBe(204);
 
       expect(moveStreamPromise).resolves.toStrictEqual(["new-move", [0]]);
       expect(newMovePromise).resolves.toStrictEqual([0]);
+    });
+
+    it("fails if the lobby doesn't exist", async () => {
+      const response = await gameApi.handle(
+        new Request("http://localhost/api/game-move", {
+          method: "POST",
+          headers: {
+            Cookie: `access=${await signAccess({ userId: DebugUser })}`,
+          },
+          body: new URLSearchParams({ id: String(-1), position: "4" }),
+        })
+      );
+      expect(response.status).toBe(404);
+    });
+
+    it("fails if the lobby doesn't have the user as a player", async () => {
+      const response = await gameApi.handle(
+        new Request("http://localhost/api/game-move", {
+          method: "POST",
+          headers: {
+            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
+          },
+          body: new URLSearchParams({ id: String(lobbyId), position: "6" }),
+        })
+      );
+      expect(response.status).toBe(401);
+    });
+
+    it("fails if the position specifies an occupied slot", async () => {
+      async function makeRequest() {
+        return new Request("http://localhost/api/game-move", {
+          method: "POST",
+          headers: {
+            Cookie: `access=${await signAccess({ userId: DebugUser })}`,
+          },
+          body: new URLSearchParams({ id: String(lobbyId), position: "7" }),
+        });
+      }
+
+      const response1 = await gameApi.handle(await makeRequest());
+      expect(response1.status).toBe(204);
+
+      const response2 = await gameApi.handle(await makeRequest());
+      expect(response2.status, await response2.text()).toBe(401);
     });
   });
 });
