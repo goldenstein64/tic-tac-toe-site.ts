@@ -1,6 +1,6 @@
 # tic-tac-toe-site2
 
-A website lets users play tic-tac-toe against each other online. It keeps a record of saved games and uses Discord OAuth2 to implement game history.
+A website that lets users play tic-tac-toe against each other online. It keeps a record of saved games and uses Discord OAuth2 to implement user authentication and individual game history.
 
 ## Outline
 
@@ -13,9 +13,9 @@ A website lets users play tic-tac-toe against each other online. It keeps a reco
   - shows a list of lobbies
     - that are active
     - that are waiting for another player (that isn't you) to join
-    - that are waiting for you to join
+    - that are available for you to join
     - that are finished
-- `/create-game`
+- `/new-lobby`
   - redirects to `/login` if unauthorized
   - shows options for creating a new lobby
     - Player X and Player O types, human or one of three computer difficulties
@@ -34,11 +34,10 @@ A website lets users play tic-tac-toe against each other online. It keeps a reco
     - If it's their turn, the user can place their own mark on any empty space on the board
     - At any time, the user may forfeit, ending the game early
   - If the board is in a finished state, users cannot modify the board any further
-  - If the board is in an unfinished state, one user can
 
 ## Getting Started
 
-To get started, clone this repo and run this command:
+To get started, clone this repo and run:
 
 ```bash
 bun install
@@ -49,15 +48,23 @@ bun install
 To start the development server, run:
 
 ```bash
-bun dev
+bun dev start --watch
 ```
 
 Open http://localhost:3000/ with your browser to see the result.
+
+## Testing
+
+To run tests, run:
+
+```bash
+bun run test
+```
 
 ## Deployment
 
 To start the production server, run:
 
 ```bash
-bun start
+bun prod start
 ```
