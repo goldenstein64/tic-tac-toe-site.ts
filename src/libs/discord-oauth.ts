@@ -2,7 +2,7 @@ import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-
 
 import Elysia from "elysia";
 import { Discord, OAuth2Tokens } from "arctic";
-import discordOauth2 from "./arctic-discord-oauth2";
+import discordOAuth2 from "./arctic-discord-oauth2";
 import { TransactionRollbackError } from "drizzle-orm";
 
 import { tx } from "../db";
@@ -74,7 +74,7 @@ export default () =>
   new Elysia()
     .decorate("discord", discord)
     .use(jwtAuth)
-    .use(discordOauth2({ provider: discord.oauth2 }))
+    .use(discordOAuth2({ provider: discord.oauth2 }))
     /** redirects the user to the Discord auth page */
     .get("/login/discord", ({ oauth2 }) =>
       oauth2.redirect(["identify", "email"])

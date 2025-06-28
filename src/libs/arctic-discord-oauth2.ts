@@ -7,7 +7,7 @@ type DiscordOAuth2Options = {
   cookie?: Omit<Partial<ElysiaCookie>, "value">;
 };
 
-export default function discordOauth2({
+export default function discordOAuth2({
   provider,
   cookie,
 }: DiscordOAuth2Options) {
