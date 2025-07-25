@@ -25,30 +25,25 @@ class MoveStream {
   ) {}
 
   async *onNewMove(ordering: number): AsyncGenerator<SSEPayload> {
+    const { lobbyId, board } = this;
     const nextTurn = orderingToMark(ordering + 1);
     const enabled = this.isClientPlaying && this.userIsX === (nextTurn === "X");
+
     yield sse({
       event: "board",
       data: await (
-        <GameRows
-          lobbyId={this.lobbyId}
-          board={this.board}
-          disabled={!enabled}
-        />
+        <GameRows lobbyId={lobbyId} board={board} disabled={!enabled} />
       ),
     });
   }
 
   async *onEnded(winnerMark: Mark | null): AsyncGenerator<SSEPayload> {
-    const { playerX, playerO } = selectPlayersInGame.get({
-      lobbyId: this.lobbyId,
-    })!;
+    const { lobbyId, board } = this;
+    const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
 
     yield sse({
       event: "board",
-      data: await (
-        <GameRows lobbyId={this.lobbyId} board={this.board} disabled />
-      ),
+      data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
     });
     yield sse({
       event: "winner",
