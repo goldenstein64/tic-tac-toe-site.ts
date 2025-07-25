@@ -91,6 +91,7 @@ export default new Elysia({ prefix: "/api" })
       user: { id: userId },
       set,
       status,
+      request,
     }) {
       const players = selectPlayersInGame.get({ lobbyId });
       if (!players) return status("Not Found");
@@ -111,9 +112,9 @@ export default new Elysia({ prefix: "/api" })
         lobbyId
       );
 
-      const onMoveStream = on(state, "move-stream") as AsyncIterable<
-        GameStateEvents["move-stream"]
-      >;
+      const onMoveStream = on(state, "move-stream", {
+        signal: request.signal,
+      }) as AsyncIterable<GameStateEvents["move-stream"]>;
       for await (const [name, args] of onMoveStream) {
         switch (name) {
           case "new-move":
