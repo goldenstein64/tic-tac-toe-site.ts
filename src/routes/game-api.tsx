@@ -16,47 +16,51 @@ import {
   selectUsernameById,
 } from "../db/queries";
 
-type MoveStreamContext = {
-  board: Board;
-  userIsX: boolean;
-  isClientPlaying: boolean;
-  lobbyId: number;
-};
+class MoveStream {
+  constructor(
+    public board: Board,
+    public userIsX: boolean,
+    public isClientPlaying: boolean,
+    public lobbyId: number
+  ) {}
 
-async function* onNewMove(
-  { userIsX, isClientPlaying, lobbyId, board }: MoveStreamContext,
-  ordering: number
-): AsyncGenerator<SSEPayload> {
-  const nextTurn = orderingToMark(ordering + 1);
-  const enabled = isClientPlaying && userIsX === (nextTurn === "X");
-  yield sse({
-    event: "board",
-    data: await (
-      <GameRows lobbyId={lobbyId} board={board} disabled={!enabled} />
-    ),
-  });
-}
+  async *onNewMove(ordering: number): AsyncGenerator<SSEPayload> {
+    const nextTurn = orderingToMark(ordering + 1);
+    const enabled = this.isClientPlaying && this.userIsX === (nextTurn === "X");
+    yield sse({
+      event: "board",
+      data: await (
+        <GameRows
+          lobbyId={this.lobbyId}
+          board={this.board}
+          disabled={!enabled}
+        />
+      ),
+    });
+  }
 
-async function* onEnded(
-  { board, lobbyId }: MoveStreamContext,
-  winnerMark: Mark | null
-): AsyncGenerator<SSEPayload> {
-  const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
+  async *onEnded(winnerMark: Mark | null): AsyncGenerator<SSEPayload> {
+    const { playerX, playerO } = selectPlayersInGame.get({
+      lobbyId: this.lobbyId,
+    })!;
 
-  yield sse({
-    event: "board",
-    data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
-  });
-  yield sse({
-    event: "winner",
-    data:
-      winnerMark ?
-        selectUsernameById.get({
-          userId: winnerMark === "X" ? playerX : playerO,
-        })!.username
-      : "no one",
-  });
-  yield sse({ event: "status", data: "finished" });
+    yield sse({
+      event: "board",
+      data: await (
+        <GameRows lobbyId={this.lobbyId} board={this.board} disabled />
+      ),
+    });
+    yield sse({
+      event: "winner",
+      data:
+        winnerMark ?
+          selectUsernameById.get({
+            userId: winnerMark === "X" ? playerX : playerO,
+          })!.username
+        : "no one",
+    });
+    yield sse({ event: "status", data: "finished" });
+  }
 }
 
 export default new Elysia({ prefix: "/api" })
@@ -104,22 +108,23 @@ export default new Elysia({ prefix: "/api" })
       const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
       const userIsX = userId === playerX;
 
-      const moveStreamCtx: MoveStreamContext = {
-        board: state.board,
+      const moveStream = new MoveStream(
+        /* board */ state.board,
         userIsX,
-        isClientPlaying: userIsX || userId === playerO,
-        lobbyId,
-      };
+        /* isClientPlaying: */ userIsX || userId == playerO,
+        lobbyId
+      );
+
       const onMoveStream = on(state, "move-stream") as AsyncIterable<
         GameStateEvents["move-stream"]
       >;
       for await (const [name, args] of onMoveStream) {
         switch (name) {
           case "new-move":
-            yield* onNewMove(moveStreamCtx, ...args);
+            yield* moveStream.onNewMove(...args);
             break;
           case "end":
-            yield* onEnded(moveStreamCtx, ...args);
+            yield* moveStream.onEnded(...args);
             return;
         }
       }
