@@ -215,7 +215,10 @@ export default new Elysia({ prefix: "/api" })
 
       if (computerIdX && computerIdO) {
         // both are computers, compute the game ASAP and create a finished lobby
-        const [moves, winnerMark] = await runGame(computerIdX, computerIdO);
+        const { moves, winner: winnerMark } = await runGame(
+          computerIdX,
+          computerIdO
+        );
         const winner =
           winnerMark === "X" ? computerIdX
           : winnerMark === "O" ? computerIdO
