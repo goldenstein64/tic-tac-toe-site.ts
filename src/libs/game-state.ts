@@ -28,12 +28,14 @@ export class GameState extends EventEmitter<GameStateEvents> {
   readonly board: Board = new Board();
   readonly computers: Map<Mark, Player | undefined> = new Map();
 
-  constructor(
-    readonly lobbyId: number,
-    playerX: number,
-    playerO: number
-  ) {
+  constructor(readonly lobbyId: number) {
     super();
+
+    const players = selectPlayersInGame.get({ lobbyId });
+    if (players === undefined)
+      throw new Error("lobby does not have an active game");
+    const { playerX, playerO } = players;
+
     const computerXFactory = idToComputerFactory.get(playerX);
     if (computerXFactory) {
       this.computers.set("X", computerXFactory());
@@ -55,7 +57,6 @@ export class GameState extends EventEmitter<GameStateEvents> {
 
     this.once("end", () => this.removeAllListeners());
     this.once("end", (winnerMark) => {
-      const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
       const winnerId =
         winnerMark === "X" ? playerX
         : winnerMark === "O" ? playerO
@@ -109,10 +110,10 @@ export class GameState extends EventEmitter<GameStateEvents> {
   }
 }
 class GameStates extends Map<number, GameState> {
-  getOrCreate(lobbyId: number, playerX: number, playerO: number): GameState {
+  getOrCreate(lobbyId: number): GameState {
     let state = this.get(lobbyId);
     if (!state) {
-      state = new GameState(lobbyId, playerX, playerO);
+      state = new GameState(lobbyId);
       state.once("end", () => this.delete(lobbyId));
       this.set(lobbyId, state);
     }

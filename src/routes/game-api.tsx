@@ -71,7 +71,7 @@ export default new Elysia({ prefix: "/api" })
       if (playerX !== userId && playerO !== userId)
         return status("Unauthorized");
 
-      const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
+      const state = gameStates.getOrCreate(lobbyId);
       if (!state.canMark(position)) return status("Unauthorized");
 
       const maxOrderResult = selectMaxOrdering.get({ lobbyId });
@@ -101,8 +101,8 @@ export default new Elysia({ prefix: "/api" })
       set.headers["Cache-Control"] = "no-cache";
       set.headers["Content-Type"] = "text/event-stream";
 
+      const state = gameStates.getOrCreate(lobbyId);
       const { playerX, playerO } = players;
-      const state = gameStates.getOrCreate(lobbyId, playerX, playerO);
       const userIsX = userId === playerX;
 
       const moveStream = new MoveStream(
