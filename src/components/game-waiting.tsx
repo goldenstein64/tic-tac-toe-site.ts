@@ -16,7 +16,10 @@ function GameBody({ lobby }: GameBodyProps) {
         <h1>tic-tac-toe-site</h1>
         <h3 id="lobby-status">
           Status:{" "}
-          <div hx-get="/api/lobby/status" hx-trigger="every 30s">
+          <div
+            hx-get={`/api/lobby/status?id=${lobby.id}`}
+            hx-trigger="every 30s"
+          >
             waiting
           </div>
         </h3>

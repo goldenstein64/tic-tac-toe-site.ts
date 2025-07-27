@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <script src="/public/htmx.min.js"></script>
-    <meta charset="UTF-8" />
 
-    <link rel="stylesheet" href="/public/global.css" />
-    <style>
-      .row {
-        padding: 5px 0px;
-      }
-    </style>
-  </head>
+<head>
+  <script src="/public/client/new-lobby.js" type="module"></script>
+  <meta charset="UTF-8" />
 
-  <body>
-    <form name="game-setup" hx-post="/api/lobby" hx-swap="none">
-      <div class="row">
-        <label for="type-x">Player X Type:</label>
-        <select id="type-x" name="typeX" required>
-          <option value="-1">Human</option>
-          <option value="1">Easy Computer</option>
-          <option value="2">Medium Computer</option>
-          <option value="3">Hard Computer</option>
-        </select>
-      </div>
-      <div class="row">
-        <label for="type-o">Player O Type:</label>
-        <select id="type-o" name="typeO" required>
-          <option value="-1">Human</option>
-          <option value="1">Easy Computer</option>
-          <option value="2">Medium Computer</option>
-          <option value="3">Hard Computer</option>
-        </select>
-      </div>
-      <div class="row">
-        <button type="submit">Submit</button>
-      </div>
-    </form>
-  </body>
+  <link rel="stylesheet" href="/public/global.css" />
+  <style>
+    .row {
+      padding: 5px 0px;
+    }
+  </style>
+</head>
+
+<body>
+  <form name="game-setup" hx-post="/api/lobby" hx-swap="none">
+    <div class="row">
+      <label for="type-x">Player X Type:</label>
+      <select id="type-x" name="typeX" required>
+        <option value="-1">Human</option>
+        <option value="1">Easy Computer</option>
+        <option value="2">Medium Computer</option>
+        <option value="3">Hard Computer</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="type-o">Player O Type:</label>
+      <select id="type-o" name="typeO" required>
+        <option value="-1">Human</option>
+        <option value="1">Easy Computer</option>
+        <option value="2">Medium Computer</option>
+        <option value="3">Hard Computer</option>
+      </select>
+    </div>
+    <div class="row">
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+</body>
+
 </html>

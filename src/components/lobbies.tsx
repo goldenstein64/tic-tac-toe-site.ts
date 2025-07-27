@@ -15,7 +15,7 @@ export function LobbiesHead() {
   return (
     <head>
       <title>{SITE_TITLE} - Lobbies</title>
-      <script src="/public/htmx.min.js" />
+      <script src="/public/client/lobby.js" type="module" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="stylesheet" href="/public/global.css" />
