@@ -43,10 +43,10 @@ main {
     background-color: light-dark(white, black);
     border: solid gray 1px;
     border-radius: 6px;
-  }
 
-  & section:not(:target) {
-    display: none;
+    &:not(:target) {
+      display: none;
+    }
   }
 
   & table {
