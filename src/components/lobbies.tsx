@@ -77,9 +77,9 @@ export async function WaitingLobbies({ userId }: WaitingLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td></td>
-          <td>Id</td>
-          <td>Created At</td>
+          <th></th>
+          <th>Id</th>
+          <th>Created At</th>
         </tr>
       </thead>
       <tbody>{waitingLobbies.map(WaitingLobbyItem)}</tbody>
@@ -130,10 +130,10 @@ export async function ActiveLobbies({ userId }: ActiveLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td></td>
-          <td>Id</td>
-          <td>Player X</td>
-          <td>Player O</td>
+          <th></th>
+          <th>Id</th>
+          <th>Player X</th>
+          <th>Player O</th>
         </tr>
       </thead>
       <tbody>{activeLobbies.map(ActiveLobbyItem)}</tbody>
@@ -185,10 +185,10 @@ export async function AvailableLobbies({ userId }: AvailableLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td></td>
-          <td>Id</td>
-          <td>Created At</td>
-          <td>Opponent</td>
+          <th></th>
+          <th>Id</th>
+          <th>Created At</th>
+          <th>Opponent</th>
         </tr>
       </thead>
       <tbody>{availableLobbies.map(AvailableLobbyItem)}</tbody>
@@ -240,12 +240,12 @@ export async function FinishedLobbies({ userId }: FinishedLobbiesProps) {
     <table>
       <thead>
         <tr>
-          <td></td>
-          <td>Id</td>
-          <td>Created At</td>
-          <td>Finished At</td>
-          <td>Player X</td>
-          <td>Player O</td>
+          <th></th>
+          <th>Id</th>
+          <th>Created At</th>
+          <th>Finished At</th>
+          <th>Player X</th>
+          <th>Player O</th>
         </tr>
       </thead>
       <tbody>{finishedLobbies.map(FinishedLobbyItem)}</tbody>
