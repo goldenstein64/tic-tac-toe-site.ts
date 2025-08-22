@@ -73,7 +73,10 @@ export const selectUserActiveLobbies = (() => {
       .where(
         and(
           eq(Lobby.status, "active"),
-          eq(Lobby.createdBy, sql.placeholder("userId"))
+          or(
+            eq(playerX.id, sql.placeholder("userId")),
+            eq(playerO.id, sql.placeholder("userId"))
+          )
         )
       )
       .offset(sql.placeholder("offset"))
@@ -96,7 +99,10 @@ export const countUserActiveLobbies = (() => {
       .where(
         and(
           eq(Lobby.status, "active"),
-          eq(Lobby.createdBy, sql.placeholder("userId"))
+          or(
+            eq(playerX.id, sql.placeholder("userId")),
+            eq(playerO.id, sql.placeholder("userId"))
+          )
         )
       )
       .prepare(),
