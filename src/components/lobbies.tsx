@@ -3,6 +3,10 @@ import type { SelectUser } from "../db/schema";
 import { Html } from "@elysiajs/html";
 
 import {
+  countUserActiveLobbies,
+  countUserAvailableLobbies,
+  countUserFinishedLobbies,
+  countUserWaitingLobbies,
   selectUserActiveLobbies,
   selectUserAvailableLobbies,
   selectUserFinishedLobbies,
@@ -10,6 +14,49 @@ import {
 } from "../db/queries";
 import { DebugPanel } from "./debug";
 import { SITE_TITLE } from "../constants";
+
+const PAGE_SIZE = 25;
+
+type LobbyType = "waiting" | "available" | "active" | "finished";
+
+type PaginatorProps = { type: LobbyType; page: number; count: number };
+function Paginator({ type, page, count }: PaginatorProps) {
+  // if (count === 1) {
+  //   return null;
+  // }
+
+  const prevButton =
+    page <= 1 ?
+      <button disabled>&lt;</button>
+    : <button
+        hx-target="closest .paginator-target"
+        hx-get="/api/lobbies"
+        hx-vals={JSON.stringify({ type, page: page - 1 })}
+      >
+        &lt;
+      </button>;
+
+  const nextButton =
+    page >= count ?
+      <button disabled>&gt;</button>
+    : <button
+        hx-target="closest .paginator-target"
+        hx-get="/api/lobbies"
+        hx-vals={JSON.stringify({ type, page: page + 1 })}
+      >
+        &gt;
+      </button>;
+
+  return (
+    <div class="paginator">
+      {prevButton}
+      <div class="page-number">
+        {page} / {count}
+      </div>
+      {nextButton}
+    </div>
+  );
+}
 
 export function LobbiesHead() {
   return (
@@ -41,7 +88,6 @@ export async function UserConfig({ user }: { user: SelectUser }) {
 }
 
 type WaitingLobbyItemProps = { lobbyId: number; createdAt: Date };
-
 export function WaitingLobbyItem({
   lobbyId,
   createdAt,
@@ -69,21 +115,35 @@ export function WaitingLobbyItem({
   );
 }
 
-type WaitingLobbiesProps = { userId: number };
-
-export async function WaitingLobbies({ userId }: WaitingLobbiesProps) {
-  const waitingLobbies = selectUserWaitingLobbies.all({ userId });
+type WaitingLobbiesProps = { userId: number; page?: number };
+export async function WaitingLobbies({
+  userId,
+  page = 1,
+}: WaitingLobbiesProps) {
+  const waitingLobbies = selectUserWaitingLobbies.all({
+    userId,
+    offset: PAGE_SIZE * (page - 1),
+    limit: PAGE_SIZE,
+  });
+  const numWaiting = countUserWaitingLobbies.get({ userId })!.count;
   return (
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>Id</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody>{waitingLobbies.map(WaitingLobbyItem)}</tbody>
-    </table>
+    <div class="paginator-target">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>{waitingLobbies.map(WaitingLobbyItem)}</tbody>
+      </table>
+      <Paginator
+        type="waiting"
+        page={page}
+        count={Math.ceil(numWaiting / PAGE_SIZE)}
+      />
+    </div>
   );
 }
 
@@ -92,7 +152,6 @@ type ActiveLobbyItemProps = {
   playerX: string;
   playerO: string;
 };
-
 export function ActiveLobbyItem({
   lobbyId,
   playerX,
@@ -122,22 +181,33 @@ export function ActiveLobbyItem({
   );
 }
 
-type ActiveLobbiesProps = { userId: number };
-
-export async function ActiveLobbies({ userId }: ActiveLobbiesProps) {
-  const activeLobbies = selectUserActiveLobbies.all({ userId });
+type ActiveLobbiesProps = { userId: number; page?: number };
+export async function ActiveLobbies({ userId, page = 1 }: ActiveLobbiesProps) {
+  const activeLobbies = selectUserActiveLobbies.all({
+    userId,
+    offset: PAGE_SIZE * (page - 1),
+    limit: PAGE_SIZE,
+  });
+  const numActive = countUserActiveLobbies.get({ userId })!.count;
   return (
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>Id</th>
-          <th>Player X</th>
-          <th>Player O</th>
-        </tr>
-      </thead>
-      <tbody>{activeLobbies.map(ActiveLobbyItem)}</tbody>
-    </table>
+    <div class="paginator-target">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Player X</th>
+            <th>Player O</th>
+          </tr>
+        </thead>
+        <tbody>{activeLobbies.map(ActiveLobbyItem)}</tbody>
+      </table>
+      <Paginator
+        type="active"
+        page={page}
+        count={Math.ceil(numActive / PAGE_SIZE)}
+      />
+    </div>
   );
 }
 
@@ -146,7 +216,6 @@ type AvailableLobbyItemProps = {
   opponent: string;
   createdAt: Date;
 };
-
 export function AvailableLobbyItem({
   lobbyId,
   opponent,
@@ -178,21 +247,36 @@ export function AvailableLobbyItem({
   );
 }
 
-type AvailableLobbiesProps = { userId: number };
-export async function AvailableLobbies({ userId }: AvailableLobbiesProps) {
-  const availableLobbies = selectUserAvailableLobbies.all({ userId });
+type AvailableLobbiesProps = { userId: number; page?: number };
+export async function AvailableLobbies({
+  userId,
+  page = 1,
+}: AvailableLobbiesProps) {
+  const availableLobbies = selectUserAvailableLobbies.all({
+    userId,
+    offset: PAGE_SIZE * (page - 1),
+    limit: PAGE_SIZE,
+  });
+  const numAvailable = countUserAvailableLobbies.get({ userId })!.count;
   return (
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>Id</th>
-          <th>Created At</th>
-          <th>Opponent</th>
-        </tr>
-      </thead>
-      <tbody>{availableLobbies.map(AvailableLobbyItem)}</tbody>
-    </table>
+    <div class="paginator-target">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Created At</th>
+            <th>Opponent</th>
+          </tr>
+        </thead>
+        <tbody>{availableLobbies.map(AvailableLobbyItem)}</tbody>
+      </table>
+      <Paginator
+        type="available"
+        page={page}
+        count={Math.ceil(numAvailable / PAGE_SIZE)}
+      />
+    </div>
   );
 }
 
@@ -231,25 +315,40 @@ export function FinishedLobbyItem({
   );
 }
 
-type FinishedLobbiesProps = { userId: number };
+type FinishedLobbiesProps = { userId: number; page?: number };
 
 /** a table of the user's finished lobbies */
-export async function FinishedLobbies({ userId }: FinishedLobbiesProps) {
-  const finishedLobbies = selectUserFinishedLobbies.all({ userId });
+export async function FinishedLobbies({
+  userId,
+  page = 1,
+}: FinishedLobbiesProps) {
+  const finishedLobbies = selectUserFinishedLobbies.all({
+    userId,
+    offset: PAGE_SIZE * (page - 1),
+    limit: PAGE_SIZE,
+  });
+  const numFinished = countUserFinishedLobbies.get({ userId })!.count;
   return (
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>Id</th>
-          <th>Created At</th>
-          <th>Finished At</th>
-          <th>Player X</th>
-          <th>Player O</th>
-        </tr>
-      </thead>
-      <tbody>{finishedLobbies.map(FinishedLobbyItem)}</tbody>
-    </table>
+    <div class="paginator-target">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Created At</th>
+            <th>Finished At</th>
+            <th>Player X</th>
+            <th>Player O</th>
+          </tr>
+        </thead>
+        <tbody>{finishedLobbies.map(FinishedLobbyItem)}</tbody>
+      </table>
+      <Paginator
+        type="finished"
+        page={page}
+        count={Math.ceil(numFinished / PAGE_SIZE)}
+      />
+    </div>
   );
 }
 

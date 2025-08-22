@@ -1,4 +1,14 @@
-import { eq, ne, and, or, sql, SQL, max, aliasedTable } from "drizzle-orm";
+import {
+  eq,
+  ne,
+  and,
+  or,
+  sql,
+  SQL,
+  max,
+  aliasedTable,
+  count,
+} from "drizzle-orm";
 
 import { db, typePrepared } from ".";
 import { LobbyStatus } from "./datatypes";
@@ -66,6 +76,29 @@ export const selectUserActiveLobbies = (() => {
           eq(Lobby.createdBy, sql.placeholder("userId"))
         )
       )
+      .offset(sql.placeholder("offset"))
+      .limit(sql.placeholder("limit"))
+      .prepare(),
+    _placeholders as { userId: number; offset: number; limit: number }
+  );
+})();
+
+export const countUserActiveLobbies = (() => {
+  const playerX = aliasedTable(User, "playerX");
+  const playerO = aliasedTable(User, "playerO");
+  return typePrepared(
+    db
+      .select({ count: count() })
+      .from(Lobby)
+      .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
+      .innerJoin(playerX, eq(playerX.id, Game.playerX))
+      .innerJoin(playerO, eq(playerO.id, Game.playerO))
+      .where(
+        and(
+          eq(Lobby.status, "active"),
+          eq(Lobby.createdBy, sql.placeholder("userId"))
+        )
+      )
       .prepare(),
     _placeholders as { userId: number }
   );
@@ -91,7 +124,36 @@ export const selectUserFinishedLobbies = (() => {
       .where(
         and(
           eq(Lobby.status, "finished"),
-          eq(Lobby.createdBy, sql.placeholder("userId"))
+          or(
+            eq(playerX.id, sql.placeholder("userId")),
+            eq(playerO.id, sql.placeholder("userId"))
+          )
+        )
+      )
+      .offset(sql.placeholder("offset"))
+      .limit(sql.placeholder("limit"))
+      .prepare(),
+    _placeholders as { userId: number; offset: number; limit: number }
+  );
+})();
+
+export const countUserFinishedLobbies = (() => {
+  const playerX = aliasedTable(User, "playerX");
+  const playerO = aliasedTable(User, "playerO");
+  return typePrepared(
+    db
+      .select({ count: count() })
+      .from(Lobby)
+      .innerJoin(Game, eq(Game.lobbyId, Lobby.id))
+      .innerJoin(playerX, eq(playerX.id, Game.playerX))
+      .innerJoin(playerO, eq(playerO.id, Game.playerO))
+      .where(
+        and(
+          eq(Lobby.status, "finished"),
+          or(
+            eq(playerX.id, sql.placeholder("userId")),
+            eq(playerO.id, sql.placeholder("userId"))
+          )
         )
       )
       .prepare(),
@@ -114,6 +176,23 @@ export const selectUserAvailableLobbies = typePrepared(
         ne(Lobby.createdBy, sql.placeholder("userId"))
       )
     )
+    .offset(sql.placeholder("offset"))
+    .limit(sql.placeholder("limit"))
+    .prepare(),
+  _placeholders as { userId: number; offset: number; limit: number }
+);
+
+export const countUserAvailableLobbies = typePrepared(
+  db
+    .select({ count: count() })
+    .from(Lobby)
+    .innerJoin(User, eq(User.id, Lobby.createdBy))
+    .where(
+      and(
+        eq(Lobby.status, "waiting"),
+        ne(Lobby.createdBy, sql.placeholder("userId"))
+      )
+    )
     .prepare(),
   _placeholders as { userId: number }
 );
@@ -124,6 +203,22 @@ export const selectUserWaitingLobbies = typePrepared(
       lobbyId: Lobby.id,
       createdAt: Lobby.createdAt,
     })
+    .from(Lobby)
+    .where(
+      and(
+        eq(Lobby.status, "waiting"),
+        eq(Lobby.createdBy, sql.placeholder("userId"))
+      )
+    )
+    .offset(sql.placeholder("offset"))
+    .limit(sql.placeholder("limit"))
+    .prepare(),
+  _placeholders as { userId: number; offset: number; limit: number }
+);
+
+export const countUserWaitingLobbies = typePrepared(
+  db
+    .select({ count: count() })
     .from(Lobby)
     .where(
       and(

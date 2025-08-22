@@ -6,7 +6,7 @@ import Elysia, { t, type status } from "elysia";
 import { randomInt } from "node:crypto";
 
 import { gameStates } from "../libs/game-state";
-import { intString } from "../types";
+import { intString, TLobbyType } from "../types";
 import { tx } from "../db";
 import {
   updateLobbyStatus,
@@ -21,6 +21,12 @@ import {
 } from "../db/queries";
 import runGame from "../libs/run-game";
 import jwtAuth from "../libs/jwt-auth";
+import {
+  ActiveLobbies,
+  AvailableLobbies,
+  FinishedLobbies,
+  WaitingLobbies,
+} from "../components/lobbies";
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
@@ -194,6 +200,24 @@ export default new Elysia({ prefix: "/api" })
       },
     }
   )
+  .get(
+    "/lobbies",
+    async ({ query: { type, page }, user: { id: userId }, status }) => {
+      switch (type) {
+        case "waiting":
+          return WaitingLobbies({ userId, page });
+        case "available":
+          return AvailableLobbies({ userId, page });
+        case "active":
+          return ActiveLobbies({ userId, page });
+        case "finished":
+          return FinishedLobbies({ userId, page });
+        default:
+          return status("Unprocessable Content");
+      }
+    },
+    { query: t.Object({ type: TLobbyType, page: intString }) }
+  )
   .patch(
     "/lobby",
     async ({ body: { id: lobbyId, action }, user: { id: userId }, status }) => {
@@ -202,6 +226,8 @@ export default new Elysia({ prefix: "/api" })
           return await forfeitActiveLobby(status, lobbyId, userId);
         case "join":
           return await joinWaitingLobby(lobbyId, userId);
+        default:
+          return status("Unprocessable Content");
       }
     },
     { body: t.Object({ id: intString, action: LobbyAction }) }
