@@ -3,7 +3,7 @@ import type { Board, Mark } from "@goldenstein64/tic-tac-toe";
 import { Html } from "@elysiajs/html";
 
 import {
-  selectGameMoves,
+  selectMovesInGame,
   selectMaxOrdering,
   selectPlayersInGame,
   selectUserById,
@@ -115,7 +115,7 @@ export function GameRows({ lobbyId, board, disabled }: GameRowsProps) {
 type GameBoardProps = { lobby: SelectLobby; disabled?: boolean };
 
 function GameBoard({ lobby: { id: lobbyId }, disabled }: GameBoardProps) {
-  const movesArray = selectGameMoves.all({ lobbyId });
+  const movesArray = selectMovesInGame.all({ lobbyId });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
   );

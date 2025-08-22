@@ -3,7 +3,7 @@ import type { Mark } from "@goldenstein64/tic-tac-toe";
 import { Html } from "@elysiajs/html";
 
 import { SelectLobby } from "../db/schema";
-import { selectGameMoves } from "../db/queries";
+import { selectMovesInGame } from "../db/queries";
 import { orderingToMark } from "../libs/run-game";
 import { COLUMN_LABELS, ROW_LABELS } from "./game-active";
 
@@ -44,7 +44,7 @@ function GameRow({ start, moves, ariaLabel: rowLabel }: GameRowProps) {
 }
 
 export function GameBoard({ lobby }: { lobby: SelectLobby }) {
-  const movesArray = selectGameMoves.all({ lobbyId: lobby.id });
+  const movesArray = selectMovesInGame.all({ lobbyId: lobby.id });
   const moves = new Map<number, number>(
     movesArray.map(({ position, ordering }) => [position, ordering])
   );

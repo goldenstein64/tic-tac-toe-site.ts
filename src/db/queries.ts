@@ -20,7 +20,7 @@ type SQLProps<T extends Record<string, unknown>> = {
 
 const _placeholders: any = undefined;
 
-export const selectGameMoves = typePrepared(
+export const selectMovesInGame = typePrepared(
   db
     .select({ position: Move.position, ordering: Move.ordering })
     .from(Move)
