@@ -2,6 +2,7 @@ import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import {
   text,
   sqliteTable as createTable,
+  index,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 
@@ -81,9 +82,10 @@ export const Move = createTable(
     ordering: number().notNull(),
     position: number().notNull(),
   },
-  (Move) => ({
-    primaryKey: primaryKey({ columns: [Move.lobbyId, Move.ordering] }),
-  })
+  (Move) => [
+    index("LobbyMove").on(Move.lobbyId),
+    primaryKey({ columns: [Move.lobbyId, Move.ordering] }),
+  ]
 );
 export type SelectMove = InferSelectModel<typeof Move>;
 export type InsertMove = InferInsertModel<typeof Move>;
