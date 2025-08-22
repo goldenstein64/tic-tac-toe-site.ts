@@ -34,7 +34,7 @@ describe("/api/game-move", () => {
     });
 
     it("works", async () => {
-      const state = new GameState(lobbyId, DebugUser, EasyComputer);
+      const state = new GameState(lobbyId);
       gameStates.set(lobbyId, state);
 
       const moveStreamPromise = once(state, "move-stream");
