@@ -21,6 +21,10 @@ const discord = new Discord(
 
 const DAYS = 24 * 60 * 60;
 
+function plural(arr: any[]): string {
+  return arr.length === 1 ? "" : "s";
+}
+
 const refreshTokens = await db
   .select({
     refreshToken: DiscordUser.refreshToken,
@@ -30,9 +34,7 @@ const refreshTokens = await db
   .where(gt(DiscordUser.expiresAt, new Date(Date.now() - 1.5 * DAYS)));
 
 console.log(
-  `refreshing ${refreshTokens.length} token${
-    refreshTokens.length === 1 ? "" : "s"
-  }...`
+  `refreshing ${refreshTokens.length} token${plural(refreshTokens)}...`
 );
 const refreshResults = await Promise.allSettled(
   refreshTokens.map(async ({ refreshToken, discordId }) => {
@@ -61,13 +63,17 @@ const refreshCount = refreshResults.reduce(
 console.log(`refreshed ${refreshCount} tokens`);
 
 if (refreshCount < refreshResults.length) {
-  const rejectedRefreshes = refreshResults.filter(
-    (result): result is PromiseRejectedResult => result.status === "rejected"
-  );
-  const errors = rejectedRefreshes.map(({ reason }) => reason);
+  const errors = refreshResults
+    .values()
+    .filter((result) => result.status === "rejected")
+    .map(({ reason }) => reason)
+    .toArray();
+
   console.error(
-    `${rejectedRefreshes.length} token${
-      rejectedRefreshes.length === 1 ? "" : "s"
-    } couldn't be refreshed!\nerrors:\n${errors}`
+    [
+      `${errors.length} token${plural(errors)} couldn't be refreshed!`,
+      "errors:",
+      ...errors,
+    ].join("\n")
   );
 }
