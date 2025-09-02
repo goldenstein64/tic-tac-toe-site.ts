@@ -2,6 +2,7 @@ import { Html } from "@elysiajs/html";
 
 import { DebugPanel } from "./debug";
 import { SITE_TITLE } from "../constants";
+import { TopNav } from "./base";
 
 function LoginHead() {
   return (
@@ -21,6 +22,7 @@ function LoginBody() {
     <body>
       <header>
         <DebugPanel />
+        <TopNav />
       </header>
       <main>
         <section>

@@ -6,6 +6,7 @@ import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
 import { GameBoard } from "./game-dormant";
 import { SITE_TITLE } from "../constants";
+import { TopNav } from "./base";
 
 type GameBodyProps = { lobby: SelectLobby };
 
@@ -14,7 +15,7 @@ function GameBody({ lobby }: GameBodyProps) {
     <body>
       <header>
         <DebugPanel />
-        <h1>{SITE_TITLE}</h1>
+        <TopNav />
         <h3 id="lobby-status">
           Status:{" "}
           <div

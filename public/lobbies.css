@@ -10,6 +10,9 @@ body {
 
 section#user-config {
   padding: 5px 0px;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
 header {

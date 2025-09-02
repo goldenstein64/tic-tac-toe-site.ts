@@ -69,3 +69,18 @@ button {
 #debug-panel > form.get-user > button[type="submit"] {
   margin-left: 5px;
 }
+
+nav#top-nav {
+  width: 100%;
+  padding: 0 0.5em;
+  margin: 0;
+  margin-bottom: 0.5em;
+  box-sizing: border-box;
+  gap: 0.5em;
+  display: flex;
+  align-items: center;
+}
+
+.flex-fill {
+  flex-grow: 1;
+}

@@ -13,6 +13,7 @@ import { orderingToMark } from "../libs/run-game";
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
 import { SITE_TITLE } from "../constants";
+import { TopNav } from "./base";
 
 export const COLUMN_LABELS = ["left", "center", "right"] as const;
 export const ROW_LABELS = ["Top", "Middle", "Bottom"] as const;
@@ -159,7 +160,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
     >
       <header>
         <DebugPanel />
-        <h1>{SITE_TITLE}</h1>
+        <TopNav />
         <h3 id="lobby-status">
           Status: <span sse-swap="status">active</span>
         </h3>

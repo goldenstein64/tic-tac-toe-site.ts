@@ -14,6 +14,7 @@ import {
 } from "../db/queries";
 import { DebugPanel } from "./debug";
 import { SITE_TITLE } from "../constants";
+import { TopNav } from "./base";
 
 const PAGE_SIZE = 25;
 
@@ -358,11 +359,13 @@ export async function LobbiesBody({ user }: LobbiesProps) {
     <body>
       <header>
         <DebugPanel />
-        <h1>{SITE_TITLE}</h1>
-        <button type="button" hx-on-click="location.href='/new-lobby'">
-          New Lobby
-        </button>
-        <UserConfig user={user} />
+        <TopNav>
+          <button type="button" hx-on-click="location.href='/new-lobby'">
+            New Lobby
+          </button>
+          <div class="flex-fill" />
+          <UserConfig user={user} />
+        </TopNav>
         <nav>
           <button type="button" hx-on-click="location.hash='#active-games'">
             Active Games
