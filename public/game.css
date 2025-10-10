@@ -29,7 +29,6 @@ main {
     padding: 5px;
     text-align: center;
     background: light-dark(white, black);
-    height: 100%;
   }
 
   > aside:first-of-type {
