@@ -8,14 +8,6 @@ body {
   background-size: 100% 100vh;
 }
 
-h1 {
-  font-size: 3em;
-  color: white;
-  margin: 0.66em auto;
-  width: fit-content;
-  color: gray;
-}
-
 h3#lobby-status {
   float: clear;
 }
