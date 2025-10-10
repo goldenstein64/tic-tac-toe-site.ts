@@ -21,8 +21,9 @@ export function PlayerInfo({ user, mark }: { user?: SelectUser; mark?: Mark }) {
   if (user) {
     return (
       <aside>
-        <p>{user.username}</p>
-        {mark && <p>{mark}</p>}
+        <p>
+          {user.username} {mark && `(${mark})`}
+        </p>
       </aside>
     );
   } else {
