@@ -12,8 +12,7 @@ import { SelectLobby, SelectUser } from "../db/schema";
 import { orderingToMark } from "../libs/run-game";
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
-import { SITE_TITLE } from "../constants";
-import { TopNav } from "./base";
+import { TopNav, UserConfig } from "./base";
 
 export const COLUMN_LABELS = ["left", "center", "right"] as const;
 export const ROW_LABELS = ["Top", "Middle", "Bottom"] as const;
@@ -160,7 +159,10 @@ function GameBody({ lobby, user }: GameBodyProps) {
     >
       <header>
         <DebugPanel />
-        <TopNav />
+        <TopNav>
+          <div class="flex-fill" />
+          <UserConfig user={user} />
+        </TopNav>
         <h3 id="lobby-status">
           Status: <span sse-swap="status">active</span>
         </h3>

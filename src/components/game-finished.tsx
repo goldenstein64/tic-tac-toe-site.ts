@@ -1,5 +1,5 @@
 import { Html } from "@elysiajs/html";
-import { SelectLobby } from "../db/schema";
+import { SelectLobby, SelectUser } from "../db/schema";
 import {
   selectPlayersInGame,
   selectFinishedLobby,
@@ -10,12 +10,11 @@ import {
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
 import { GameBoard } from "./game-dormant";
-import { SITE_TITLE } from "../constants";
-import { TopNav } from "./base";
+import { TopNav, UserConfig } from "./base";
 
-type GameBodyProps = { lobby: SelectLobby };
+type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 
-function GameBody({ lobby }: GameBodyProps) {
+function GameBody({ lobby, user }: GameBodyProps) {
   const { playerX, playerO } = selectPlayersInGame.get({
     lobbyId: lobby.id,
   })!;
@@ -24,7 +23,10 @@ function GameBody({ lobby }: GameBodyProps) {
     <body>
       <header>
         <DebugPanel />
-        <TopNav />
+        <TopNav>
+          <div class="flex-fill" />
+          <UserConfig user={user} />
+        </TopNav>
         <h3 id="lobby-status">Status: finished</h3>
         <h3 id="lobby-winner">
           Winner:{" "}
