@@ -15,7 +15,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
       href="/public/game.css" /></head
   ><body
     ><header
-      ><h1>tic-tac-toe-site</h1
+      ><nav id="top-nav"><h1>tic-tac-toe-site</h1></nav
       ><h3 id="lobby-status"
         >Status:
         <div hx-get="/api/lobby/status?id=1" hx-trigger="every 30s"
@@ -23,8 +23,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
         ></h3
       ><h3 id="lobby-winner">Winner: </h3></header
     ><main
-      ><aside><p>DebugUser</p></aside
-      ><aside></aside
+      ><aside><p>DebugUser </p></aside><aside></aside
       ><section class="game-board"
         ><button type="button" disabled="" aria-label="Top-left"></button
         ><button type="button" disabled="" aria-label="Top-center"></button
@@ -58,13 +57,13 @@ exports[`game.tsx matches active lobby 1`] = `
       href="/public/game.css" /></head
   ><body hx-trigger="load" hx-ext="sse" sse-connect="/api/game-move?id=2"
     ><header
-      ><h1>tic-tac-toe-site</h1
+      ><nav id="top-nav"><h1>tic-tac-toe-site</h1></nav
       ><h3 id="lobby-status">Status: <span sse-swap="status">active</span></h3
       ><h3 id="lobby-winner"
         >Winner: <span sse-swap="winner"></span></h3></header
     ><main
-      ><aside><p>DebugUser</p><p>X</p></aside
-      ><aside><p>HardComputer</p><p>O</p></aside
+      ><aside><p>DebugUser (X)</p></aside
+      ><aside><p>HardComputer (O)</p></aside
       ><section class="game-board" hx-swap="innerHTML" sse-swap="board"
         ><button
           type="button"
@@ -164,11 +163,12 @@ exports[`game.tsx matches finished lobby 1`] = `
       href="/public/game.css" /></head
   ><body
     ><header
-      ><h1>tic-tac-toe-site</h1><h3 id="lobby-status">Status: finished</h3
+      ><nav id="top-nav"><h1>tic-tac-toe-site</h1></nav
+      ><h3 id="lobby-status">Status: finished</h3
       ><h3 id="lobby-winner">Winner: DebugUser</h3></header
     ><main
-      ><aside><p>DebugUser</p><p>X</p></aside
-      ><aside><p>EasyComputer</p><p>O</p></aside
+      ><aside><p>DebugUser (X)</p></aside
+      ><aside><p>EasyComputer (O)</p></aside
       ><section class="game-board"
         ><button type="button" disabled="" aria-label="Top-left" class="mark-x"
           >X</button
