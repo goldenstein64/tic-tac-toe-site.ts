@@ -35,15 +35,13 @@ A website that lets users play tic-tac-toe against each other online. It keeps a
     - At any time, the user may forfeit, ending the game early
   - If the board is in a finished state, users cannot modify the board any further
 
-## Getting Started
+## Development
 
 To get started, clone this repo and run:
 
 ```bash
 bun install
 ```
-
-## Development
 
 To start the development server, run:
 
@@ -58,7 +56,7 @@ Open http://localhost:3000/ with your browser to see the result.
 To run tests, run:
 
 ```bash
-bun run test
+bun test
 ```
 
 ## Deployment
