@@ -11,6 +11,9 @@ body {
 h1 {
   font-size: 3em;
   color: white;
+  margin: 0.66em auto;
+  width: fit-content;
+  color: gray;
 }
 
 h3#lobby-status {
@@ -37,12 +40,6 @@ main {
     float: right;
     border-radius: 4px 0 0 4px;
   }
-}
-
-h1 {
-  margin: 0.66em auto;
-  width: fit-content;
-  color: gray;
 }
 
 .game-board {
