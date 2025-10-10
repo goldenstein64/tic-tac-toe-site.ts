@@ -24,7 +24,8 @@ body {
 }
 
 button,
-input[type="button"] {
+input[type="button"],
+.btn {
   background: linear-gradient(
     light-dark(#efefef, #444444),
     light-dark(#e5e5e5, #292929)
@@ -37,9 +38,7 @@ input[type="button"] {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-}
 
-button {
   &:disabled {
     background: linear-gradient(
       light-dark(#d1d1d1, #646464),
