@@ -28,17 +28,15 @@ export const app = new Elysia({ name: "App" })
   .get("/login", async ({ user, redirect }) => {
     return user ? redirect("/", 302) : LoginHtml();
   })
-  .guard({
-    async beforeHandle({ user, path, redirect }) {
-      if (
-        !user &&
-        !path.startsWith("/debug") &&
-        !path.startsWith("/public") &&
-        path !== "/login"
-      ) {
-        return redirect("/login", 302);
-      }
-    },
+  .onBeforeHandle(({ user, path, redirect }) => {
+    if (
+      !user &&
+      !path.startsWith("/debug") &&
+      !path.startsWith("/public") &&
+      path !== "/login"
+    ) {
+      return redirect("/login", 302);
+    }
   })
   .resolve(({ user }) => ({ user: user! }))
   .use(gameApi)
@@ -47,13 +45,14 @@ export const app = new Elysia({ name: "App" })
   .get("/", ({ user }) => LobbiesHtml({ user }))
   .get(
     "/game",
-    ({ query: { id: lobbyId }, user, status }) => {
+    ({ query: { id: lobbyId }, user, status, set }) => {
       const lobby = selectLobbyById.get({ lobbyId });
+      set.headers["content-type"] = "text/html";
       return (
         !lobby ? status(404)
         : lobby.status === "active" ? ActiveGameHtml({ lobby, user })
-        : lobby.status === "waiting" ? WaitingGameHtml({ lobby })
-        : lobby.status === "finished" ? FinishedGameHtml({ lobby })
+        : lobby.status === "waiting" ? WaitingGameHtml({ lobby, user })
+        : lobby.status === "finished" ? FinishedGameHtml({ lobby, user })
         : status(404)
       );
     },
