@@ -23,6 +23,24 @@ body {
   margin: 0px;
 }
 
+header {
+  & > button {
+    display: block;
+  }
+
+  & > nav {
+    background: light-dark(white, black);
+    border-radius: 4px;
+    margin: 0px auto;
+    padding: 10px;
+    width: fit-content;
+
+    & > button + button {
+      margin-left: 10px;
+    }
+  }
+}
+
 button,
 input[type="button"],
 .btn {
