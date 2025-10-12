@@ -19,6 +19,7 @@ import gameApi from "./routes/game-api";
 import lobbyApi from "./routes/lobby-api";
 import sessionApi from "./routes/session-api";
 import debug from "./routes/debug";
+import { NewLobbyHtml } from "./components/new-lobby";
 
 export const app = new Elysia({ name: "App" })
   .use(await debug())
@@ -58,7 +59,7 @@ export const app = new Elysia({ name: "App" })
     },
     { query: t.Object({ id: intString }) }
   )
-  .get("/new-lobby", () => Bun.file("./private/new-lobby.html"))
+  .get("/new-lobby", ({ user }) => NewLobbyHtml({ user }))
   .use(staticPlugin());
 
 export type App = typeof app;
