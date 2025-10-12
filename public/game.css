@@ -53,6 +53,13 @@ main {
     border-radius: 0;
     box-sizing: border-box;
 
+    /* attempts to keep the button the same size even if it's empty */
+    &:empty::after {
+      content: "X";
+      font: inherit;
+      visibility: hidden;
+    }
+
     &:disabled {
       background: transparent;
       border: 1px solid light-dark(black, white);
