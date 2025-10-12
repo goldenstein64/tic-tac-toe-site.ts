@@ -18,15 +18,6 @@ function GameBody({ lobby, user }: GameBodyProps) {
           <div class="flex-fill" />
           <UserConfig user={user} />
         </TopNav>
-        <h3 id="lobby-status">
-          Status:{" "}
-          <div
-            hx-get={`/api/lobby/status?id=${lobby.id}`}
-            hx-trigger="every 30s"
-          >
-            waiting
-          </div>
-        </h3>
         <h3 id="lobby-winner">Winner: </h3>
       </header>
       <main>
@@ -37,6 +28,16 @@ function GameBody({ lobby, user }: GameBodyProps) {
         <PlayerInfo user={undefined} mark={undefined} />
         <GameBoard lobby={lobby} />
       </main>
+      <footer>
+        <span
+          hx-get={`/api/lobby/status?id=${lobby.id}`}
+          hx-trigger="every 30s"
+          id="lobby-status"
+          data-status="waiting"
+        >
+          waiting
+        </span>
+      </footer>
     </body>
   );
 }

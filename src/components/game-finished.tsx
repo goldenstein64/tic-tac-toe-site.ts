@@ -27,7 +27,6 @@ function GameBody({ lobby, user }: GameBodyProps) {
           <div class="flex-fill" />
           <UserConfig user={user} />
         </TopNav>
-        <h3 id="lobby-status">Status: finished</h3>
         <h3 id="lobby-winner">
           Winner:{" "}
           {winnerId === null ?
@@ -42,6 +41,11 @@ function GameBody({ lobby, user }: GameBodyProps) {
         <PlayerInfo user={selectUserById.get({ userId: playerO })} mark="O" />
         <GameBoard lobby={lobby} />
       </main>
+      <footer>
+        <span id="lobby-status" data-status="finished">
+          finished
+        </span>
+      </footer>
     </body>
   );
 }

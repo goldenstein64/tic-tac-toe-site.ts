@@ -67,3 +67,10 @@ main {
     }
   }
 }
+
+footer {
+  position: absolute;
+  width: calc(100% - 2em);
+  bottom: 1em;
+  left: 1em;
+}

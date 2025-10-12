@@ -163,9 +163,6 @@ function GameBody({ lobby, user }: GameBodyProps) {
           <div class="flex-fill" />
           <UserConfig user={user} />
         </TopNav>
-        <h3 id="lobby-status">
-          Status: <span sse-swap="status">active</span>
-        </h3>
         <h3 id="lobby-winner">
           Winner: <span sse-swap="winner" />
         </h3>
@@ -175,6 +172,11 @@ function GameBody({ lobby, user }: GameBodyProps) {
         <PlayerInfo user={playerOUser} mark="O" />
         <GameBoard lobby={lobby} disabled={nextMark !== userMark} />
       </main>
+      <footer>
+        <span id="lobby-status" sse-swap="status" data-status="active">
+          active
+        </span>
+      </footer>
     </body>
   );
 }
