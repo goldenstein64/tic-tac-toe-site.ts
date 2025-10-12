@@ -21,7 +21,9 @@ export async function UserConfig({ user }: { user: SelectUser }) {
 export function TopNav({ children }: { children?: Children }) {
   return (
     <nav id="top-nav">
-      <h1>tic-tac-toe-site</h1>
+      <h1>
+        <a href="/">tic-tac-toe-site</a>
+      </h1>
       {children}
     </nav>
   );
