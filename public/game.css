@@ -47,9 +47,7 @@ main {
     height: 100%;
     aspect-ratio: 1 / 1;
     border: 1px solid light-dark(white, black);
-    font-size: 10vmax;
-    font-weight: 800;
-    line-height: 0;
+    font: 800 10vmax / 0 var(--font-family);
     border-radius: 0;
     box-sizing: border-box;
 

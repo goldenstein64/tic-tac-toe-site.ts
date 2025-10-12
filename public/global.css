@@ -13,6 +13,8 @@
 
   --color-theme-beach1: rgb(91, 204, 213);
   --color-theme-beach2: #1072c7;
+
+  --font-family: sans-serif;
 }
 
 * {
