@@ -42,10 +42,6 @@ class MoveStream {
     const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
 
     yield sse({
-      event: "board",
-      data: await (<GameRows lobbyId={lobbyId} board={board} disabled />),
-    });
-    yield sse({
       event: "winner",
       data:
         winnerMark ?
