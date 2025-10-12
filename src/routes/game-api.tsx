@@ -55,6 +55,7 @@ class MoveStream {
         : "no one",
     });
     yield sse({ event: "status", data: "finished" });
+    yield sse({ event: "end" });
   }
 }
 

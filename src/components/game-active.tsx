@@ -156,6 +156,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
       hx-trigger="load"
       hx-ext="sse"
       sse-connect={`/api/game-move?id=${lobby.id}`}
+      sse-close="end"
     >
       <header>
         <DebugPanel />
