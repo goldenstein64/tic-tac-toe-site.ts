@@ -1,3 +1,1 @@
-import htmx from "htmx.org";
-
-htmx.process(document.body);
+import "htmx.org";
