@@ -1,11 +1,33 @@
 body {
-  background-image: linear-gradient(
-    45deg,
-    var(--x-secondary-color),
-    var(--o-secondary-color)
-  );
-  background-repeat: no-repeat;
-  background-size: 100% 100vh;
+  &:has(#lobby-status[data-status="waiting"]) {
+    background-image: linear-gradient(
+      45deg,
+      var(--o-secondary-color),
+      var(--empty-secondary-color)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 100vh;
+  }
+
+  &:has(#lobby-status[data-status="active"]) {
+    background-image: linear-gradient(
+      45deg,
+      var(--x-secondary-color),
+      var(--o-secondary-color)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 100vh;
+  }
+
+  &:has(#lobby-status[data-status="finished"]) {
+    background-image: linear-gradient(
+      45deg,
+      var(--empty-secondary-color),
+      var(--empty-secondary-color2)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 100vh;
+  }
 }
 
 h3#lobby-status {

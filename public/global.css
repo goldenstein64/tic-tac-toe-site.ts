@@ -5,6 +5,10 @@
   --o-primary-color: light-dark(rgb(44 154 118), rgb(158, 255, 223));
   --o-secondary-color: light-dark(rgb(158, 255, 223), rgb(23, 88, 67));
 
+  --empty-primary-color: light-dark(rgb(44, 44, 44), rgb(216, 216, 216));
+  --empty-secondary-color: light-dark(rgb(197, 197, 197), rgb(56, 56, 56));
+  --empty-secondary-color2: light-dark(rgb(145, 145, 145), rgb(80, 80, 80));
+
   --color-theme1A: rgb(212, 128, 76);
   --color-theme1B: rgb(93, 152, 135);
   --color-theme1C: rgb(38, 65, 66);
