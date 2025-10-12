@@ -38,7 +38,7 @@ class MoveStream {
   }
 
   async *onEnded(winnerMark: Mark | null): AsyncGenerator<SSEPayload> {
-    const { lobbyId, board } = this;
+    const { lobbyId } = this;
     const { playerX, playerO } = selectPlayersInGame.get({ lobbyId })!;
 
     yield sse({
