@@ -44,12 +44,23 @@ afterEach(() => document.close());
 
 describe("game.tsx", () => {
   it("matches waiting lobby", async () => {
-    document.write(await (<WaitingGameHtml lobby={waitingLobby} />));
+    document.write(
+      await (<WaitingGameHtml lobby={waitingLobby} user={debugUser} />)
+    );
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
+
+    const gameButtonList = document.querySelectorAll<HTMLButtonElement>(
+      ".game-board > button.game-button"
+    );
+
+    for (const gameButton of gameButtonList) {
+      expect(gameButton.disabled).toBeTrue();
+    }
   });
 
   it("matches active lobby", async () => {
+    happyDOM.settings.disableJavaScriptFileLoading = false;
     document.write(
       await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
     );
@@ -58,7 +69,9 @@ describe("game.tsx", () => {
   });
 
   it("matches finished lobby", async () => {
-    document.write(await (<FinishedGameHtml lobby={finishedLobby} />));
+    document.write(
+      await (<FinishedGameHtml lobby={finishedLobby} user={debugUser} />)
+    );
     await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
 
