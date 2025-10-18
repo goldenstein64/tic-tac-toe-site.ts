@@ -56,124 +56,12 @@ const PlayerTypeString = t
   .Encode((value: PlayerType) => value.toString());
 
 class CustomRollbackError extends Error {}
-class ResponseError extends Error {
-  errorObject: ReturnType<typeof status>;
+class StatusError extends Error {
+  statusArgs: Parameters<typeof status>;
 
-  constructor(sts: typeof status, ...args: Parameters<typeof status>) {
+  constructor(...args: Parameters<typeof status>) {
     super((args[1] as object).toString());
-    this.errorObject = sts(...args);
-  }
-}
-
-type ForfeitResult =
-  | { success: true }
-  | { success: false; message: string }
-  | ReturnType<typeof status>;
-
-async function forfeitActiveLobby(
-  sts: typeof status,
-  lobbyId: number,
-  userId: number
-): Promise<ForfeitResult> {
-  try {
-    return await tx(async () => {
-      const playerResult = selectPlayerInGame.get({ lobbyId, userId });
-      if (playerResult === undefined) {
-        throw new ResponseError(
-          sts,
-          "Forbidden",
-          "lobby does not exist or does not contain this user"
-        );
-      }
-
-      const { playerX, playerO } = playerResult;
-      let winner: number;
-      let winnerMark: Mark;
-      if (userId === playerX) {
-        winner = playerO;
-        winnerMark = "O";
-      } else {
-        winner = playerX;
-        winnerMark = "X";
-      }
-
-      const lobby = updateLobbyStatus({
-        id: lobbyId,
-        fromStatus: "active",
-        toStatus: "finished",
-      });
-
-      if (lobby === undefined) {
-        throw new CustomRollbackError(
-          "unable to forfeit game (lobby wasn't active or didn't exist)"
-        );
-      }
-
-      insertFinishedLobby.run({ lobbyId, winner });
-
-      const state = gameStates.get(lobbyId);
-      if (state) {
-        state.emit("end", winnerMark);
-      }
-
-      return { success: true };
-    });
-  } catch (err) {
-    if (err instanceof CustomRollbackError) {
-      return { success: false, message: err.message };
-    } else if (err instanceof ResponseError) {
-      return err.errorObject;
-    } else {
-      throw err;
-    }
-  }
-}
-
-type JoinResult =
-  | { success: true }
-  | { success: false; message: string }
-  | ReturnType<typeof status>;
-
-async function joinWaitingLobby(
-  lobbyId: number,
-  userId: number
-): Promise<JoinResult> {
-  try {
-    return await tx(async () => {
-      const lobby = updateLobbyStatus({
-        id: lobbyId,
-        fromStatus: "waiting",
-        toStatus: "active",
-      });
-      if (lobby === undefined) {
-        throw new CustomRollbackError(
-          "unable to join lobby (deleted or not waiting)"
-        );
-      }
-
-      // choose who will be Xs or Os
-      let playerX: number, playerO: number;
-      if (randomInt(2) === 0) {
-        playerX = userId;
-        playerO = lobby.createdBy;
-      } else {
-        playerX = lobby.createdBy;
-        playerO = userId;
-      }
-
-      // add a Game and ActiveLobby row
-      insertGame.run({ lobbyId, playerX, playerO });
-
-      // a new game state will be created when needed
-
-      return { success: true };
-    });
-  } catch (err) {
-    if (err instanceof CustomRollbackError) {
-      return { success: false, message: err.message };
-    } else {
-      throw err;
-    }
+    this.statusArgs = args;
   }
 }
 
@@ -219,18 +107,105 @@ export default new Elysia({ prefix: "/api" })
     { query: t.Object({ type: TLobbyType, page: intString }) }
   )
   .patch(
-    "/lobby",
-    async ({ body: { id: lobbyId, action }, user: { id: userId }, status }) => {
-      switch (action) {
-        case "forfeit":
-          return await forfeitActiveLobby(status, lobbyId, userId);
-        case "join":
-          return await joinWaitingLobby(lobbyId, userId);
-        default:
-          return status("Unprocessable Content");
+    "/lobby/forfeit",
+    async ({ body: { id: lobbyId }, user: { id: userId }, status }) => {
+      try {
+        return await tx(async () => {
+          const playerResult = selectPlayerInGame.get({ lobbyId, userId });
+          if (playerResult === undefined) {
+            throw new StatusError(
+              "Forbidden",
+              "lobby does not exist or does not contain this user"
+            );
+          }
+
+          const { playerX, playerO } = playerResult;
+          let winner: number;
+          let winnerMark: Mark;
+          if (userId === playerX) {
+            winner = playerO;
+            winnerMark = "O";
+          } else {
+            winner = playerX;
+            winnerMark = "X";
+          }
+
+          const state = gameStates.get(lobbyId);
+          if (state) {
+            state.emit("end", winnerMark);
+          } else {
+            const lobby = updateLobbyStatus({
+              lobbyId,
+              fromStatus: "active",
+              toStatus: "finished",
+            });
+
+            if (lobby === undefined) {
+              throw new CustomRollbackError(
+                "unable to forfeit lobby (deleted or not active)"
+              );
+            }
+
+            insertFinishedLobby.run({ lobbyId, winner });
+          }
+
+          return { success: true };
+        });
+      } catch (err) {
+        console.log("exception");
+        if (err instanceof CustomRollbackError) {
+          return { success: false, message: err.message };
+        } else if (err instanceof StatusError) {
+          return status(...err.statusArgs);
+        } else {
+          throw err;
+        }
       }
     },
-    { body: t.Object({ id: intString, action: LobbyAction }) }
+    { body: t.Object({ id: intString }) }
+  )
+  .patch(
+    "/lobby/join",
+    async ({ body: { id: lobbyId }, user: { id: userId } }) => {
+      try {
+        return await tx(async () => {
+          const lobby = updateLobbyStatus({
+            lobbyId,
+            fromStatus: "waiting",
+            toStatus: "active",
+          });
+          if (lobby === undefined) {
+            throw new CustomRollbackError(
+              "unable to join lobby (deleted or not waiting)"
+            );
+          }
+
+          // choose who will be Xs or Os
+          let playerX: number, playerO: number;
+          if (randomInt(2) === 0) {
+            playerX = userId;
+            playerO = lobby.createdBy;
+          } else {
+            playerX = lobby.createdBy;
+            playerO = userId;
+          }
+
+          // add a Game and ActiveLobby row
+          insertGame.run({ lobbyId, playerX, playerO });
+
+          // a new game state will be created when needed
+
+          return { success: true };
+        });
+      } catch (err) {
+        if (err instanceof CustomRollbackError) {
+          return { success: false, message: err.message };
+        } else {
+          throw err;
+        }
+      }
+    },
+    { body: t.Object({ id: intString }) }
   )
   .post(
     "/lobby",

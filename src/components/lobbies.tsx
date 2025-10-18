@@ -153,8 +153,9 @@ export function ActiveLobbyItem({
         </button>
         <button
           type="button"
-          hx-patch="/api/lobby"
-          hx-vals={JSON.stringify({ id: lobbyId, action: "forfeit" })}
+          hx-patch="/api/lobby/forfeit"
+          hx-swap="none"
+          hx-vals={JSON.stringify({ id: lobbyId })}
         >
           Forfeit
         </button>
@@ -217,8 +218,8 @@ export function AvailableLobbyItem({
         </button>
         <button
           type="button"
-          hx-patch="/api/lobby"
-          hx-vals={JSON.stringify({ id: lobbyId, action: "join" })}
+          hx-patch="/api/lobby/join"
+          hx-vals={JSON.stringify({ id: lobbyId })}
           hx-swap="none"
           hx-on--after-request={`location.href="/game?id=${lobbyId}"`}
         >

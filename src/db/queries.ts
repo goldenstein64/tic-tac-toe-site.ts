@@ -318,23 +318,24 @@ export const insertFinishedLobby = typePrepared(
       id: sql.placeholder("lobbyId"),
       winner: sql.placeholder("winner"),
     })
+    .returning({ finishedAt: FinishedLobby.finishedAt })
     .prepare(),
   _placeholders as { lobbyId: number; winner?: number }
 );
 
 export function updateLobbyStatus({
-  id,
+  lobbyId,
   toStatus,
   fromStatus,
 }: {
-  id: number;
+  lobbyId: number;
   toStatus: LobbyStatus;
   fromStatus: LobbyStatus;
 }) {
   return db
     .update(Lobby)
     .set({ status: toStatus })
-    .where(and(eq(Lobby.id, id), eq(Lobby.status, fromStatus)))
+    .where(and(eq(Lobby.id, lobbyId), eq(Lobby.status, fromStatus)))
     .returning({ status: Lobby.status, createdBy: Lobby.createdBy })
     .get();
 }

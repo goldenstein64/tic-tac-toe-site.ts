@@ -62,7 +62,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
         : winnerMark === "O" ? playerO
         : undefined;
       updateLobbyStatus({
-        id: lobbyId,
+        lobbyId,
         fromStatus: "active",
         toStatus: "finished",
       });
