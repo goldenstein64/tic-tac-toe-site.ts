@@ -1,0 +1,57 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`new-lobby.tsx matches new lobby 1`] = `
+"<html
+  ><head
+    ><title>tic-tac-toe-site - New Lobby</title
+    ><script src="/public/client/new-lobby.js" type="module"></script
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><link
+      rel="stylesheet"
+      href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/new-lobby.css" /></head
+  ><body
+    ><header
+      ><nav id="top-nav"
+        ><h1><a href="/">tic-tac-toe-site</a></h1
+        ><div class="flex-fill"></div
+        ><section id="user-config"
+          ><span>DebugUser </span
+          ><button
+            type="button"
+            hx-delete="/api/session"
+            hx-swap="none"
+            hx-on--after-request="location.href='/login'"
+            >Log out</button
+          ></section
+        ></nav
+      ></header
+    ><main
+      ><form name="game-setup" hx-post="/api/lobby" hx-swap="none"
+        ><fieldset class="row"
+          ><label for="type-x">Player X Type:</label
+          ><select id="type-x" name="typeX" required=""
+            ><option value="-1">Human</option
+            ><option value="1">Easy Computer</option
+            ><option value="2">Medium Computer</option
+            ><option value="3">Hard Computer</option></select
+          ></fieldset
+        ><fieldset class="row"
+          ><label for="type-o">Player O Type:</label
+          ><select id="type-o" name="typeO" required=""
+            ><option value="-1">Human</option
+            ><option value="1">Easy Computer</option
+            ><option value="2">Medium Computer</option
+            ><option value="3">Hard Computer</option></select
+          ></fieldset
+        ><fieldset class="row"
+          ><button type="submit">Create</button></fieldset
+        ></form
+      ></main
+    ></body
+  ></html
+>
+"
+`;
