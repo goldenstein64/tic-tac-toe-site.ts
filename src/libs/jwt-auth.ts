@@ -29,6 +29,13 @@ export const REFRESH_COOKIE_OPTS = {
 
 export default () =>
   new Elysia({ name: "JWTAuth" })
+    .guard({
+      as: "scoped",
+      cookie: t.Cookie({
+        access: t.Optional(t.String()),
+        refresh: t.Optional(t.String()),
+      }),
+    })
     .use(
       jwt({
         name: "jwtAccess",
@@ -51,14 +58,14 @@ export default () =>
         cookie: { access: cookieAccess, refresh: cookieRefresh },
       }): Promise<{ user: SelectUser | null }> => {
         // check whether they're already logged in
-        const access = await jwtAccess.verify(cookieAccess.value);
+        const access = await jwtAccess.verify(cookieAccess.value as string);
         if (access) {
           const user = selectUserById.get({ userId: access.userId });
           return { user: user ?? null };
         }
 
         // otherwise, try to refresh the token
-        const refresh = await jwtRefresh.verify(cookieRefresh.value);
+        const refresh = await jwtRefresh.verify(cookieRefresh.value as string);
         if (!refresh) return { user: null };
 
         const { userId, refreshKey } = refresh;
