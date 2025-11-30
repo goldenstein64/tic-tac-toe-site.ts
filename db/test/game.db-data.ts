@@ -54,15 +54,28 @@ export default function testInitialData(config: DataConfig) {
         createdAt: new Date(Date.UTC(2024, 11 - 1, 28, 2, 31)),
         status: "waiting",
       },
+      {
+        id: 5,
+        createdBy: 5, // another debug user
+        createdAt: new Date(Date.UTC(2025, 11 - 1, 30, 2, 35)),
+        status: "finished",
+      },
     ])
   );
 
   runSql(
-    db.insert(FinishedLobby).values({
-      id: 3,
-      finishedAt: new Date(Date.UTC(2024, 11 - 1, 28, 2, 32)),
-      winner: 4, // debug user
-    })
+    db.insert(FinishedLobby).values([
+      {
+        id: 3,
+        finishedAt: new Date(Date.UTC(2024, 11 - 1, 28, 2, 32)),
+        winner: 4, // debug user
+      },
+      {
+        id: 5,
+        finishedAt: new Date(Date.UTC(2025, 11 - 1, 30, 2, 36)),
+        winner: 4, // debug user
+      },
+    ])
   );
 
   runSql(
@@ -76,6 +89,11 @@ export default function testInitialData(config: DataConfig) {
         lobbyId: 3,
         playerX: 4, // debug user
         playerO: 1, // easy computer
+      },
+      {
+        lobbyId: 5,
+        playerX: 4, // debug user
+        playerO: 5, // another debug user
       },
     ])
   );
@@ -100,6 +118,15 @@ export default function testInitialData(config: DataConfig) {
       { lobbyId: 3, ordering: 2, position: 2 },
       { lobbyId: 3, ordering: 3, position: 3 },
       { lobbyId: 3, ordering: 4, position: 1 },
+
+      // O - -
+      // - - O
+      // X X X
+      { lobbyId: 5, ordering: 0, position: 8 },
+      { lobbyId: 5, ordering: 1, position: 0 },
+      { lobbyId: 5, ordering: 2, position: 6 },
+      { lobbyId: 5, ordering: 3, position: 5 },
+      { lobbyId: 5, ordering: 4, position: 7 },
     ])
   );
 }
