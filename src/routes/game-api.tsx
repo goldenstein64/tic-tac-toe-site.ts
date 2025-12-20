@@ -89,9 +89,11 @@ export default new Elysia({ prefix: "/api" })
       set,
       status,
       request,
+      headers: { accept },
     }) {
       const players = selectPlayersInGame.get({ lobbyId });
       if (!players) return status("Not Found");
+      if (accept !== "text/event-stream") return status("Not Found");
 
       // headers specific to SSEs
       set.headers["X-Accel-Buffering"] = "no";
