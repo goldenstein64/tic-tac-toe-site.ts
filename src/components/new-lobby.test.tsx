@@ -19,7 +19,7 @@ function getHTML(document: Document): Promise<string> {
   });
 }
 
-async function setUpPage(initial: string) {
+async function setUpPage(initial: string): Promise<Document> {
   const browser = new Browser({
     settings: { disableJavaScriptFileLoading: true },
   });
