@@ -36,7 +36,9 @@ function getHTML(document: Document): Promise<string> {
   });
 }
 
-beforeAll(() => GlobalRegistrator.register());
+beforeAll(() =>
+  GlobalRegistrator.register({ settings: { enableJavaScriptEvaluation: true } })
+);
 afterAll(() => GlobalRegistrator.unregister());
 
 beforeEach(() => document.open());
