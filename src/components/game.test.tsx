@@ -1,19 +1,9 @@
-/// <reference lib="dom" />
-import type DetachedWindowAPI from "happy-dom/lib/window/DetachedWindowAPI";
-
-import {
-  describe,
-  it,
-  expect,
-  afterAll,
-  beforeAll,
-  beforeEach,
-  afterEach,
-} from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 import { format } from "prettier";
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { Browser } from "happy-dom";
+import Document from "happy-dom/lib/nodes/document/Document";
 
 import WaitingGameHtml from "./game-waiting";
 import FinishedGameHtml from "./game-finished";
@@ -27,8 +17,6 @@ const waitingLobby = db.select().from(Lobby).where(eq(Lobby.id, 1)).get()!;
 const activeLobby = db.select().from(Lobby).where(eq(Lobby.id, 2)).get()!;
 const finishedLobby = db.select().from(Lobby).where(eq(Lobby.id, 3)).get()!;
 
-declare const happyDOM: DetachedWindowAPI;
-
 function getHTML(document: Document): Promise<string> {
   return format(document.documentElement.outerHTML, {
     parser: "html",
@@ -36,52 +24,50 @@ function getHTML(document: Document): Promise<string> {
   });
 }
 
-beforeAll(() =>
-  GlobalRegistrator.register({ settings: { enableJavaScriptEvaluation: true } })
-);
-afterAll(() => GlobalRegistrator.unregister());
-
-beforeEach(() => document.open());
-afterEach(() => document.close());
+async function setUpPage(initial: string) {
+  const browser = new Browser({
+    settings: { disableJavaScriptFileLoading: true },
+  });
+  const page = browser.newPage();
+  page.content = initial;
+  await browser.waitUntilComplete();
+  return page.mainFrame.document;
+}
 
 describe("game.tsx", () => {
   it("matches waiting lobby", async () => {
-    document.write(
+    const document = await setUpPage(
       await (<WaitingGameHtml lobby={waitingLobby} user={debugUser} />)
     );
-    await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
 
-    const gameButtonList = document.querySelectorAll<HTMLButtonElement>(
+    const gameButtons = document.querySelectorAll(
       ".game-board > button.game-button"
-    );
+    ) as Iterable<HTMLButtonElement>;
 
-    for (const gameButton of gameButtonList) {
+    for (const gameButton of gameButtons) {
       expect(gameButton.disabled).toBeTrue();
     }
   });
 
   it("matches active lobby", async () => {
-    happyDOM.settings.disableJavaScriptFileLoading = false;
-    document.write(
+    const document = await setUpPage(
       await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
     );
-    await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
   });
 
   it("matches finished lobby", async () => {
-    document.write(
+    const document = await setUpPage(
       await (<FinishedGameHtml lobby={finishedLobby} user={debugUser} />)
     );
-    await happyDOM.waitUntilComplete();
     expect(await getHTML(document)).toMatchSnapshot();
 
-    const gameButtonList = document.querySelectorAll<HTMLButtonElement>(
+    const gameButtons = document.querySelectorAll(
       ".game-board > button.game-button"
-    );
+    ) as Iterable<HTMLButtonElement>;
 
-    for (const gameButton of gameButtonList) {
+    for (const gameButton of gameButtons) {
       expect(gameButton.disabled).toBeTrue();
     }
   });

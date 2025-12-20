@@ -1,14 +1,4 @@
-import type DetachedWindowAPI from "happy-dom/lib/window/DetachedWindowAPI";
-
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  afterEach,
-} from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { Html } from "@elysiajs/html";
 import { eq } from "drizzle-orm";
 
@@ -17,11 +7,10 @@ import { db } from "../db";
 import { User } from "../db/schema";
 
 import { format } from "prettier";
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { Browser } from "happy-dom";
+import Document from "happy-dom/lib/nodes/document/Document";
 
 const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
-
-declare const happyDOM: DetachedWindowAPI;
 
 function getHTML(document: Document): Promise<string> {
   return format(document.documentElement.outerHTML, {
@@ -30,16 +19,19 @@ function getHTML(document: Document): Promise<string> {
   });
 }
 
-beforeAll(() => GlobalRegistrator.register());
-afterAll(() => GlobalRegistrator.unregister());
-
-beforeEach(() => document.open());
-afterEach(() => document.close());
+async function setUpPage(initial: string) {
+  const browser = new Browser({
+    settings: { disableJavaScriptFileLoading: true },
+  });
+  const page = browser.newPage();
+  page.content = initial;
+  await browser.waitUntilComplete();
+  return page.mainFrame.document;
+}
 
 describe("new-lobby.tsx", () => {
   it("matches new lobby", async () => {
-    document.write(await (<NewLobbyHtml user={debugUser} />));
-    await happyDOM.waitUntilComplete();
+    const document = await setUpPage(await (<NewLobbyHtml user={debugUser} />));
     expect(await getHTML(document)).toMatchSnapshot();
   });
 });
