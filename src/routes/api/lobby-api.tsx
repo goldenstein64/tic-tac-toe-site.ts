@@ -5,9 +5,10 @@ import html from "@elysiajs/html";
 import Elysia, { t, type status } from "elysia";
 import { randomInt } from "node:crypto";
 
-import { gameStates } from "../game/game-state";
-import { intString, TLobbyType } from "../types";
-import { tx } from "../db";
+import { gameStates } from "#/src/game/game-state";
+import runGame from "#/src/game/run-game";
+import { intString, TLobbyType } from "#/src/types";
+import { tx } from "#/src/db";
 import {
   updateLobbyStatus,
   selectPlayerInGame,
@@ -18,15 +19,14 @@ import {
   selectLobbyByIdStatusCreatedBy,
   deleteLobbyById,
   selectLobbyStatusById,
-} from "../db/queries";
-import runGame from "../game/run-game";
-import jwtAuth from "../auth/jwt-auth";
+} from "#/src/db/queries";
+import jwtAuth from "#/src/auth/jwt-auth";
 import {
   ActiveLobbies,
   AvailableLobbies,
   FinishedLobbies,
   WaitingLobbies,
-} from "../components/lobbies";
+} from "#/src/components/lobbies";
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
@@ -65,7 +65,7 @@ class StatusError extends Error {
   }
 }
 
-export default new Elysia({ prefix: "/api" })
+export default new Elysia()
   .use(html())
   .use(jwtAuth())
   .resolve(({ user }) => ({ user: user! }))

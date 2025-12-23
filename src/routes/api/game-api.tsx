@@ -5,16 +5,16 @@ import { on } from "node:events";
 import { Elysia, t, sse } from "elysia";
 import html, { Html } from "@elysiajs/html";
 
-import jwtAuth from "../auth/jwt-auth";
-import { orderingToMark } from "../game/run-game";
-import { intString } from "../types";
-import { GameRows } from "../components/game-active";
-import { gameStates, GameStateEvents } from "../game/game-state";
+import jwtAuth from "#/src/auth/jwt-auth";
+import { orderingToMark } from "#/src/game/run-game";
+import { gameStates, GameStateEvents } from "#/src/game/game-state";
+import { intString } from "#/src/types";
+import { GameRows } from "#/src/components/game-active";
 import {
   selectPlayersInGame,
   selectMaxOrdering,
   selectUsernameById,
-} from "../db/queries";
+} from "#/src/db/queries";
 
 class MoveStream {
   constructor(
@@ -55,7 +55,7 @@ class MoveStream {
   }
 }
 
-export default new Elysia({ prefix: "/api" })
+export default new Elysia()
   .use(html())
   .use(jwtAuth())
   .resolve(({ user }) => ({ user: user! }))

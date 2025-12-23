@@ -15,10 +15,9 @@ import { intString } from "./types";
 
 import { selectLobbyById } from "./db/queries";
 
-import gameApi from "./routes/game-api";
-import lobbyApi from "./routes/lobby-api";
-import sessionApi from "./routes/session-api";
+import api from "./routes/api";
 import debug from "./routes/debug";
+
 import { NewLobbyHtml } from "./components/new-lobby";
 
 export const app = new Elysia({ name: "App" })
@@ -40,9 +39,7 @@ export const app = new Elysia({ name: "App" })
     }
   })
   .resolve(({ user }) => ({ user: user! }))
-  .use(gameApi)
-  .use(lobbyApi)
-  .use(sessionApi)
+  .use(api)
   .get("/", ({ user }) => LobbiesHtml({ user }))
   .get(
     "/game",

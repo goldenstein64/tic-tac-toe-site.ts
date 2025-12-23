@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { once } from "node:events";
+import { eq } from "drizzle-orm";
+
+import { signAccess } from "#/test/util";
+
+import { gameStates, GameState } from "#/src/game/game-state";
+import { deleteLobbyById, insertGame, insertLobby } from "#/src/db/queries";
+import { Game, Move } from "#/src/db/schema";
+import { db } from "#/src/db";
 
 import gameApi from "./game-api";
-import { signAccess } from "#/test/util";
-import { gameStates, GameState } from "../game/game-state";
-import { deleteLobbyById, insertGame, insertLobby } from "../db/queries";
-import { Game, Move } from "../db/schema";
-import { db } from "../db";
-import { eq } from "drizzle-orm";
 
 const EasyComputer = 1;
 const DebugUser = 4;
@@ -92,10 +94,10 @@ describe("/api/game-move", () => {
         });
       }
 
-      const response1 = await gameApi.handle(await makeRequest());
+      const response1: Response = await gameApi.handle(await makeRequest());
       expect(response1.status).toBe(204);
 
-      const response2 = await gameApi.handle(await makeRequest());
+      const response2: Response = await gameApi.handle(await makeRequest());
       expect(response2.status, await response2.text()).toBe(401);
     });
   });
