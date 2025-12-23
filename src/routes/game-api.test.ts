@@ -3,7 +3,7 @@ import { once } from "node:events";
 
 import gameApi from "./game-api";
 import { signAccess } from "#/test/util";
-import { gameStates, GameState } from "../libs/game-state";
+import { gameStates, GameState } from "../game/game-state";
 import { deleteLobbyById, insertGame, insertLobby } from "../db/queries";
 import { Game, Move } from "../db/schema";
 import { db } from "../db";

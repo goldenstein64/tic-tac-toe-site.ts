@@ -87,7 +87,7 @@ describe("discord-oauth", () => {
   it("redirects and sets cookies on GET /login/discord/callback", async () => {
     const setCookieArray = await (async () => {
       const request = new Request("http://localhost/login/discord");
-      const response = await discordOauth.handle(request);
+      const response: Response = await discordOauth.handle(request);
       expect(response.status, await response.text()).toBe(302);
       return response.headers.getSetCookie();
     })();
@@ -97,7 +97,7 @@ describe("discord-oauth", () => {
     if (!stateCookie) return expect().fail("state not found!");
     const state = stateCookie.match(STATE_REGEX)![1];
 
-    const response = await (() => {
+    const response: Response = await (() => {
       const requestURL = new URL("http://localhost/login/discord/callback");
       requestURL.searchParams.append("code", "1234567890");
       requestURL.searchParams.append("state", state);

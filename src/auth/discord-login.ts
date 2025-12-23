@@ -53,7 +53,7 @@ function addDiscordUser(userInfo: DiscordAPIUser, tokens: OAuth2Tokens) {
  */
 export default () =>
   new Elysia()
-    .use(jwtAuth)
+    .use(jwtAuth())
     .use(discordOAuth2())
     /** redirects the user to the Discord auth page */
     .get("/login/discord", ({ discord }) =>

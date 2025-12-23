@@ -5,11 +5,11 @@ import { on } from "node:events";
 import { Elysia, t, sse } from "elysia";
 import html, { Html } from "@elysiajs/html";
 
-import jwtAuth from "../libs/jwt-auth";
-import { orderingToMark } from "../libs/run-game";
+import jwtAuth from "../auth/jwt-auth";
+import { orderingToMark } from "../game/run-game";
 import { intString } from "../types";
 import { GameRows } from "../components/game-active";
-import { gameStates, GameStateEvents } from "../libs/game-state";
+import { gameStates, GameStateEvents } from "../game/game-state";
 import {
   selectPlayersInGame,
   selectMaxOrdering,

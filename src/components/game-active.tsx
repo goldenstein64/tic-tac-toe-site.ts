@@ -9,7 +9,7 @@ import {
   selectUserById,
 } from "../db/queries";
 import { SelectLobby, SelectUser } from "../db/schema";
-import { orderingToMark } from "../libs/run-game";
+import { orderingToMark } from "../game/run-game";
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
 import { TopNav, UserConfig } from "./base";

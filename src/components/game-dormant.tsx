@@ -4,7 +4,7 @@ import { Html } from "@elysiajs/html";
 
 import { SelectLobby } from "../db/schema";
 import { selectMovesInGame } from "../db/queries";
-import { orderingToMark } from "../libs/run-game";
+import { orderingToMark } from "../game/run-game";
 import { COLUMN_LABELS, ROW_LABELS } from "./game-active";
 
 type GameButtonProps = { children?: Mark; ariaLabel: string };

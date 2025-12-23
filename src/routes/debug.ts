@@ -7,7 +7,7 @@ import jwtAuth, {
   ACCESS_MAX_AGE,
   REFRESH_COOKIE_OPTS,
   REFRESH_MAX_AGE,
-} from "../libs/jwt-auth";
+} from "../auth/jwt-auth";
 import { db } from "../db";
 import { User } from "../db/schema";
 

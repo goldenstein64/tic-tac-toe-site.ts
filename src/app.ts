@@ -8,8 +8,8 @@ import FinishedGameHtml from "./components/game-finished";
 import LobbiesHtml from "./components/lobbies";
 import LoginHtml from "./components/login";
 
-import jwtAuth from "./libs/jwt-auth";
-import discordLogin from "./libs/discord-login";
+import jwtAuth from "./auth/jwt-auth";
+import discordLogin from "./auth/discord-login";
 
 import { intString } from "./types";
 

@@ -39,7 +39,7 @@ export default function discordOAuth2() {
       return {
         discord: {
           userInfo,
-          createURL: (scopes: string[]): URL => {
+          createURL(scopes: string[]): URL {
             const state = arctic.generateState();
             cookie["state"].set({
               value: state,
@@ -61,7 +61,8 @@ export default function discordOAuth2() {
               throw Error("state mismatch");
 
             cookie["state"].remove();
-            if (!cookie["codeVerifier"].value)
+            const codeVerifier = cookie["codeVerifier"].value as string | null;
+            if (!codeVerifier)
               throw new Error(
                 `Bug with ${String(provider)} and codeVerifier. Please open issue`
               );
@@ -69,7 +70,7 @@ export default function discordOAuth2() {
             cookie["codeVerifier"].remove();
             return provider.validateAuthorizationCode(
               query["code"],
-              cookie["codeVerifier"].value
+              codeVerifier
             );
           },
         },

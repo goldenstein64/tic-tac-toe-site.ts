@@ -5,7 +5,7 @@ import html from "@elysiajs/html";
 import Elysia, { t, type status } from "elysia";
 import { randomInt } from "node:crypto";
 
-import { gameStates } from "../libs/game-state";
+import { gameStates } from "../game/game-state";
 import { intString, TLobbyType } from "../types";
 import { tx } from "../db";
 import {
@@ -19,8 +19,8 @@ import {
   deleteLobbyById,
   selectLobbyStatusById,
 } from "../db/queries";
-import runGame from "../libs/run-game";
-import jwtAuth from "../libs/jwt-auth";
+import runGame from "../game/run-game";
+import jwtAuth from "../auth/jwt-auth";
 import {
   ActiveLobbies,
   AvailableLobbies,
