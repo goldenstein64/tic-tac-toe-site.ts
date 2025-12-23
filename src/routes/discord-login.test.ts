@@ -11,14 +11,14 @@ import {
 import { parse as parseCookie } from "cookie";
 import { eq } from "drizzle-orm";
 import { UserPremiumType } from "discord-api-types/v10";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
 import discordOauthPlugin from "./discord-login";
 import { db } from "../db";
 import { DiscordUser } from "../db/schema";
-import { ACCESS_MAX_AGE, REFRESH_MAX_AGE } from "./jwt-auth";
+import { ACCESS_MAX_AGE, REFRESH_MAX_AGE } from "../auth/jwt-auth";
 import { verifyAccess, verifyRefresh } from "#/test/util";
-import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
 
 const DAYS = 60 * 60 * 24;
 
@@ -62,8 +62,8 @@ afterAll(() => server.close());
 
 const discordOauth = discordOauthPlugin();
 
-describe("discord-oauth", () => {
-  it("redirects on GET /login/discord", async () => {
+describe("/login/discord", async () => {
+  it("redirects on GET", async () => {
     const request = new Request("http://localhost/login/discord");
     const response = await discordOauth.handle(request);
     expect(response.status).toBe(302); // Found
@@ -81,10 +81,12 @@ describe("discord-oauth", () => {
       Bun.env.DISCORD_REDIRECT_URL
     );
   });
+});
 
+describe("/login/discord/callback", async () => {
   const STATE_REGEX = /^state=(.*?);/;
 
-  it("redirects and sets cookies on GET /login/discord/callback", async () => {
+  it("redirects and sets cookies on GET", async () => {
     const setCookieArray = await (async () => {
       const request = new Request("http://localhost/login/discord");
       const response: Response = await discordOauth.handle(request);

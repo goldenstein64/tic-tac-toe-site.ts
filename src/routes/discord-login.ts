@@ -2,9 +2,9 @@ import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-
 
 import Elysia from "elysia";
 import { OAuth2Tokens } from "arctic";
-import discordOAuth2 from "./discord-oauth2";
 import { TransactionRollbackError } from "drizzle-orm";
 
+import discordOAuth2 from "../auth/discord-oauth2";
 import { tx } from "../db";
 import {
   insertUser,
@@ -17,7 +17,7 @@ import jwtAuth, {
   REFRESH_MAX_AGE,
   ACCESS_COOKIE_OPTS,
   REFRESH_COOKIE_OPTS,
-} from "./jwt-auth";
+} from "../auth/jwt-auth";
 
 declare module "bun" {
   interface Env {
