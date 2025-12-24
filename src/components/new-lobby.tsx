@@ -19,18 +19,32 @@ function NewLobbyHead() {
   );
 }
 
+const PLAYER_TYPES = Object.freeze([
+  { name: "Human", id: -1 },
+  { name: "Easy Computer", id: 1 },
+  { name: "Medium Computer", id: 2 },
+  { name: "Hard Computer", id: 3 },
+] as const);
+
 type PlayerTypeInputProps = { mark: Mark };
 function PlayerTypeInput({ mark }: PlayerTypeInputProps) {
   const lower = mark.toLowerCase();
+
   return (
     <>
-      <label for={`type-${lower}`}>Player {mark} Type:</label>
-      <select id={`type-${lower}`} name={`type${mark}`} required>
-        <option value="-1">Human</option>
-        <option value="1">Easy Computer</option>
-        <option value="2">Medium Computer</option>
-        <option value="3">Hard Computer</option>
-      </select>
+      <span>Player {mark} Type:</span>
+      {PLAYER_TYPES.map(({ name, id }) => (
+        <>
+          <br />
+          <input
+            id={`select-${lower}-${id}`}
+            type="radio"
+            name={`type${mark}`}
+            value={String(id)}
+          />
+          <label for={`select-${lower}-${id}`}>{name}</label>
+        </>
+      ))}
     </>
   );
 }
