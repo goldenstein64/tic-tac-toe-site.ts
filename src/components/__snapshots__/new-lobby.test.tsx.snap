@@ -30,7 +30,8 @@ exports[`new-lobby.tsx matches new lobby 1`] = `
       ></header
     ><main
       ><form name="game-setup" hx-post="/api/lobby" hx-swap="none"
-        ><fieldset class="row"
+        ><input type="hidden" name="_csrf" value="something" /><fieldset
+          class="row"
           ><label for="type-x">Player X Type:</label
           ><select id="type-x" name="typeX" required=""
             ><option value="-1">Human</option

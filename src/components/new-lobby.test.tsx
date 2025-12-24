@@ -31,7 +31,9 @@ async function setUpPage(initial: string): Promise<Document> {
 
 describe("new-lobby.tsx", () => {
   it("matches new lobby", async () => {
-    const document = await setUpPage(await (<NewLobbyHtml user={debugUser} />));
+    const document = await setUpPage(
+      await (<NewLobbyHtml user={debugUser} csrfToken="something" />)
+    );
     expect(await getHTML(document)).toMatchSnapshot();
   });
 });

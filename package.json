@@ -16,7 +16,7 @@
     "#/*": "./*"
   },
   "dependencies": {
-    "@elysiajs/eden": "^1.4.5",
+    "@elysiajs/eden": "^1.4.6",
     "@elysiajs/html": "^1.4.0",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/static": "^1.4.7",
@@ -26,6 +26,7 @@
     "drizzle-orm": "^0.44.7",
     "drizzle-typebox": "^0.3.3",
     "elysia": "^1.4.19",
+    "elysia-csrf": "^0.1.0",
     "htmx-ext-sse": "^2.2.4",
     "htmx.org": "^2.0.8"
   },

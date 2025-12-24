@@ -35,7 +35,9 @@ function PlayerTypeInput({ mark }: PlayerTypeInputProps) {
   );
 }
 
-function NewLobbyBody({ user }: { user: SelectUser }) {
+type NewLobbyProps = { user: SelectUser; csrfToken: string };
+
+function NewLobbyBody({ user, csrfToken }: NewLobbyProps) {
   return (
     <body>
       <header>
@@ -47,6 +49,7 @@ function NewLobbyBody({ user }: { user: SelectUser }) {
       </header>
       <main>
         <form name="game-setup" hx-post="/api/lobby" hx-swap="none">
+          <input type="hidden" name="_csrf" value={csrfToken} />
           <fieldset class="row">
             <PlayerTypeInput mark="X" />
           </fieldset>
@@ -62,11 +65,11 @@ function NewLobbyBody({ user }: { user: SelectUser }) {
   );
 }
 
-export function NewLobbyHtml({ user }: { user: SelectUser }) {
+export function NewLobbyHtml({ user, csrfToken }: NewLobbyProps) {
   return (
     <html>
       <NewLobbyHead />
-      <NewLobbyBody user={user} />
+      <NewLobbyBody user={user} csrfToken={csrfToken} />
     </html>
   );
 }

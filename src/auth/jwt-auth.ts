@@ -27,8 +27,8 @@ export const REFRESH_COOKIE_OPTS = {
   sameSite: "lax",
 } as const;
 
-export default () =>
-  new Elysia({ name: "JWTAuth" })
+export function jwtAuth() {
+  return new Elysia({ name: "JWTAuth" })
     .guard({
       as: "scoped",
       cookie: t.Cookie({
@@ -56,7 +56,9 @@ export default () =>
         jwtAccess,
         jwtRefresh,
         cookie: { access: cookieAccess, refresh: cookieRefresh },
-      }): Promise<{ user: SelectUser | null }> => {
+      }): Promise<{
+        user: SelectUser | null;
+      }> => {
         // check whether they're already logged in
         const access = await jwtAccess.verify(cookieAccess.value as string);
         if (access) {
@@ -83,3 +85,66 @@ export default () =>
         return { user };
       }
     );
+}
+
+export function jwtMustAuth() {
+  return new Elysia({ name: "JWTAuth" })
+    .guard({
+      as: "scoped",
+      cookie: t.Cookie({
+        access: t.Optional(t.String()),
+        refresh: t.Optional(t.String()),
+      }),
+    })
+    .use(
+      jwt({
+        name: "jwtAccess",
+        secret: Bun.env.JWT_ACCESS_SECRET,
+        schema: t.Object({ userId: t.Number() }),
+      })
+    )
+    .use(
+      jwt({
+        name: "jwtRefresh",
+        secret: Bun.env.JWT_REFRESH_SECRET,
+        schema: t.Object({ userId: t.Number(), refreshKey: t.Number() }),
+      })
+    )
+    .resolve(
+      { as: "scoped" },
+      async ({
+        jwtAccess,
+        jwtRefresh,
+        cookie: { access: cookieAccess, refresh: cookieRefresh },
+        status,
+      }): Promise<{ user: SelectUser }> => {
+        // check whether they're already logged in
+        const access = await jwtAccess.verify(cookieAccess.value as string);
+        if (access) {
+          const user = selectUserById.get({ userId: access.userId });
+          if (user === undefined) throw status("Internal Server Error");
+          return { user };
+        }
+
+        // otherwise, try to refresh the token
+        const refresh = await jwtRefresh.verify(cookieRefresh.value as string);
+        if (!refresh) throw status("Internal Server Error");
+
+        const { userId, refreshKey } = refresh;
+        const user = selectUserByIdRefreshKey.get({ userId, refreshKey });
+        if (!user) throw status("Internal Server Error");
+
+        cookieAccess.set({
+          value: await jwtAccess.sign({
+            userId,
+            exp: Math.floor(Date.now() / 1000) + ACCESS_MAX_AGE,
+          }),
+          ...ACCESS_COOKIE_OPTS,
+        });
+
+        return { user };
+      }
+    );
+}
+
+export default jwtAuth;
