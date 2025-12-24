@@ -31,25 +31,51 @@ exports[`new-lobby.tsx matches new lobby 1`] = `
     ><main
       ><form name="game-setup" hx-post="/api/lobby" hx-swap="none"
         ><input type="hidden" name="_csrf" value="something" /><fieldset
-          class="row"
-          ><label for="type-x">Player X Type:</label
-          ><select id="type-x" name="typeX" required=""
-            ><option value="-1">Human</option
-            ><option value="1">Easy Computer</option
-            ><option value="2">Medium Computer</option
-            ><option value="3">Hard Computer</option></select
-          ></fieldset
-        ><fieldset class="row"
-          ><label for="type-o">Player O Type:</label
-          ><select id="type-o" name="typeO" required=""
-            ><option value="-1">Human</option
-            ><option value="1">Easy Computer</option
-            ><option value="2">Medium Computer</option
-            ><option value="3">Hard Computer</option></select
-          ></fieldset
-        ><fieldset class="row"
-          ><button type="submit">Create</button></fieldset
-        ></form
+          style="display: inline-block"
+          ><span>Player X Type:</span><br /><input
+            id="select-x--1"
+            type="radio"
+            name="typeX"
+            value="-1"
+          /><label for="select-x--1">Human</label><br /><input
+            id="select-x-1"
+            type="radio"
+            name="typeX"
+            value="1"
+          /><label for="select-x-1">Easy Computer</label><br /><input
+            id="select-x-2"
+            type="radio"
+            name="typeX"
+            value="2"
+          /><label for="select-x-2">Medium Computer</label><br /><input
+            id="select-x-3"
+            type="radio"
+            name="typeX"
+            value="3"
+          /><label for="select-x-3">Hard Computer</label></fieldset
+        ><fieldset style="display: inline-block"
+          ><span>Player O Type:</span><br /><input
+            id="select-o--1"
+            type="radio"
+            name="typeO"
+            value="-1"
+          /><label for="select-o--1">Human</label><br /><input
+            id="select-o-1"
+            type="radio"
+            name="typeO"
+            value="1"
+          /><label for="select-o-1">Easy Computer</label><br /><input
+            id="select-o-2"
+            type="radio"
+            name="typeO"
+            value="2"
+          /><label for="select-o-2">Medium Computer</label><br /><input
+            id="select-o-3"
+            type="radio"
+            name="typeO"
+            value="3"
+          /><label for="select-o-3">Hard Computer</label></fieldset
+        ><button type="submit" style="display: block">Create</button></form
       ></main
     ></body
   ></html
