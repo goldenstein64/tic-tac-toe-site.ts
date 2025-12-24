@@ -64,15 +64,15 @@ function NewLobbyBody({ user, csrfToken }: NewLobbyProps) {
       <main>
         <form name="game-setup" hx-post="/api/lobby" hx-swap="none">
           <input type="hidden" name="_csrf" value={csrfToken} />
-          <fieldset class="row">
+          <fieldset style={{ display: "inline-block" }}>
             <PlayerTypeInput mark="X" />
           </fieldset>
-          <fieldset class="row">
+          <fieldset style={{ display: "inline-block" }}>
             <PlayerTypeInput mark="O" />
           </fieldset>
-          <fieldset class="row">
-            <button type="submit">Create</button>
-          </fieldset>
+          <button type="submit" style={{ display: "block" }}>
+            Create
+          </button>
         </form>
       </main>
     </body>
