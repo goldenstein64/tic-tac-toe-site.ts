@@ -43,7 +43,7 @@ describe("/api/game-move", () => {
       const newMovePromise = once(state, "new-move");
 
       const response = await gameApi.handle(
-        new Request("http://localhost/api/game-move", {
+        new Request("http://localhost/game-move", {
           method: "POST",
           headers: {
             Cookie: `access=${await signAccess({ userId: DebugUser })}`,
@@ -59,7 +59,7 @@ describe("/api/game-move", () => {
 
     it("fails if the lobby doesn't exist", async () => {
       const response = await gameApi.handle(
-        new Request("http://localhost/api/game-move", {
+        new Request("http://localhost/game-move", {
           method: "POST",
           headers: {
             Cookie: `access=${await signAccess({ userId: DebugUser })}`,
@@ -72,7 +72,7 @@ describe("/api/game-move", () => {
 
     it("fails if the lobby doesn't have the user as a player", async () => {
       const response = await gameApi.handle(
-        new Request("http://localhost/api/game-move", {
+        new Request("http://localhost/game-move", {
           method: "POST",
           headers: {
             Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
@@ -85,7 +85,7 @@ describe("/api/game-move", () => {
 
     it("fails if the position specifies an occupied slot", async () => {
       async function makeRequest() {
-        return new Request("http://localhost/api/game-move", {
+        return new Request("http://localhost/game-move", {
           method: "POST",
           headers: {
             Cookie: `access=${await signAccess({ userId: DebugUser })}`,
