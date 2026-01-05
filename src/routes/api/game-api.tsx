@@ -26,8 +26,8 @@ class MoveStream {
 
   async *onNewMove(ordering: number): AsyncGenerator<SSEPayload> {
     const { lobbyId, board } = this;
-    const nextTurn = orderingToMark(ordering + 1);
-    const enabled = this.isClientPlaying && this.userIsX === (nextTurn === "X");
+    const nextTurnIsX = orderingToMark(ordering + 1) === "X";
+    const enabled = this.isClientPlaying && this.userIsX === nextTurnIsX;
 
     yield sse({
       event: "board",

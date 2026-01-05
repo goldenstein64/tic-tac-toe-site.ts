@@ -1,7 +1,7 @@
 import { type Mark, Board } from "@goldenstein64/tic-tac-toe";
 import { Player } from "@goldenstein64/tic-tac-toe/player";
 import { EventEmitter } from "events";
-import { setTimeout as delay } from "timers/promises";
+import { setTimeout } from "timers/promises";
 
 import { idToComputerFactory, orderingToMark } from "./run-game";
 import {
@@ -26,7 +26,8 @@ export type GameStateEvents = GameStateInitialEvents & {
 
 export class GameState extends EventEmitter<GameStateEvents> {
   readonly board: Board = new Board();
-  readonly computers: Map<Mark, Player | undefined> = new Map();
+  computerX: Player | undefined = undefined;
+  computerO: Player | undefined = undefined;
 
   constructor(readonly lobbyId: number) {
     super();
@@ -36,15 +37,8 @@ export class GameState extends EventEmitter<GameStateEvents> {
       throw new Error("lobby does not have an active game");
     const { playerX, playerO } = players;
 
-    const computerXFactory = idToComputerFactory.get(playerX);
-    if (computerXFactory) {
-      this.computers.set("X", computerXFactory());
-    }
-
-    const computerOFactory = idToComputerFactory.get(playerO);
-    if (computerOFactory) {
-      this.computers.set("O", computerOFactory());
-    }
+    this.computerX = idToComputerFactory.get(playerX)?.();
+    this.computerO = idToComputerFactory.get(playerO)?.();
 
     for (const { position, ordering } of selectMoves.all({ lobbyId })) {
       const mark = orderingToMark(ordering);
@@ -74,16 +68,15 @@ export class GameState extends EventEmitter<GameStateEvents> {
 
     this.on("new-move", async (ordering) => {
       const nextMark = orderingToMark(ordering + 1);
-      const nextComputer = this.computers.get(nextMark);
+      const nextComputer = nextMark === "X" ? this.computerX : this.computerO;
       if (!nextComputer) return;
 
       if (this.ended(ordering)) return;
 
-      // this is not a race, we want the computer to return its move after a
-      // minimum of one second
+      // pretend the computer is "thinking"
       const [position] = await Promise.all([
         nextComputer.getMove(this.board, nextMark),
-        delay(1000),
+        setTimeout(1000),
       ]);
       this.setMark(position, ordering + 1);
     });
