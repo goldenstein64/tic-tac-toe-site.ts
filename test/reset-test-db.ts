@@ -11,4 +11,4 @@ for (const table of Object.values(schema)) {
   }
 }
 
-await testInitialData({ quiet: true });
+testInitialData({ quiet: true });
