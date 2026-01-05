@@ -6,5 +6,5 @@ export default app;
 export type { App } from "./app";
 
 console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port} in ${Bun.env.NODE_ENV}`
+  `Running at http://${app.server?.hostname}:${app.server?.port} in ${Bun.env.NODE_ENV}`
 );
