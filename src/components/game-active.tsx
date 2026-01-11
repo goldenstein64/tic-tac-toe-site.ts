@@ -138,7 +138,6 @@ type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 
 function GameBody({ lobby, user }: GameBodyProps) {
   const { playerX, playerO } = selectPlayersInGame.get({ lobbyId: lobby.id })!;
-  // TODO: the user may not be playing the game, so don't assume they are Os otherwise
   const userMark =
     user.id === playerX ? "X"
     : user.id === playerO ? "O"
