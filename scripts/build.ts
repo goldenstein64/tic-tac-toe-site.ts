@@ -1,3 +1,5 @@
+const NODE_ENV = process.env.NODE_ENV;
+
 await Bun.$`rm -rf public/client`;
 
 await Bun.build({
@@ -11,7 +13,7 @@ await Bun.build({
   splitting: true,
   target: "browser",
   format: "esm",
-  minify: true,
+  minify: NODE_ENV === "production",
   sourcemap: "linked",
 });
 
