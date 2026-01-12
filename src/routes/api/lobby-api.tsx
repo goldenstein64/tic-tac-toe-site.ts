@@ -152,7 +152,6 @@ export default new Elysia()
           return { success: true };
         });
       } catch (err) {
-        console.log("exception");
         if (err instanceof CustomRollbackError) {
           return { success: false, message: err.message };
         } else if (err instanceof StatusError) {
