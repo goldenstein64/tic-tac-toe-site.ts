@@ -81,17 +81,17 @@ export default function testInitialData(config: DataConfig) {
   runSql(
     db.insert(Game).values([
       {
-        lobbyId: 2,
+        lobbyId: 2, // active lobby
         playerX: 4, // debug user
         playerO: 3, // hard computer
       },
       {
-        lobbyId: 3,
+        lobbyId: 3, // finished lobby by DebugUser
         playerX: 4, // debug user
         playerO: 1, // easy computer
       },
       {
-        lobbyId: 5,
+        lobbyId: 5, // finished lobby by AnotherDebugUser
         playerX: 4, // debug user
         playerO: 5, // another debug user
       },
