@@ -1,38 +1,57 @@
-import { describe, it, expect, beforeAll, afterAll } from "bun:test";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "bun:test";
 import { once } from "node:events";
 import { eq } from "drizzle-orm";
 
 import { signAccess } from "#/test/util";
 
-import { gameStates, GameState } from "#/src/game/game-state";
 import { deleteLobbyById, insertGame, insertLobby } from "#/src/db/queries";
 import { Game, Move } from "#/src/db/schema";
+import { LobbyStatus } from "#/src/db/datatypes";
 import { db } from "#/src/db";
 
 import gameApi from "./game-api";
+import { gameStates, GameState } from "#/src/game/game-state";
 
 const EasyComputer = 1;
 const DebugUser = 4;
 const AnotherDebugUser = 5;
 
+function setupLobby(status: LobbyStatus, playerX: number, playerO?: number) {
+  const lobby = insertLobby.get({ userId: playerX, status })!;
+  const lobbyId = lobby.id;
+  if (playerO !== undefined) {
+    insertGame.run({
+      lobbyId,
+      playerX,
+      playerO,
+    });
+  }
+  return lobbyId;
+}
+
+function teardownLobby(lobbyId: number) {
+  db.delete(Move).where(eq(Move.lobbyId, lobbyId)).run();
+  db.delete(Game).where(eq(Game.lobbyId, lobbyId)).run();
+  deleteLobbyById.run({ id: lobbyId });
+}
+
 describe("/api/game-move", () => {
   describe("POST", () => {
     let lobbyId: number;
     beforeAll(() => {
-      const lobby = insertLobby.get({ userId: DebugUser, status: "active" })!;
-      expect(lobby).toBeObject();
-      lobbyId = lobby.id;
-      insertGame.run({
-        lobbyId: lobbyId,
-        playerX: DebugUser,
-        playerO: EasyComputer,
-      });
+      lobbyId = setupLobby("active", DebugUser, EasyComputer);
     });
 
     afterAll(() => {
-      db.delete(Move).where(eq(Move.lobbyId, lobbyId)).run();
-      db.delete(Game).where(eq(Game.lobbyId, lobbyId)).run();
-      deleteLobbyById.run({ id: lobbyId });
+      teardownLobby(lobbyId);
     });
 
     it("works", async () => {
@@ -103,4 +122,81 @@ describe("/api/game-move", () => {
   });
 
   describe.todo("GET", () => {});
+});
+
+describe("GET /api/game/is-asleep", () => {
+  describe("in an active lobby", () => {
+    let lobbyId: number;
+    beforeEach(() => {
+      lobbyId = setupLobby("active", DebugUser, EasyComputer);
+    });
+
+    afterEach(() => {
+      teardownLobby(lobbyId);
+    });
+
+    it("sends that lobby is asleep", async () => {
+      const response = await gameApi.handle(
+        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
+          headers: {
+            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
+          },
+        })
+      );
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toBe(true);
+    });
+
+    it("sends that lobby is asleep with X-Trigger-Refresh", async () => {
+      const response = await gameApi.handle(
+        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
+          headers: {
+            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
+            "X-Trigger-Refresh": "true",
+          },
+        })
+      );
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toBe(true);
+      expect(response.headers.has("HX-Refresh")).toBeFalse();
+    });
+
+    it("sends that lobby is not asleep", async () => {
+      using _state = gameStates.getOrCreate(lobbyId);
+
+      const response = await gameApi.handle(
+        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
+          headers: {
+            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
+          },
+        })
+      );
+
+      gameStates.delete(lobbyId);
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toBe(false);
+    });
+
+    it("sends HX-Refresh header when X-Trigger-Refresh is supplied", async () => {
+      using _state = gameStates.getOrCreate(lobbyId);
+
+      const response = await gameApi.handle(
+        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
+          headers: {
+            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
+            "X-Trigger-Refresh": "true",
+          },
+        })
+      );
+
+      gameStates.delete(lobbyId);
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toBe(false);
+      expect(response.headers.get("HX-Refresh")).toBe("true");
+    });
+  });
 });

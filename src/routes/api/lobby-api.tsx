@@ -89,18 +89,6 @@ export default new Elysia()
     }
   )
   .get(
-    "/lobby/is-asleep",
-    ({ query: { id: lobbyId }, headers, set }) => {
-      const status = selectLobbyStatusById.get({ lobbyId })?.status;
-      const isAsleep = status === "active" && !gameStates.has(lobbyId);
-      if (!isAsleep && headers["x-trigger-refresh"] === "true") {
-        set.headers["HX-Refresh"] = "true";
-      }
-      return isAsleep;
-    },
-    { query: t.Object({ id: intString }), response: t.Boolean() }
-  )
-  .get(
     "/lobbies",
     async ({ query: { type, page }, user: { id: userId }, status }) => {
       switch (type) {

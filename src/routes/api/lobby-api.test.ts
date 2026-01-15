@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { describe, it, expect } from "bun:test";
 
 import { signAccess } from "#/test/util";
 import { deleteLobbyById, insertGame, insertLobby } from "#/src/db/queries";
@@ -8,7 +8,6 @@ import { eq } from "drizzle-orm";
 
 import lobbyApi from "./lobby-api";
 import { LobbyStatus } from "#/src/db/datatypes";
-import { gameStates } from "#/src/game/game-state";
 
 const EasyComputer = 1;
 const DebugUser = 4;
@@ -62,83 +61,6 @@ describe("GET /api/lobby/status", () => {
     expect(response2.headers.get("HX-Refresh")).toBe("true");
 
     teardownLobby(lobbyId);
-  });
-});
-
-describe("GET /api/lobby/is-asleep", () => {
-  describe("in an active lobby", () => {
-    let lobbyId: number;
-    beforeEach(() => {
-      lobbyId = setupLobby("active", DebugUser, EasyComputer);
-    });
-
-    afterEach(() => {
-      teardownLobby(lobbyId);
-    });
-
-    it("sends that lobby is asleep", async () => {
-      const response = await lobbyApi.handle(
-        new Request(`http://localhost/lobby/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-          },
-        })
-      );
-
-      expect(response.status).toBe(200);
-      expect(await response.json()).toBe(true);
-    });
-
-    it("sends that lobby is asleep with X-Trigger-Refresh", async () => {
-      const response = await lobbyApi.handle(
-        new Request(`http://localhost/lobby/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-            "X-Trigger-Refresh": "true",
-          },
-        })
-      );
-
-      expect(response.status).toBe(200);
-      expect(await response.json()).toBe(true);
-      expect(response.headers.has("HX-Refresh")).toBeFalse();
-    });
-
-    it("sends that lobby is not asleep", async () => {
-      using _state = gameStates.getOrCreate(lobbyId);
-
-      const response = await lobbyApi.handle(
-        new Request(`http://localhost/lobby/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-          },
-        })
-      );
-
-      gameStates.delete(lobbyId);
-
-      expect(response.status).toBe(200);
-      expect(await response.json()).toBe(false);
-    });
-
-    it("sends HX-Refresh header when X-Trigger-Refresh is supplied", async () => {
-      using _state = gameStates.getOrCreate(lobbyId);
-
-      const response = await lobbyApi.handle(
-        new Request(`http://localhost/lobby/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-            "X-Trigger-Refresh": "true",
-          },
-        })
-      );
-
-      gameStates.delete(lobbyId);
-
-      expect(response.status).toBe(200);
-      expect(await response.json()).toBe(false);
-      expect(response.headers.get("HX-Refresh")).toBe("true");
-    });
   });
 });
 

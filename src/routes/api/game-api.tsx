@@ -14,6 +14,7 @@ import {
   selectPlayersInGame,
   selectMaxOrdering,
   selectUsernameById,
+  selectLobbyStatusById,
 } from "#/src/db/queries";
 
 namespace MoveStream {
@@ -73,6 +74,18 @@ export default new Elysia()
   .use(html())
   .use(jwtAuth())
   .resolve(({ user }) => ({ user: user! }))
+  .get(
+    "/game/is-asleep",
+    ({ query: { id: lobbyId }, headers, set }) => {
+      const status = selectLobbyStatusById.get({ lobbyId })?.status;
+      const isAsleep = status === "active" && !gameStates.has(lobbyId);
+      if (!isAsleep && headers["x-trigger-refresh"] === "true") {
+        set.headers["HX-Refresh"] = "true";
+      }
+      return isAsleep;
+    },
+    { query: t.Object({ id: intString }), response: t.Boolean() }
+  )
   .post(
     "/game-move",
     ({
