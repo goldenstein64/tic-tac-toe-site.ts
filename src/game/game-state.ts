@@ -27,7 +27,10 @@ export type GameStateEvents = GameStateInitialEvents & {
   }[keyof GameStateInitialEvents];
 };
 
-export class GameState extends EventEmitter<GameStateEvents> {
+export class GameState
+  extends EventEmitter<GameStateEvents>
+  implements Disposable
+{
   static readonly SLEEP_TIME = 5 * MINUTES;
 
   sleepTimer: NodeJS.Timeout = this.getSleepTimer();
@@ -71,8 +74,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
         winner: winnerId,
       });
 
-      this.removeAllListeners();
-      clearTimeout(this.sleepTimer);
+      this[Symbol.dispose]();
     });
 
     this.on("new-move", async (ordering) => {
@@ -118,6 +120,11 @@ export class GameState extends EventEmitter<GameStateEvents> {
   resetSleep() {
     clearTimeout(this.sleepTimer);
     this.sleepTimer = this.getSleepTimer();
+  }
+
+  [Symbol.dispose]() {
+    this.removeAllListeners();
+    clearTimeout(this.sleepTimer);
   }
 }
 
