@@ -15,7 +15,7 @@ import { GameBoard } from "./game-active";
 
 const POLL_ASLEEP = {
   "hx-get": "/api/lobby/is-asleep",
-  "hx-trigger": "every 5s",
+  "hx-trigger": "every 30s",
   "hx-headers": JSON.stringify({ "X-Trigger-Refresh": "true" }),
   "hx-swap": "none",
 } as const;

@@ -18,8 +18,7 @@ type GameStateInitialEvents = {
   sleep: [];
 };
 
-const SECONDS = 1000;
-const MINUTES = 60 * SECONDS;
+const MINUTES = 60 * 1000;
 
 const events = ["new-move", "end", "sleep"] as const;
 export type GameStateEvents = GameStateInitialEvents & {
@@ -29,7 +28,7 @@ export type GameStateEvents = GameStateInitialEvents & {
 };
 
 export class GameState extends EventEmitter<GameStateEvents> {
-  static readonly SLEEP_TIME = 15 * SECONDS;
+  static readonly SLEEP_TIME = 5 * MINUTES;
 
   readonly sleepController: AbortController = new AbortController();
   sleepTimer: NodeJS.Timeout = this.getSleepTimer();
