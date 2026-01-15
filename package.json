@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "NODE_ENV=development bun run",
     "prod": "NODE_ENV=production bun run",
+    "testing": "NODE_ENV=test bun run",
     "test": "bun test",
     "db": "drizzle-kit",
     "start": "bun run src/index.ts",
