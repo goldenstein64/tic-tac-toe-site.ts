@@ -30,7 +30,6 @@ export type GameStateEvents = GameStateInitialEvents & {
 export class GameState extends EventEmitter<GameStateEvents> {
   static readonly SLEEP_TIME = 5 * MINUTES;
 
-  readonly sleepController: AbortController = new AbortController();
   sleepTimer: NodeJS.Timeout = this.getSleepTimer();
 
   readonly board: Board = new Board();
@@ -57,7 +56,6 @@ export class GameState extends EventEmitter<GameStateEvents> {
       this.on(evt, (...args: any) => this.emit("move-stream", evt, args));
     }
 
-    this.once("end", () => this.removeAllListeners());
     this.once("end", (winnerMark) => {
       const winnerId =
         winnerMark === "X" ? playerX
@@ -72,6 +70,9 @@ export class GameState extends EventEmitter<GameStateEvents> {
         lobbyId,
         winner: winnerId,
       });
+
+      this.removeAllListeners();
+      clearTimeout(this.sleepTimer);
     });
 
     this.on("new-move", async (ordering) => {
@@ -119,6 +120,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
     this.sleepTimer = this.getSleepTimer();
   }
 }
+
 class GameStates extends Map<number, GameState> {
   getOrCreate(lobbyId: number): GameState {
     let state = this.get(lobbyId);
