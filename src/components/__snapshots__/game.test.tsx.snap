@@ -30,7 +30,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
         ></nav
       ><h3 id="lobby-winner">Winner: </h3></header
     ><main
-      ><aside><p>DebugUser </p></aside><aside></aside
+      ><aside><p>DebugUser </p></aside
       ><section class="game-board"
         ><button type="button" disabled="" aria-label="Top-left"></button
         ><button type="button" disabled="" aria-label="Top-center"></button
