@@ -98,7 +98,9 @@ describe("/api/game-move", () => {
       expect(response1.status).toBe(204);
 
       const response2: Response = await gameApi.handle(await makeRequest());
-      expect(response2.status, await response2.text()).toBe(401);
+      expect(response2.status).toBe(401);
     });
   });
+
+  describe.todo("GET", () => {});
 });
