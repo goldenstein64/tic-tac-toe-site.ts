@@ -10,7 +10,9 @@ import FinishedGameHtml from "./game-finished";
 import ActiveGameHtml from "./game-active";
 import { db } from "../db";
 import { Lobby, User } from "../db/schema";
+import { gameStates } from "../game/game-state";
 
+const hardComputer = db.select().from(User).where(eq(User.id, 3)).get()!;
 const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
 
 const waitingLobby = db.select().from(Lobby).where(eq(Lobby.id, 1)).get()!;
@@ -50,16 +52,35 @@ describe("game.tsx", () => {
     }
   });
 
-  it("matches active lobby", async () => {
+  it("matches active awake lobby for user with turn", async () => {
+    using _state = gameStates.getOrCreate(activeLobby.id);
+    const document = await setUpPage(
+      await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
+    );
+    expect(await getHTML(document)).toMatchSnapshot();
+    gameStates.delete(activeLobby.id);
+  });
+
+  it("matches active awake lobby for user without turn", async () => {
+    using _state = gameStates.getOrCreate(activeLobby.id);
+    const document = await setUpPage(
+      await (<ActiveGameHtml lobby={activeLobby} user={hardComputer} />)
+    );
+    expect(await getHTML(document)).toMatchSnapshot();
+    gameStates.delete(activeLobby.id);
+  });
+  it("matches active sleeping lobby for user with turn", async () => {
     const document = await setUpPage(
       await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
     );
     expect(await getHTML(document)).toMatchSnapshot();
   });
-
-  it.todo("matches active awake lobby for user with turn", () => {});
-  it.todo("matches active sleeping lobby for user with turn", () => {});
-  it.todo("matches active sleeping lobby for user without turn", () => {});
+  it("matches active sleeping lobby for user without turn", async () => {
+    const document = await setUpPage(
+      await (<ActiveGameHtml lobby={activeLobby} user={hardComputer} />)
+    );
+    expect(await getHTML(document)).toMatchSnapshot();
+  });
 
   it("matches finished lobby", async () => {
     const document = await setUpPage(

@@ -60,7 +60,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
 "
 `;
 
-exports[`game.tsx matches active lobby 1`] = `
+exports[`game.tsx matches active awake lobby for user with turn 1`] = `
 "<html lang="en-US"
   ><head
     ><title>tic-tac-toe-site - Game</title
@@ -162,6 +162,387 @@ exports[`game.tsx matches active lobby 1`] = `
           hx-post="/api/game-move"
           hx-swap="none"
           hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:7}"
+          aria-label="Bottom-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:8}"
+          disabled=""
+          aria-label="Bottom-right"
+          class="mark-o"
+          >O</button
+        ></section
+      ></main
+    ><footer
+      ><span id="lobby-status" sse-swap="status" data-status="active"
+        >active</span
+      ></footer
+    ></body
+  ></html
+>
+"
+`;
+
+exports[`game.tsx matches active awake lobby for user without turn 1`] = `
+"<html lang="en-US"
+  ><head
+    ><title>tic-tac-toe-site - Game</title
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><script
+      src="/public/client/game.js"
+      type="module"
+    ></script
+    ><link rel="stylesheet" href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/game.css" /></head
+  ><body
+    hx-trigger="load"
+    hx-ext="sse"
+    sse-connect="/api/game-move?id=2"
+    sse-close="end"
+    ><header
+      ><nav id="top-nav"
+        ><h1><a href="/">tic-tac-toe-site</a></h1
+        ><div class="flex-fill"></div
+        ><section id="user-config"
+          ><span>HardComputer </span
+          ><button
+            type="button"
+            hx-delete="/api/session"
+            hx-swap="none"
+            hx-on--after-request="location.href='/login'"
+            >Log out</button
+          ></section
+        ></nav
+      ><h3 id="lobby-winner"
+        >Winner: <span sse-swap="winner"></span></h3></header
+    ><main
+      ><aside><p>DebugUser (X)</p></aside
+      ><aside><p>HardComputer (O)</p></aside
+      ><section class="game-board" hx-swap="innerHTML" sse-swap="board"
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:0}"
+          disabled=""
+          aria-label="Top-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:1}"
+          disabled=""
+          aria-label="Top-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:2}"
+          disabled=""
+          aria-label="Top-right"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:3}"
+          disabled=""
+          aria-label="Middle-left"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:4}"
+          disabled=""
+          aria-label="Middle-center"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:5}"
+          disabled=""
+          aria-label="Middle-right"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:6}"
+          disabled=""
+          aria-label="Bottom-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:7}"
+          disabled=""
+          aria-label="Bottom-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:8}"
+          disabled=""
+          aria-label="Bottom-right"
+          class="mark-o"
+          >O</button
+        ></section
+      ></main
+    ><footer
+      ><span id="lobby-status" sse-swap="status" data-status="active"
+        >active</span
+      ></footer
+    ></body
+  ></html
+>
+"
+`;
+
+exports[`game.tsx matches active sleeping lobby for user with turn 1`] = `
+"<html lang="en-US"
+  ><head
+    ><title>tic-tac-toe-site - Game</title
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><script
+      src="/public/client/game.js"
+      type="module"
+    ></script
+    ><link rel="stylesheet" href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/game.css" /></head
+  ><body
+    hx-trigger="load"
+    hx-ext="sse"
+    sse-connect="/api/game-move?id=2"
+    sse-close="end"
+    ><header
+      ><nav id="top-nav"
+        ><h1><a href="/">tic-tac-toe-site</a></h1
+        ><div class="flex-fill"></div
+        ><section id="user-config"
+          ><span>DebugUser </span
+          ><button
+            type="button"
+            hx-delete="/api/session"
+            hx-swap="none"
+            hx-on--after-request="location.href='/login'"
+            >Log out</button
+          ></section
+        ></nav
+      ><h3 id="lobby-winner"
+        >Winner: <span sse-swap="winner"></span></h3></header
+    ><main
+      ><aside><p>DebugUser (X)</p></aside
+      ><aside><p>HardComputer (O)</p></aside
+      ><section class="game-board" hx-swap="innerHTML" sse-swap="board"
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:0}"
+          disabled=""
+          aria-label="Top-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:1}"
+          aria-label="Top-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:2}"
+          aria-label="Top-right"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:3}"
+          disabled=""
+          aria-label="Middle-left"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:4}"
+          disabled=""
+          aria-label="Middle-center"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:5}"
+          disabled=""
+          aria-label="Middle-right"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:6}"
+          disabled=""
+          aria-label="Bottom-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:7}"
+          aria-label="Bottom-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:8}"
+          disabled=""
+          aria-label="Bottom-right"
+          class="mark-o"
+          >O</button
+        ></section
+      ></main
+    ><footer
+      ><span id="lobby-status" sse-swap="status" data-status="active"
+        >active</span
+      ></footer
+    ></body
+  ></html
+>
+"
+`;
+
+exports[`game.tsx matches active sleeping lobby for user without turn 1`] = `
+"<html lang="en-US"
+  ><head
+    ><title>tic-tac-toe-site - Game</title
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><script
+      src="/public/client/game.js"
+      type="module"
+    ></script
+    ><link rel="stylesheet" href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/game.css" /></head
+  ><body
+    hx-trigger="load"
+    hx-ext="sse"
+    sse-connect="/api/game-move?id=2"
+    sse-close="end"
+    ><header
+      ><nav id="top-nav"
+        ><h1><a href="/">tic-tac-toe-site</a></h1
+        ><div class="flex-fill"></div
+        ><section id="user-config"
+          ><span>HardComputer </span
+          ><button
+            type="button"
+            hx-delete="/api/session"
+            hx-swap="none"
+            hx-on--after-request="location.href='/login'"
+            >Log out</button
+          ></section
+        ></nav
+      ><h3 id="lobby-winner"
+        >Winner: <span sse-swap="winner"></span></h3></header
+    ><main
+      ><aside><p>DebugUser (X)</p></aside
+      ><aside><p>HardComputer (O)</p></aside
+      ><section class="game-board" hx-swap="innerHTML" sse-swap="board"
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:0}"
+          disabled=""
+          aria-label="Top-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:1}"
+          disabled=""
+          aria-label="Top-center"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:2}"
+          disabled=""
+          aria-label="Top-right"
+        ></button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:3}"
+          disabled=""
+          aria-label="Middle-left"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:4}"
+          disabled=""
+          aria-label="Middle-center"
+          class="mark-o"
+          >O</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:5}"
+          disabled=""
+          aria-label="Middle-right"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:6}"
+          disabled=""
+          aria-label="Bottom-left"
+          class="mark-x"
+          >X</button
+        ><button
+          type="button"
+          hx-post="/api/game-move"
+          hx-swap="none"
+          hx-vals="{&amp;#34;id&amp;#34;:2,&amp;#34;position&amp;#34;:7}"
+          disabled=""
           aria-label="Bottom-center"
         ></button
         ><button
