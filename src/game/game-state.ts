@@ -1,7 +1,7 @@
 import { type Mark, Board } from "@goldenstein64/tic-tac-toe";
 import { Player } from "@goldenstein64/tic-tac-toe/player";
 import { EventEmitter } from "events";
-import { setTimeout } from "timers/promises";
+import { setTimeout as delay } from "timers/promises";
 
 import { idToComputerFactory, orderingToMark } from "./run-game";
 import {
@@ -15,9 +15,13 @@ import {
 type GameStateInitialEvents = {
   "new-move": [ordering: number];
   end: [winner: Mark | null];
+  sleep: [];
 };
 
-const events = ["new-move", "end"] as const;
+const SECONDS = 1000;
+const MINUTES = 60 * SECONDS;
+
+const events = ["new-move", "end", "sleep"] as const;
 export type GameStateEvents = GameStateInitialEvents & {
   "move-stream": {
     [K in keyof GameStateInitialEvents]: [evt: K, GameStateInitialEvents[K]];
@@ -25,6 +29,11 @@ export type GameStateEvents = GameStateInitialEvents & {
 };
 
 export class GameState extends EventEmitter<GameStateEvents> {
+  static readonly SLEEP_TIME = 15 * SECONDS;
+
+  readonly sleepController: AbortController = new AbortController();
+  sleepTimer: NodeJS.Timeout = this.getSleepTimer();
+
   readonly board: Board = new Board();
   computerX: Player | undefined = undefined;
   computerO: Player | undefined = undefined;
@@ -76,7 +85,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
       // pretend the computer is "thinking"
       const [position] = await Promise.all([
         nextComputer.getMove(this.board, nextMark),
-        setTimeout(1000),
+        delay(1000),
       ]);
       this.setMark(position, ordering + 1);
     });
@@ -101,6 +110,15 @@ export class GameState extends EventEmitter<GameStateEvents> {
   canMark(position: number): boolean {
     return this.board.canMark(position);
   }
+
+  getSleepTimer(): NodeJS.Timeout {
+    return setTimeout(() => this.emit("sleep"), GameState.SLEEP_TIME);
+  }
+
+  resetSleep() {
+    clearTimeout(this.sleepTimer);
+    this.sleepTimer = this.getSleepTimer();
+  }
 }
 class GameStates extends Map<number, GameState> {
   getOrCreate(lobbyId: number): GameState {
@@ -108,6 +126,7 @@ class GameStates extends Map<number, GameState> {
     if (!state) {
       state = new GameState(lobbyId);
       state.once("end", () => this.delete(lobbyId));
+      state.once("sleep", () => this.delete(lobbyId));
       this.set(lobbyId, state);
     }
     return state;

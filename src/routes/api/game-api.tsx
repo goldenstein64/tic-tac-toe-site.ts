@@ -16,13 +16,27 @@ import {
   selectUsernameById,
 } from "#/src/db/queries";
 
+namespace MoveStream {
+  export type MoveStreamContext = {
+    board: Board;
+    userIsX: boolean;
+    isClientPlaying: boolean;
+    lobbyId: number;
+  };
+}
+
 class MoveStream {
-  constructor(
-    public board: Board,
-    public userIsX: boolean,
-    public isClientPlaying: boolean,
-    public lobbyId: number
-  ) {}
+  public board: Board;
+  public userIsX: boolean;
+  public isClientPlaying: boolean;
+  public lobbyId: number;
+
+  constructor(ctx: MoveStream.MoveStreamContext) {
+    this.board = ctx.board;
+    this.userIsX = ctx.userIsX;
+    this.isClientPlaying = ctx.isClientPlaying;
+    this.lobbyId = ctx.lobbyId;
+  }
 
   async *onNewMove(ordering: number): AsyncGenerator<SSEPayload> {
     const { lobbyId, board } = this;
@@ -51,7 +65,7 @@ class MoveStream {
         : "no one",
     });
     yield sse({ event: "status", data: "finished" });
-    yield sse({ event: "end" });
+    yield sse({ event: "end", data: "finished" });
   }
 }
 
@@ -61,12 +75,22 @@ export default new Elysia()
   .resolve(({ user }) => ({ user: user! }))
   .post(
     "/game-move",
-    ({ body: { id: lobbyId, position }, user: { id: userId }, status }) => {
+    ({
+      body: { id: lobbyId, position },
+      user: { id: userId },
+      status,
+      set,
+    }) => {
       const players = selectPlayersInGame.get({ lobbyId });
       if (!players) return status("Not Found");
       const { playerX, playerO } = players;
       if (playerX !== userId && playerO !== userId)
         return status("Unauthorized");
+
+      if (!gameStates.has(lobbyId)) {
+        // lobby is asleep, reload it to wake it up
+        set.headers["HX-Refresh"] = "true";
+      }
 
       const state = gameStates.getOrCreate(lobbyId);
       if (!state.canMark(position)) return status("Unauthorized");
@@ -74,6 +98,7 @@ export default new Elysia()
       const maxOrderResult = selectMaxOrdering.get({ lobbyId });
       const ordering = (maxOrderResult?.maxOrdering ?? -1) + 1;
       state.setMark(position, ordering);
+      state.resetSleep();
       return status("No Content");
     },
     {
@@ -104,12 +129,12 @@ export default new Elysia()
       const { playerX, playerO } = players;
       const userIsX = userId === playerX;
 
-      const moveStream = new MoveStream(
-        /* board */ state.board,
+      const moveStream = new MoveStream({
+        board: state.board,
         userIsX,
-        /* isClientPlaying: */ userIsX || userId == playerO,
-        lobbyId
-      );
+        isClientPlaying: userIsX || userId == playerO,
+        lobbyId,
+      });
 
       const onMoveStream = on(state, "move-stream", {
         signal: request.signal,
@@ -121,6 +146,9 @@ export default new Elysia()
             break;
           case "end":
             yield* moveStream.onEnded(...args);
+            return;
+          case "sleep":
+            yield sse({ event: "end", data: "asleep" });
             return;
         }
       }

@@ -25,7 +25,6 @@ function GameBody({ lobby, user }: GameBodyProps) {
           user={selectUserById.get({ userId: lobby.createdBy })}
           mark={undefined}
         />
-        <PlayerInfo user={undefined} mark={undefined} />
         <GameBoard lobby={lobby} />
       </main>
       <footer>
@@ -44,10 +43,12 @@ function GameBody({ lobby, user }: GameBodyProps) {
 
 export function WaitingGameHtml(props: GameBodyProps) {
   return (
-    <html>
-      <GameHead />
-      <GameBody {...props} />
-    </html>
+    <>
+      <html>
+        <GameHead />
+        <GameBody {...props} />
+      </html>
+    </>
   );
 }
 

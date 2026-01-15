@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
-import html from "@elysiajs/html";
+import html, { Html } from "@elysiajs/html";
 
 import ActiveGameHtml from "./components/game-active";
 import WaitingGameHtml from "./components/game-waiting";
@@ -20,6 +20,8 @@ import debug from "./routes/debug";
 
 import { NewLobbyHtml } from "./components/new-lobby";
 import { csrf } from "elysia-csrf";
+import { gameStates } from "./game/game-state";
+import SleepingGameHtml from "./components/game-asleep";
 
 const newLobby = new Elysia({ name: "NewLobby" })
   .use(csrf({ cookie: true }))
@@ -50,16 +52,23 @@ export const app = new Elysia({ name: "App" })
   .get("/", ({ user }) => LobbiesHtml({ user }))
   .get(
     "/game",
-    ({ query: { id: lobbyId }, user, status, set }) => {
+    ({ query: { id: lobbyId }, user, status }) => {
       const lobby = selectLobbyById.get({ lobbyId });
-      set.headers["content-type"] = "text/html";
-      return (
-        lobby === undefined ? status("Not Found")
-        : lobby.status === "active" ? ActiveGameHtml({ lobby, user })
-        : lobby.status === "waiting" ? WaitingGameHtml({ lobby, user })
-        : lobby.status === "finished" ? FinishedGameHtml({ lobby, user })
-        : status("Not Found")
-      );
+
+      switch (lobby?.status) {
+        case "active":
+          if (gameStates.has(lobbyId)) {
+            return <ActiveGameHtml lobby={lobby} user={user} />;
+          } else {
+            return <SleepingGameHtml lobby={lobby} user={user} />;
+          }
+        case "waiting":
+          return <WaitingGameHtml lobby={lobby} user={user} />;
+        case "finished":
+          return <FinishedGameHtml lobby={lobby} user={user} />;
+        default:
+          return status("Not Found");
+      }
     },
     { query: t.Object({ id: intString }) }
   )

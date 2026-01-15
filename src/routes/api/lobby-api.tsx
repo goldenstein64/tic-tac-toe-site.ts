@@ -1,7 +1,7 @@
 import type { Static } from "elysia";
 import type { Mark } from "@goldenstein64/tic-tac-toe";
 
-import html from "@elysiajs/html";
+import html, { Html } from "@elysiajs/html";
 import Elysia, { t, type status } from "elysia";
 import { randomInt } from "node:crypto";
 
@@ -89,17 +89,29 @@ export default new Elysia()
     }
   )
   .get(
+    "/lobby/is-asleep",
+    ({ query: { id: lobbyId }, headers, set }) => {
+      const status = selectLobbyStatusById.get({ lobbyId })?.status;
+      const isAsleep = status === "active" && !gameStates.has(lobbyId);
+      if (!isAsleep && headers["x-trigger-refresh"] === "true") {
+        set.headers["HX-Refresh"] = "true";
+      }
+      return isAsleep;
+    },
+    { query: t.Object({ id: intString }), response: t.Boolean() }
+  )
+  .get(
     "/lobbies",
     async ({ query: { type, page }, user: { id: userId }, status }) => {
       switch (type) {
         case "waiting":
-          return WaitingLobbies({ userId, page });
+          return <WaitingLobbies userId={userId} page={page} />;
         case "available":
-          return AvailableLobbies({ userId, page });
+          return <AvailableLobbies userId={userId} page={page} />;
         case "active":
-          return ActiveLobbies({ userId, page });
+          return <ActiveLobbies userId={userId} page={page} />;
         case "finished":
-          return FinishedLobbies({ userId, page });
+          return <FinishedLobbies userId={userId} page={page} />;
         default:
           return status("Unprocessable Content");
       }
