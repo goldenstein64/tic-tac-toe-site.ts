@@ -1,3 +1,5 @@
+/** components for finished games */
+
 import { Html } from "@elysiajs/html";
 import { SelectLobby, SelectUser } from "../db/schema";
 import {

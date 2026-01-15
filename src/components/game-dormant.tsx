@@ -1,3 +1,5 @@
+/** components for inactive games */
+
 import type { Mark } from "@goldenstein64/tic-tac-toe";
 
 import { Html } from "@elysiajs/html";

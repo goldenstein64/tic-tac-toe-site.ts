@@ -1,3 +1,5 @@
+/** components for inactive games that have just been created */
+
 import { Html } from "@elysiajs/html";
 import { SelectLobby, SelectUser } from "../db/schema";
 import { selectUserById } from "../db/queries";

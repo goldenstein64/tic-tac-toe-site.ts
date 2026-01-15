@@ -1,3 +1,5 @@
+/** components for active games that are asleep */
+
 import { Html } from "@elysiajs/html";
 
 import {

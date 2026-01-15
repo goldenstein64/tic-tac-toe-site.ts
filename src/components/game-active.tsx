@@ -1,3 +1,5 @@
+/** components for active games */
+
 import type { Board, Mark } from "@goldenstein64/tic-tac-toe";
 
 import { Html } from "@elysiajs/html";
