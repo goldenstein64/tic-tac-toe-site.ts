@@ -48,6 +48,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
     ><footer
       ><span
         hx-get="/api/lobby/status?id=1"
+        hx-headers="{&amp;#34;x-trigger-refresh&amp;#34;:&amp;#34;true&amp;#34;}"
         hx-trigger="every 30s"
         id="lobby-status"
         data-status="waiting"

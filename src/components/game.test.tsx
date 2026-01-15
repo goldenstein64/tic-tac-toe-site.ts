@@ -57,6 +57,10 @@ describe("game.tsx", () => {
     expect(await getHTML(document)).toMatchSnapshot();
   });
 
+  it.todo("matches active awake lobby for user with turn", () => {});
+  it.todo("matches active sleeping lobby for user with turn", () => {});
+  it.todo("matches active sleeping lobby for user without turn", () => {});
+
   it("matches finished lobby", async () => {
     const document = await setUpPage(
       await (<FinishedGameHtml lobby={finishedLobby} user={debugUser} />)

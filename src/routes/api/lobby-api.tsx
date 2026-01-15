@@ -71,9 +71,9 @@ export default new Elysia()
   .resolve(({ user }) => ({ user: user! }))
   .get(
     "/lobby/status",
-    ({ query: { id: lobbyId }, set }) => {
+    ({ query: { id: lobbyId }, set, headers }) => {
       const status = selectLobbyStatusById.get({ lobbyId })?.status;
-      if (status === "active") {
+      if (status === "active" && headers["x-trigger-refresh"] === "true") {
         set.headers["HX-Refresh"] = "true";
       }
       return status;

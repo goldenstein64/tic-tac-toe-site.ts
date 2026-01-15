@@ -30,6 +30,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
       <footer>
         <span
           hx-get={`/api/lobby/status?id=${lobby.id}`}
+          hx-headers={JSON.stringify({ "x-trigger-refresh": "true" })}
           hx-trigger="every 30s"
           id="lobby-status"
           data-status="waiting"
