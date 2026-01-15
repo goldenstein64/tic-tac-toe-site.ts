@@ -225,7 +225,7 @@ export default new Elysia()
       const computerIdX = typeX === -1 ? undefined : typeX;
       const computerIdO = typeO === -1 ? undefined : typeO;
 
-      if (computerIdX && computerIdO) {
+      if (computerIdX !== undefined && computerIdO !== undefined) {
         // both are computers, compute the game ASAP and create a finished lobby
         const { moves, winner: winnerMark } = await runGame(
           computerIdX,
@@ -250,7 +250,7 @@ export default new Elysia()
           insertFinishedLobby.run({ lobbyId, winner });
           set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
         });
-      } else if (computerIdX || computerIdO) {
+      } else if (computerIdX !== undefined || computerIdO !== undefined) {
         // only one is a computer, create an active lobby with this user as the
         // human
         await tx(async () => {
