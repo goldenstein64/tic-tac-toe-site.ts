@@ -50,3 +50,6 @@ game.db-wal
 /.env.local
 /public/out
 /public/client
+
+TODO.md
+doc/game.drawio
