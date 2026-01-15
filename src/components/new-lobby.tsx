@@ -1,7 +1,7 @@
 import { Html } from "@elysiajs/html";
 
 import { DebugPanel } from "./debug";
-import { TopNav, UserConfig } from "./base";
+import { TopNav, UserConfig, DefaultHtml } from "./base";
 import { SITE_TITLE } from "../constants";
 import { Mark } from "@goldenstein64/tic-tac-toe";
 import { SelectUser } from "../db/schema";
@@ -81,9 +81,9 @@ function NewLobbyBody({ user, csrfToken }: NewLobbyProps) {
 
 export function NewLobbyHtml({ user, csrfToken }: NewLobbyProps) {
   return (
-    <html>
+    <DefaultHtml>
       <NewLobbyHead />
       <NewLobbyBody user={user} csrfToken={csrfToken} />
-    </html>
+    </DefaultHtml>
   );
 }

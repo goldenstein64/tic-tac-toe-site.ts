@@ -14,7 +14,7 @@ import { SelectLobby, SelectUser } from "../db/schema";
 import { orderingToMark } from "../game/run-game";
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
-import { TopNav, UserConfig } from "./base";
+import { TopNav, UserConfig, DefaultHtml } from "./base";
 
 export const COLUMN_LABELS = ["left", "center", "right"] as const;
 export const ROW_LABELS = ["Top", "Middle", "Bottom"] as const;
@@ -190,10 +190,10 @@ type GameHtmlProps = GameBodyProps;
 
 export function GameHtml(props: GameHtmlProps) {
   return (
-    <html>
+    <DefaultHtml>
       <GameHead />
       <GameBody {...props} />
-    </html>
+    </DefaultHtml>
   );
 }
 

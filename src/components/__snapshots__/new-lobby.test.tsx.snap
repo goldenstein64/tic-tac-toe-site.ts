@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`new-lobby.tsx matches new lobby 1`] = `
-"<html
+"<html lang="en-US"
   ><head
     ><title>tic-tac-toe-site - New Lobby</title
     ><script src="/public/client/new-lobby.js" type="module"></script

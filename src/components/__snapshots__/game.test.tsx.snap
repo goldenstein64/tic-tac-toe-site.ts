@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`game.tsx matches waiting lobby 1`] = `
-"<html
+"<html lang="en-US"
   ><head
     ><title>tic-tac-toe-site - Game</title
     ><meta charset="UTF-8" /><meta
@@ -61,7 +61,7 @@ exports[`game.tsx matches waiting lobby 1`] = `
 `;
 
 exports[`game.tsx matches active lobby 1`] = `
-"<html
+"<html lang="en-US"
   ><head
     ><title>tic-tac-toe-site - Game</title
     ><meta charset="UTF-8" /><meta
@@ -186,7 +186,7 @@ exports[`game.tsx matches active lobby 1`] = `
 `;
 
 exports[`game.tsx matches finished lobby 1`] = `
-"<html
+"<html lang="en-US"
   ><head
     ><title>tic-tac-toe-site - Game</title
     ><meta charset="UTF-8" /><meta

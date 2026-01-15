@@ -7,7 +7,7 @@ import { selectUserById } from "../db/queries";
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
 import { GameBoard } from "./game-dormant";
-import { TopNav, UserConfig } from "./base";
+import { TopNav, UserConfig, DefaultHtml } from "./base";
 
 type GameBodyProps = { lobby: SelectLobby; user: SelectUser };
 
@@ -47,10 +47,10 @@ function GameBody({ lobby, user }: GameBodyProps) {
 export function WaitingGameHtml(props: GameBodyProps) {
   return (
     <>
-      <html>
+      <DefaultHtml>
         <GameHead />
         <GameBody {...props} />
-      </html>
+      </DefaultHtml>
     </>
   );
 }

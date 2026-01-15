@@ -14,7 +14,7 @@ import {
 } from "../db/queries";
 import { DebugPanel } from "./debug";
 import { SITE_TITLE } from "../constants";
-import { TopNav, UserConfig } from "./base";
+import { TopNav, UserConfig, DefaultHtml } from "./base";
 
 const PAGE_SIZE = 25;
 
@@ -392,10 +392,10 @@ type LobbiesProps = { user: SelectUser };
 
 export async function LobbiesHtml(props: LobbiesProps) {
   return (
-    <html>
+    <DefaultHtml>
       <LobbiesHead />
       <LobbiesBody {...props} />
-    </html>
+    </DefaultHtml>
   );
 }
 

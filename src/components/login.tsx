@@ -2,7 +2,7 @@ import { Html } from "@elysiajs/html";
 
 import { DebugPanel } from "./debug";
 import { SITE_TITLE } from "../constants";
-import { TopNav } from "./base";
+import { TopNav, DefaultHtml } from "./base";
 
 function LoginHead() {
   return (
@@ -46,9 +46,9 @@ function LoginBody() {
 
 export default function LoginHtml() {
   return (
-    <html>
+    <DefaultHtml>
       <LoginHead />
       <LoginBody />
-    </html>
+    </DefaultHtml>
   );
 }

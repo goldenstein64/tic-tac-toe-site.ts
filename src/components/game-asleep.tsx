@@ -12,7 +12,7 @@ import { orderingToMark } from "../game/run-game";
 
 import { DebugPanel } from "./debug";
 import { GameHead, PlayerInfo } from "./game-base";
-import { TopNav, UserConfig } from "./base";
+import { TopNav, UserConfig, DefaultHtml } from "./base";
 import { GameBoard } from "./game-active";
 
 const POLL_ASLEEP = {
@@ -72,10 +72,10 @@ async function GameBody({ lobby, user }: GameBodyProps) {
 
 export function SleepingGameHtml(props: GameBodyProps) {
   return (
-    <html>
+    <DefaultHtml>
       <GameHead />
       <GameBody {...props} />
-    </html>
+    </DefaultHtml>
   );
 }
 

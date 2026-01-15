@@ -1,4 +1,4 @@
-import { Children } from "@kitajs/html";
+import { Children, PropsWithChildren } from "@kitajs/html";
 import { Html } from "@elysiajs/html";
 import { SelectUser } from "../db/schema";
 
@@ -26,5 +26,12 @@ export function TopNav({ children }: { children?: Children }) {
       </h1>
       {children}
     </nav>
+  );
+}
+export function DefaultHtml({ children, ...props }: PropsWithChildren) {
+  return (
+    <html lang="en-US" {...props}>
+      {children}
+    </html>
   );
 }
