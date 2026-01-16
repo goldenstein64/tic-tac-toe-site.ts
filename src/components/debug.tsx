@@ -7,7 +7,7 @@ export function DebugPanel() {
     <div id="debug-panel">
       <button
         type="button"
-        style="float: right"
+        style={{ float: "right" }}
         hx-on-click="document.querySelector('#debug-panel').style.display = 'none'"
       >
         X
