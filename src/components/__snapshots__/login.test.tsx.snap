@@ -1,0 +1,32 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`matches snapshot 1`] = `
+"<html lang="en-US"
+  ><head
+    ><title>tic-tac-toe-site - Login</title
+    ><script src="/public/client/login.js" type="module"></script
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><link
+      rel="stylesheet"
+      href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/login.css" /></head
+  ><body
+    ><header
+      ><nav id="top-nav"
+        ><h1><a href="/">tic-tac-toe-site</a></h1></nav
+      ></header
+    ><main
+      ><section
+        ><button
+          id="discord-sign-in"
+          type="button"
+          hx-on-click="location.href='/login/discord'"
+          >Sign in with Discord<img
+            src="/public/discord-mark-white.png"
+            width="619"
+            height="469" /></button></section></main></body
+></html>
+"
+`;

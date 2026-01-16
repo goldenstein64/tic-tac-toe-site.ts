@@ -1,5 +1,6 @@
 import { type Document, Browser } from "happy-dom";
 import { SignJWT, jwtVerify } from "jose";
+import { format } from "prettier";
 
 const encoder = new TextEncoder();
 const accessSecret = encoder.encode(Bun.env.JWT_ACCESS_SECRET);
@@ -33,4 +34,10 @@ export async function setupDocument(initial: string): Promise<Document> {
   page.content = initial;
   await browser.waitUntilComplete();
   return page.mainFrame.document;
+}
+export function getHTML(document: Document): Promise<string> {
+  return format(document.documentElement.outerHTML, {
+    parser: "html",
+    htmlWhitespaceSensitivity: "strict",
+  });
 }
