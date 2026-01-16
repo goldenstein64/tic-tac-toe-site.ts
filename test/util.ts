@@ -1,3 +1,4 @@
+import { type Document, Browser } from "happy-dom";
 import { SignJWT, jwtVerify } from "jose";
 
 const encoder = new TextEncoder();
@@ -22,4 +23,14 @@ export function verifyAccess(signed: string) {
 
 export function verifyRefresh(signed: string) {
   return jwtVerify(signed, refreshSecret);
+}
+
+export async function setupDocument(initial: string): Promise<Document> {
+  const browser = new Browser({
+    settings: { disableJavaScriptFileLoading: true },
+  });
+  const page = browser.newPage();
+  page.content = initial;
+  await browser.waitUntilComplete();
+  return page.mainFrame.document;
 }
