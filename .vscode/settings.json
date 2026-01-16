@@ -1,6 +1,15 @@
 {
-    "editor.tabSize": 2,
-    "editor.insertSpaces": true,
-    "editor.formatOnSave": true,
-    "prettier.experimentalTernaries": true
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "prettier.experimentalTernaries": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.js, ${capture}.test.ts",
+    "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts, ${capture}.test.js",
+    "*.jsx": "${capture}.js, ${capture}.test.jsx",
+    "*.tsx": "${capture}.ts, ${capture}.test.tsx, ${capture}.test.ts",
+    "tsconfig.json": "tsconfig.*.json",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, bun.lock"
+  },
+  "explorer.fileNesting.enabled": true
 }
