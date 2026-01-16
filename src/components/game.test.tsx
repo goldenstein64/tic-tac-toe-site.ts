@@ -1,8 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
-import { format } from "prettier";
-import { Browser } from "happy-dom";
+import { Browser, HTMLElement, HTMLButtonElement } from "happy-dom";
 import Document from "happy-dom/lib/nodes/document/Document";
 
 import WaitingGameHtml from "./game-waiting";
@@ -11,6 +10,7 @@ import ActiveGameHtml from "./game-active";
 import { db } from "../db";
 import { Lobby, User } from "../db/schema";
 import { gameStates } from "../game/game-state";
+import SleepingGameHtml from "./game-asleep";
 
 const hardComputer = db.select().from(User).where(eq(User.id, 3)).get()!;
 const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
@@ -18,13 +18,6 @@ const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
 const waitingLobby = db.select().from(Lobby).where(eq(Lobby.id, 1)).get()!;
 const activeLobby = db.select().from(Lobby).where(eq(Lobby.id, 2)).get()!;
 const finishedLobby = db.select().from(Lobby).where(eq(Lobby.id, 3)).get()!;
-
-function getHTML(document: Document): Promise<string> {
-  return format(document.documentElement.outerHTML, {
-    parser: "html",
-    htmlWhitespaceSensitivity: "strict",
-  });
-}
 
 async function setUpPage(initial: string): Promise<Document> {
   const browser = new Browser({
@@ -41,14 +34,13 @@ describe("game.tsx", () => {
     const document = await setUpPage(
       await (<WaitingGameHtml lobby={waitingLobby} user={debugUser} />)
     );
-    expect(await getHTML(document)).toMatchSnapshot();
 
     const gameButtons = document.querySelectorAll(
-      ".game-board > button.game-button"
+      ".game-board button"
     ) as Iterable<HTMLButtonElement>;
 
-    for (const gameButton of gameButtons) {
-      expect(gameButton.disabled).toBeTrue();
+    for (const button of gameButtons) {
+      expect(button.disabled).toBeTrue();
     }
   });
 
@@ -57,8 +49,24 @@ describe("game.tsx", () => {
     const document = await setUpPage(
       await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
     );
-    expect(await getHTML(document)).toMatchSnapshot();
     gameStates.delete(activeLobby.id);
+
+    const gameButtons = document.querySelectorAll(".game-board button");
+    expect(gameButtons).toHaveLength(9);
+
+    for (const button of gameButtons) {
+      if (!(button instanceof HTMLButtonElement)) expect.unreachable();
+      if (button.textContent === "") {
+        expect(button.disabled).toBeFalse();
+      } else {
+        expect(button.disabled).toBeTrue();
+      }
+    }
+
+    const lobbyStatus = document.querySelector("#lobby-status");
+    if (!(lobbyStatus instanceof HTMLElement)) expect.unreachable();
+    expect(lobbyStatus.dataset["status"]).toBe("active");
+    expect(lobbyStatus.dataset["asleep"]).toBeUndefined();
   });
 
   it("matches active awake lobby for user without turn", async () => {
@@ -66,34 +74,82 @@ describe("game.tsx", () => {
     const document = await setUpPage(
       await (<ActiveGameHtml lobby={activeLobby} user={hardComputer} />)
     );
-    expect(await getHTML(document)).toMatchSnapshot();
     gameStates.delete(activeLobby.id);
+
+    const gameButtons = document.querySelectorAll(".game-board button");
+    expect(gameButtons).toHaveLength(9);
+
+    for (const button of gameButtons) {
+      if (!(button instanceof HTMLButtonElement)) expect.unreachable();
+      expect(button.disabled).toBeTrue();
+    }
+
+    const lobbyStatus = document.querySelector("#lobby-status");
+    if (!(lobbyStatus instanceof HTMLElement)) expect.unreachable();
+    expect(lobbyStatus.dataset["status"]).toBe("active");
+    expect(lobbyStatus.dataset["asleep"]).toBeUndefined();
   });
+
   it("matches active sleeping lobby for user with turn", async () => {
     const document = await setUpPage(
-      await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
+      await (<SleepingGameHtml lobby={activeLobby} user={debugUser} />)
     );
-    expect(await getHTML(document)).toMatchSnapshot();
+
+    const gameButtons = document.querySelectorAll(".game-board button");
+    expect(gameButtons).toHaveLength(9);
+
+    for (const button of gameButtons) {
+      if (!(button instanceof HTMLButtonElement)) expect.unreachable();
+      if (button.textContent === "") {
+        expect(button.disabled).toBeFalse();
+      } else {
+        expect(button.disabled).toBeTrue();
+      }
+    }
+
+    const lobbyStatus = document.querySelector("#lobby-status")!;
+    if (!(lobbyStatus instanceof HTMLElement)) expect.unreachable();
+    expect(gameStates.has(activeLobby.id)).toBeFalse();
+    expect(lobbyStatus.dataset["status"]).toBe("active");
+    expect(lobbyStatus.dataset["asleep"]).toBe("");
   });
+
   it("matches active sleeping lobby for user without turn", async () => {
     const document = await setUpPage(
-      await (<ActiveGameHtml lobby={activeLobby} user={hardComputer} />)
+      await (<SleepingGameHtml lobby={activeLobby} user={hardComputer} />)
     );
-    expect(await getHTML(document)).toMatchSnapshot();
+
+    const gameButtons = document.querySelectorAll(
+      ".game-board button"
+    ) as Iterable<HTMLButtonElement>;
+
+    for (const button of gameButtons) {
+      if (!(button instanceof HTMLButtonElement)) expect.unreachable();
+      expect(button.disabled).toBeTrue();
+    }
+
+    const lobbyStatus = document.querySelector("#lobby-status")!;
+    if (!(lobbyStatus instanceof HTMLElement)) expect.unreachable();
+    expect(gameStates.has(activeLobby.id)).toBeFalse();
+    expect(lobbyStatus.dataset["status"]).toBe("active");
+    expect(lobbyStatus.dataset["asleep"]).toBe("");
   });
 
   it("matches finished lobby", async () => {
     const document = await setUpPage(
       await (<FinishedGameHtml lobby={finishedLobby} user={debugUser} />)
     );
-    expect(await getHTML(document)).toMatchSnapshot();
-
     const gameButtons = document.querySelectorAll(
-      ".game-board > button.game-button"
+      ".game-board button"
     ) as Iterable<HTMLButtonElement>;
 
-    for (const gameButton of gameButtons) {
-      expect(gameButton.disabled).toBeTrue();
+    for (const button of gameButtons) {
+      if (!(button instanceof HTMLButtonElement)) expect.unreachable();
+      expect(button.disabled).toBeTrue();
     }
+
+    const lobbyStatus = document.querySelector("#lobby-status");
+    if (!(lobbyStatus instanceof HTMLElement)) expect.unreachable();
+    expect(lobbyStatus.dataset["status"]).toBe("finished");
   });
 });
