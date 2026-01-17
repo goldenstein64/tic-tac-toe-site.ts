@@ -26,7 +26,7 @@ export const selectMovesInGame = typePrepared(
     .from(Move)
     .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
     .prepare(),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );
 
 export const selectMaxOrdering = typePrepared(
@@ -35,7 +35,7 @@ export const selectMaxOrdering = typePrepared(
     .from(Move)
     .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
     .prepare(),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );
 
 export const selectUserById = typePrepared(
@@ -44,7 +44,7 @@ export const selectUserById = typePrepared(
     .from(User)
     .where(eq(User.id, sql.placeholder("userId")))
     .prepare(),
-  _placeholders as { userId: number }
+  _placeholders as { userId: number },
 );
 
 export const selectPlayersInGame = typePrepared(
@@ -53,7 +53,7 @@ export const selectPlayersInGame = typePrepared(
     .from(Game)
     .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
     .prepare(),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );
 
 export const selectUserActiveLobbies = (() => {
@@ -63,6 +63,7 @@ export const selectUserActiveLobbies = (() => {
     db
       .select({
         lobbyId: Lobby.id,
+        createdAt: Lobby.createdAt,
         playerX: playerX.username,
         playerO: playerO.username,
       })
@@ -75,14 +76,14 @@ export const selectUserActiveLobbies = (() => {
           eq(Lobby.status, "active"),
           or(
             eq(playerX.id, sql.placeholder("userId")),
-            eq(playerO.id, sql.placeholder("userId"))
-          )
-        )
+            eq(playerO.id, sql.placeholder("userId")),
+          ),
+        ),
       )
       .offset(sql.placeholder("offset"))
       .limit(sql.placeholder("limit"))
       .prepare(),
-    _placeholders as { userId: number; offset: number; limit: number }
+    _placeholders as { userId: number; offset: number; limit: number },
   );
 })();
 
@@ -101,12 +102,12 @@ export const countUserActiveLobbies = (() => {
           eq(Lobby.status, "active"),
           or(
             eq(playerX.id, sql.placeholder("userId")),
-            eq(playerO.id, sql.placeholder("userId"))
-          )
-        )
+            eq(playerO.id, sql.placeholder("userId")),
+          ),
+        ),
       )
       .prepare(),
-    _placeholders as { userId: number }
+    _placeholders as { userId: number },
   );
 })();
 
@@ -132,14 +133,14 @@ export const selectUserFinishedLobbies = (() => {
           eq(Lobby.status, "finished"),
           or(
             eq(playerX.id, sql.placeholder("userId")),
-            eq(playerO.id, sql.placeholder("userId"))
-          )
-        )
+            eq(playerO.id, sql.placeholder("userId")),
+          ),
+        ),
       )
       .offset(sql.placeholder("offset"))
       .limit(sql.placeholder("limit"))
       .prepare(),
-    _placeholders as { userId: number; offset: number; limit: number }
+    _placeholders as { userId: number; offset: number; limit: number },
   );
 })();
 
@@ -158,12 +159,12 @@ export const countUserFinishedLobbies = (() => {
           eq(Lobby.status, "finished"),
           or(
             eq(playerX.id, sql.placeholder("userId")),
-            eq(playerO.id, sql.placeholder("userId"))
-          )
-        )
+            eq(playerO.id, sql.placeholder("userId")),
+          ),
+        ),
       )
       .prepare(),
-    _placeholders as { userId: number }
+    _placeholders as { userId: number },
   );
 })();
 
@@ -179,13 +180,13 @@ export const selectUserAvailableLobbies = typePrepared(
     .where(
       and(
         eq(Lobby.status, "waiting"),
-        ne(Lobby.createdBy, sql.placeholder("userId"))
-      )
+        ne(Lobby.createdBy, sql.placeholder("userId")),
+      ),
     )
     .offset(sql.placeholder("offset"))
     .limit(sql.placeholder("limit"))
     .prepare(),
-  _placeholders as { userId: number; offset: number; limit: number }
+  _placeholders as { userId: number; offset: number; limit: number },
 );
 
 export const countUserAvailableLobbies = typePrepared(
@@ -196,11 +197,11 @@ export const countUserAvailableLobbies = typePrepared(
     .where(
       and(
         eq(Lobby.status, "waiting"),
-        ne(Lobby.createdBy, sql.placeholder("userId"))
-      )
+        ne(Lobby.createdBy, sql.placeholder("userId")),
+      ),
     )
     .prepare(),
-  _placeholders as { userId: number }
+  _placeholders as { userId: number },
 );
 
 export const selectUserWaitingLobbies = typePrepared(
@@ -213,13 +214,13 @@ export const selectUserWaitingLobbies = typePrepared(
     .where(
       and(
         eq(Lobby.status, "waiting"),
-        eq(Lobby.createdBy, sql.placeholder("userId"))
-      )
+        eq(Lobby.createdBy, sql.placeholder("userId")),
+      ),
     )
     .offset(sql.placeholder("offset"))
     .limit(sql.placeholder("limit"))
     .prepare(),
-  _placeholders as { userId: number; offset: number; limit: number }
+  _placeholders as { userId: number; offset: number; limit: number },
 );
 
 export const countUserWaitingLobbies = typePrepared(
@@ -229,11 +230,11 @@ export const countUserWaitingLobbies = typePrepared(
     .where(
       and(
         eq(Lobby.status, "waiting"),
-        eq(Lobby.createdBy, sql.placeholder("userId"))
-      )
+        eq(Lobby.createdBy, sql.placeholder("userId")),
+      ),
     )
     .prepare(),
-  _placeholders as { userId: number }
+  _placeholders as { userId: number },
 );
 
 export const selectDiscordUserById = typePrepared(
@@ -243,7 +244,7 @@ export const selectDiscordUserById = typePrepared(
     .innerJoin(User, eq(User.id, DiscordUser.userId))
     .where(eq(DiscordUser.discordId, sql.placeholder("discordId")))
     .prepare(),
-  _placeholders as SQLProps<{ discordId: string }>
+  _placeholders as SQLProps<{ discordId: string }>,
 );
 
 export const insertUser = typePrepared(
@@ -252,7 +253,7 @@ export const insertUser = typePrepared(
     .values({ username: sql.placeholder("username") })
     .returning({ userId: User.id, refreshKey: User.refreshKey })
     .prepare(),
-  _placeholders as SQLProps<{ username: string }>
+  _placeholders as SQLProps<{ username: string }>,
 );
 
 export const insertDiscordUser = typePrepared(
@@ -272,7 +273,7 @@ export const insertDiscordUser = typePrepared(
     accessToken: string;
     refreshToken: string;
     expiresAt: Date;
-  }>
+  }>,
 );
 
 export function updateDiscordUser({
@@ -296,7 +297,7 @@ export const selectMoves = typePrepared(
     .from(Move)
     .where(eq(Move.lobbyId, sql.placeholder("lobbyId")))
     .prepare(),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );
 
 export const insertMove = typePrepared(
@@ -308,7 +309,7 @@ export const insertMove = typePrepared(
       position: sql.placeholder("position"),
     })
     .prepare(),
-  _placeholders as { lobbyId: number; ordering: number; position: number }
+  _placeholders as { lobbyId: number; ordering: number; position: number },
 );
 
 export const insertFinishedLobby = typePrepared(
@@ -320,7 +321,7 @@ export const insertFinishedLobby = typePrepared(
     })
     .returning({ finishedAt: FinishedLobby.finishedAt })
     .prepare(),
-  _placeholders as { lobbyId: number; winner?: number }
+  _placeholders as { lobbyId: number; winner?: number },
 );
 
 export function updateLobbyStatus({
@@ -347,11 +348,11 @@ export const selectUserByIdRefreshKey = typePrepared(
     .where(
       and(
         eq(User.id, sql.placeholder("userId")),
-        eq(User.refreshKey, sql.placeholder("refreshKey"))
-      )
+        eq(User.refreshKey, sql.placeholder("refreshKey")),
+      ),
     )
     .prepare(),
-  _placeholders as { userId: number; refreshKey: number }
+  _placeholders as { userId: number; refreshKey: number },
 );
 
 export const selectUsernameById = typePrepared(
@@ -360,7 +361,7 @@ export const selectUsernameById = typePrepared(
     .from(User)
     .where(eq(User.id, sql.placeholder("userId")))
     .prepare(),
-  _placeholders as { userId: number }
+  _placeholders as { userId: number },
 );
 
 export const selectLobbyByIdStatusCreatedBy = typePrepared(
@@ -371,11 +372,11 @@ export const selectLobbyByIdStatusCreatedBy = typePrepared(
       and(
         eq(Lobby.id, sql.placeholder("lobbyId")),
         eq(Lobby.createdBy, sql.placeholder("createdBy")),
-        eq(Lobby.status, sql.placeholder("status"))
-      )
+        eq(Lobby.status, sql.placeholder("status")),
+      ),
     )
     .prepare(),
-  _placeholders as { lobbyId: number; createdBy: number; status: LobbyStatus }
+  _placeholders as { lobbyId: number; createdBy: number; status: LobbyStatus },
 );
 
 export const insertGame = typePrepared(
@@ -387,7 +388,7 @@ export const insertGame = typePrepared(
       playerO: sql.placeholder("playerO"),
     })
     .prepare(),
-  _placeholders as { lobbyId: number; playerX: number; playerO: number }
+  _placeholders as { lobbyId: number; playerX: number; playerO: number },
 );
 
 export const insertLobby = typePrepared(
@@ -399,7 +400,7 @@ export const insertLobby = typePrepared(
     })
     .returning({ id: Lobby.id, createdAt: Lobby.createdAt })
     .prepare(),
-  _placeholders as { userId: number; status: LobbyStatus }
+  _placeholders as { userId: number; status: LobbyStatus },
 );
 
 export const deleteLobbyById = typePrepared(
@@ -407,7 +408,7 @@ export const deleteLobbyById = typePrepared(
     .delete(Lobby)
     .where(eq(Lobby.id, sql.placeholder("id")))
     .prepare(),
-  _placeholders as { id: number }
+  _placeholders as { id: number },
 );
 
 export const selectPlayerInGame = typePrepared(
@@ -419,12 +420,12 @@ export const selectPlayerInGame = typePrepared(
         eq(Game.lobbyId, sql.placeholder("lobbyId")),
         or(
           eq(Game.playerX, sql.placeholder("userId")),
-          eq(Game.playerO, sql.placeholder("userId"))
-        )
-      )
+          eq(Game.playerO, sql.placeholder("userId")),
+        ),
+      ),
     )
     .prepare(),
-  _placeholders as { lobbyId: number; userId: number }
+  _placeholders as { lobbyId: number; userId: number },
 );
 
 export function insertMoves(args: { lobbyId: number; moves: number[] }) {
@@ -439,7 +440,7 @@ export const selectLobbyById = typePrepared(
     .select()
     .from(Lobby)
     .where(eq(Lobby.id, sql.placeholder("lobbyId"))),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );
 
 export const selectFinishedLobby = typePrepared(
@@ -448,7 +449,7 @@ export const selectFinishedLobby = typePrepared(
     .from(FinishedLobby)
     .where(eq(FinishedLobby.id, sql.placeholder("lobbyId")))
     .prepare(),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );
 
 export const selectLobbyStatusById = typePrepared(
@@ -457,5 +458,5 @@ export const selectLobbyStatusById = typePrepared(
     .from(Lobby)
     .where(eq(Lobby.id, sql.placeholder("lobbyId")))
     .prepare(),
-  _placeholders as { lobbyId: number }
+  _placeholders as { lobbyId: number },
 );

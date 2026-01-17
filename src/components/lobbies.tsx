@@ -63,7 +63,7 @@ export function LobbiesHead() {
   return (
     <head>
       <title>{SITE_TITLE} - Lobbies</title>
-      <script src="/public/client/lobby.js" type="module" />
+      <script src="/public/client/lobbies.js" type="module" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="stylesheet" href="/public/global.css" />
@@ -95,7 +95,7 @@ export function WaitingLobbyItem({
         </button>
       </td>
       <td>{lobbyId}</td>
-      <td>{createdAt.toUTCString()}</td>
+      <td class="date-time">{createdAt.toISOString()}</td>
     </tr>
   );
 }
@@ -116,7 +116,7 @@ export async function WaitingLobbies({
       <table>
         <thead>
           <tr>
-            <th></th>
+            <th />
             <th>Id</th>
             <th>Created At</th>
           </tr>
@@ -134,11 +134,13 @@ export async function WaitingLobbies({
 
 type ActiveLobbyItemProps = {
   lobbyId: number;
+  createdAt: Date;
   playerX: string;
   playerO: string;
 };
 export function ActiveLobbyItem({
   lobbyId,
+  createdAt,
   playerX,
   playerO,
 }: ActiveLobbyItemProps) {
@@ -161,6 +163,7 @@ export function ActiveLobbyItem({
         </button>
       </td>
       <td>{lobbyId}</td>
+      <td class="date-time">{createdAt.toISOString()}</td>
       <td>{playerX}</td>
       <td>{playerO}</td>
     </tr>
@@ -180,8 +183,9 @@ export async function ActiveLobbies({ userId, page = 1 }: ActiveLobbiesProps) {
       <table>
         <thead>
           <tr>
-            <th></th>
+            <th />
             <th>Id</th>
+            <th>Created At</th>
             <th>Player X</th>
             <th>Player O</th>
           </tr>
@@ -227,7 +231,7 @@ export function AvailableLobbyItem({
         </button>
       </td>
       <td>{lobbyId}</td>
-      <td>{createdAt.toUTCString()}</td>
+      <td class="date-time">{createdAt.toISOString()}</td>
       <td>{opponent}</td>
     </tr>
   );
@@ -249,7 +253,7 @@ export async function AvailableLobbies({
       <table>
         <thead>
           <tr>
-            <th></th>
+            <th />
             <th>Id</th>
             <th>Created At</th>
             <th>Opponent</th>
@@ -293,8 +297,8 @@ export function FinishedLobbyItem({
         </button>
       </td>
       <td>{lobbyId}</td>
-      <td>{createdAt.toUTCString()}</td>
-      <td>{finishedAt.toUTCString()}</td>
+      <td class="date-time">{createdAt.toISOString()}</td>
+      <td class="date-time">{finishedAt.toISOString()}</td>
       <td>{playerX}</td>
       <td>{playerO}</td>
     </tr>
@@ -319,7 +323,7 @@ export async function FinishedLobbies({
       <table>
         <thead>
           <tr>
-            <th></th>
+            <th />
             <th>Id</th>
             <th>Created At</th>
             <th>Finished At</th>

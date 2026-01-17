@@ -5,7 +5,7 @@ await Bun.$`rm -rf public/client`;
 await Bun.build({
   entrypoints: [
     "client/game.ts",
-    "client/lobby.ts",
+    "client/lobbies.ts",
     "client/login.ts",
     "client/new-lobby.ts",
   ],
