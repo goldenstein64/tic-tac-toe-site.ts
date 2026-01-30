@@ -1,11 +1,16 @@
 import "htmx.org";
 
-const dateCells = document.querySelectorAll(
-  "main td.date-time",
-) as NodeListOf<HTMLTableCellElement>;
+function noWrap(textContent: string) {
+  return `<span class="no-wrap">${textContent}</span>`;
+}
+
+const dateCells =
+  document.querySelectorAll<HTMLTableCellElement>("main td.date-time");
 
 for (const cell of dateCells) {
-  const date = new Date(cell.textContent);
+  const dateObj: Date = new Date(cell.textContent);
+  const date: string = dateObj.toLocaleDateString();
+  const time: string = dateObj.toLocaleTimeString();
 
-  cell.innerHTML = `<span class="no-wrap">${date.toLocaleDateString()}</span>, <span class="no-wrap">${date.toLocaleTimeString()}</span>`;
+  cell.innerHTML = `${noWrap(date)}, ${noWrap(time)}`;
 }
