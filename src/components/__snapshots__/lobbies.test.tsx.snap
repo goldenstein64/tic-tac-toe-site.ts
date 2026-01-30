@@ -1,0 +1,182 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`GET / matches snapshot 1`] = `
+"<html lang="en-US"
+  ><head
+    ><title>tic-tac-toe-site - Lobbies</title
+    ><script src="/public/client/lobbies.js" type="module"></script
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" /><link
+      rel="stylesheet"
+      href="/public/global.css" /><link
+      rel="stylesheet"
+      href="/public/lobbies.css" /></head
+  ><body
+    ><header
+      ><nav id="top-nav"
+        ><h1><a href="/">tic-tac-toe-site</a></h1
+        ><button type="button" hx-on-click="location.href='/new-lobby'"
+          >New Lobby</button
+        ><div class="flex-fill"></div
+        ><section id="user-config"
+          ><span>DebugUser </span
+          ><button
+            type="button"
+            hx-delete="/api/session"
+            hx-swap="none"
+            hx-on--after-request="location.href='/login'"
+            >Log out</button
+          ></section
+        ></nav
+      ><nav
+        ><button type="button" hx-on-click="location.hash='#active-games'"
+          >Active Games</button
+        ><button type="button" hx-on-click="location.hash='#available-games'"
+          >Available Games</button
+        ><button type="button" hx-on-click="location.hash='#waiting-games'"
+          >Waiting Games</button
+        ><button type="button" hx-on-click="location.hash='#finished-games'"
+          >Finished Games</button
+        ></nav
+      ></header
+    ><main
+      ><section id="active-games"
+        ><h2>Active Games</h2
+        ><div class="paginator-target"
+          ><table
+            ><thead
+              ><tr
+                ><th></th><th>Id</th><th>Created At</th><th>Player X</th
+                ><th>Player O</th></tr
+              ></thead
+            ><tbody
+              ><tr
+                ><td class="actions"
+                  ><button
+                    type="button"
+                    hx-on-click="location.href=&amp;#34;/game?id=2&amp;#34;"
+                    >View</button
+                  ><button
+                    type="button"
+                    hx-patch="/api/lobby/forfeit"
+                    hx-swap="none"
+                    hx-vals="{&amp;#34;id&amp;#34;:2}"
+                    >Forfeit</button
+                  ></td
+                ><td>2</td><td class="date-time">2024-11-28T02:30:00.000Z</td
+                ><td>DebugUser</td><td>HardComputer</td></tr
+              ></tbody
+            ></table
+          ><div class="paginator"
+            ><button disabled="">&lt;</button
+            ><div class="page-number">1 / 1</div
+            ><button disabled="">&gt;</button></div
+          ></div
+        ></section
+      ><section id="available-games"
+        ><h2>Available Games</h2
+        ><div class="paginator-target"
+          ><table
+            ><thead
+              ><tr
+                ><th></th><th>Id</th><th>Created At</th><th>Opponent</th></tr
+              ></thead
+            ><tbody
+              ><tr
+                ><td class="actions"
+                  ><button
+                    type="button"
+                    hx-on-click="location.href=&amp;#34;/game?id=4&amp;#34;"
+                    >View</button
+                  ><button
+                    type="button"
+                    hx-patch="/api/lobby/join"
+                    hx-vals="{&amp;#34;id&amp;#34;:4}"
+                    hx-swap="none"
+                    hx-on--after-request="location.href=&amp;#34;/game?id=4&amp;#34;"
+                    >Join</button
+                  ></td
+                ><td>4</td><td class="date-time">2024-11-28T02:31:00.000Z</td
+                ><td>AnotherDebugUser</td></tr
+              ></tbody
+            ></table
+          ><div class="paginator"
+            ><button disabled="">&lt;</button
+            ><div class="page-number">1 / 1</div
+            ><button disabled="">&gt;</button></div
+          ></div
+        ></section
+      ><section id="waiting-games"
+        ><h2>Waiting Games</h2
+        ><div class="paginator-target"
+          ><table
+            ><thead
+              ><tr><th></th><th>Id</th><th>Created At</th></tr></thead
+            ><tbody
+              ><tr
+                ><td class="actions"
+                  ><button
+                    type="button"
+                    hx-on-click="location.href=&amp;#34;/game?id=1&amp;#34;"
+                    >View</button
+                  ><button
+                    type="button"
+                    hx-delete="/api/lobby"
+                    hx-vals="{&amp;#34;id&amp;#34;:1}"
+                    >Forget</button
+                  ></td
+                ><td>1</td
+                ><td class="date-time">2024-11-28T02:29:00.000Z</td></tr
+              ></tbody
+            ></table
+          ><div class="paginator"
+            ><button disabled="">&lt;</button
+            ><div class="page-number">1 / 1</div
+            ><button disabled="">&gt;</button></div
+          ></div
+        ></section
+      ><section id="finished-games"
+        ><h2>Finished Games</h2
+        ><div class="paginator-target"
+          ><table
+            ><thead
+              ><tr
+                ><th></th><th>Id</th><th>Created At</th><th>Finished At</th
+                ><th>Player X</th><th>Player O</th></tr
+              ></thead
+            ><tbody
+              ><tr
+                ><td class="actions"
+                  ><button
+                    type="button"
+                    hx-on-click="location.href=&amp;#34;/game?id=3&amp;#34;"
+                    >View</button
+                  ></td
+                ><td>3</td><td class="date-time">2024-11-28T02:31:00.000Z</td
+                ><td class="date-time">2024-11-28T02:32:00.000Z</td
+                ><td>DebugUser</td><td>EasyComputer</td></tr
+              ><tr
+                ><td class="actions"
+                  ><button
+                    type="button"
+                    hx-on-click="location.href=&amp;#34;/game?id=5&amp;#34;"
+                    >View</button
+                  ></td
+                ><td>5</td><td class="date-time">2025-11-30T02:35:00.000Z</td
+                ><td class="date-time">2025-11-30T02:36:00.000Z</td
+                ><td>DebugUser</td><td>AnotherDebugUser</td></tr
+              ></tbody
+            ></table
+          ><div class="paginator"
+            ><button disabled="">&lt;</button
+            ><div class="page-number">1 / 1</div
+            ><button disabled="">&gt;</button></div
+          ></div
+        ></section
+      ></main
+    ></body
+  ></html
+>
+"
+`;

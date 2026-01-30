@@ -28,24 +28,24 @@ function Paginator({ type, page, count }: PaginatorProps) {
 
   const prevButton =
     page <= 1 ?
-      <button disabled>&lt;</button>
+      <button disabled>{"&lt;"}</button>
     : <button
         hx-target="closest .paginator-target"
         hx-get="/api/lobbies"
         hx-vals={JSON.stringify({ type, page: page - 1 })}
       >
-        &lt;
+        {"&lt;"}
       </button>;
 
   const nextButton =
     page >= count ?
-      <button disabled>&gt;</button>
+      <button disabled>{"&gt;"}</button>
     : <button
         hx-target="closest .paginator-target"
         hx-get="/api/lobbies"
         hx-vals={JSON.stringify({ type, page: page + 1 })}
       >
-        &gt;
+        {"&gt;"}
       </button>;
 
   return (
