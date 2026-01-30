@@ -1,6 +1,6 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`matches snapshot 1`] = `
+exports[`GET /login matches snapshot 1`] = `
 "<html lang="en-US"
   ><head
     ><title>tic-tac-toe-site - Login</title
