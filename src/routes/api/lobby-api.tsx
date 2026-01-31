@@ -141,7 +141,7 @@ export default new Elysia()
             });
 
             if (lobby === undefined) {
-              // this should already be checked by (playerResult === undefined)
+              // may be thrown if fromStatus was not "active"
               throw new StatusError(
                 "Forbidden",
                 "lobby does not exist or is not active",
