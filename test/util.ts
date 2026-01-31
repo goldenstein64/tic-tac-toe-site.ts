@@ -1,4 +1,15 @@
-import { type Document, Browser } from "happy-dom";
+import { type Document } from "happy-dom";
+
+import { db } from "#/src/db";
+import {
+  deleteLobbyById,
+  insertFinishedLobby,
+  insertGame,
+  insertLobby,
+} from "#/src/db/queries";
+import { Game, Move } from "#/src/db/schema";
+import { eq } from "drizzle-orm";
+import { Browser } from "happy-dom";
 import { SignJWT, jwtVerify } from "jose";
 import { format } from "prettier";
 
@@ -26,12 +37,15 @@ export function verifyRefresh(signed: string) {
   return jwtVerify(signed, refreshSecret);
 }
 
-export async function setupDocument(initial: string): Promise<Document> {
+export async function setupDocument(initial?: string): Promise<Document> {
   const browser = new Browser({
+    // why did I do this again?
     settings: { disableJavaScriptFileLoading: true },
   });
   const page = browser.newPage();
-  page.content = initial;
+  if (typeof initial === "string") {
+    page.content = initial;
+  }
   await browser.waitUntilComplete();
   return page.mainFrame.document;
 }
@@ -41,3 +55,46 @@ export function getHTML(document: Document): Promise<string> {
     htmlWhitespaceSensitivity: "strict",
   });
 }
+
+class _DisposableLobby {
+  id: number;
+  createdAt: Date;
+
+  constructor({ id, createdAt }: { id: number; createdAt: Date }) {
+    this.id = id;
+    this.createdAt = createdAt;
+  }
+
+  [Symbol.dispose]() {
+    db.delete(Move).where(eq(Move.lobbyId, this.id)).run();
+    db.delete(Game).where(eq(Game.lobbyId, this.id)).run();
+    deleteLobbyById.run({ id: this.id });
+  }
+}
+
+type ActiveLobbyProps = { playerX: number; playerO: number };
+export function setupActiveLobby({ playerX, playerO }: ActiveLobbyProps) {
+  const lobby = insertLobby.get({ userId: playerX, status: "active" })!;
+  insertGame.run({ lobbyId: lobby.id, playerX, playerO });
+
+  return new _DisposableLobby(lobby);
+}
+
+type FinishedLobbyProps = { playerX: number; playerO: number; winner: number };
+export function setupFinishedLobby({
+  playerX,
+  playerO,
+  winner,
+}: FinishedLobbyProps) {
+  const lobby = insertLobby.get({ userId: playerX, status: "finished" })!;
+  insertGame.run({ lobbyId: lobby.id, playerX, playerO });
+  insertFinishedLobby.run({ lobbyId: lobby.id, winner });
+  return new _DisposableLobby(lobby);
+}
+
+export function setupWaitingLobby(userId: number) {
+  const lobby = insertLobby.get({ userId, status: "waiting" })!;
+  return new _DisposableLobby(lobby);
+}
+
+export type DisposableLobby = _DisposableLobby;

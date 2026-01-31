@@ -1,21 +1,7 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  afterEach,
-} from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { once } from "node:events";
-import { eq } from "drizzle-orm";
 
-import { signAccess } from "#/test/util";
-
-import { deleteLobbyById, insertGame, insertLobby } from "#/src/db/queries";
-import { Game, Move } from "#/src/db/schema";
-import { LobbyStatus } from "#/src/db/datatypes";
-import { db } from "#/src/db";
+import { signAccess, setupActiveLobby } from "#/test/util";
 
 import gameApi from "./game-api";
 import { gameStates, GameState } from "#/src/game/game-state";
@@ -24,37 +10,14 @@ const EasyComputer = 1;
 const DebugUser = 4;
 const AnotherDebugUser = 5;
 
-function setupLobby(status: LobbyStatus, playerX: number, playerO?: number) {
-  const lobby = insertLobby.get({ userId: playerX, status })!;
-  const lobbyId = lobby.id;
-  if (playerO !== undefined) {
-    insertGame.run({
-      lobbyId,
-      playerX,
-      playerO,
-    });
-  }
-  return lobbyId;
-}
-
-function teardownLobby(lobbyId: number) {
-  db.delete(Move).where(eq(Move.lobbyId, lobbyId)).run();
-  db.delete(Game).where(eq(Game.lobbyId, lobbyId)).run();
-  deleteLobbyById.run({ id: lobbyId });
-}
-
 describe("/api/game-move", () => {
   describe("POST", () => {
-    let lobbyId: number;
-    beforeAll(() => {
-      lobbyId = setupLobby("active", DebugUser, EasyComputer);
-    });
-
-    afterAll(() => {
-      teardownLobby(lobbyId);
-    });
-
     it("works", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
       const state = new GameState(lobbyId);
       gameStates.set(lobbyId, state);
 
@@ -68,7 +31,7 @@ describe("/api/game-move", () => {
             Cookie: `access=${await signAccess({ userId: DebugUser })}`,
           },
           body: new URLSearchParams({ id: String(lobbyId), position: "4" }),
-        })
+        }),
       );
       expect(response.status).toBe(204);
 
@@ -77,6 +40,11 @@ describe("/api/game-move", () => {
     });
 
     it("fails if the lobby doesn't exist", async () => {
+      using _lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+
       const response = await gameApi.handle(
         new Request("http://localhost/game-move", {
           method: "POST",
@@ -84,12 +52,18 @@ describe("/api/game-move", () => {
             Cookie: `access=${await signAccess({ userId: DebugUser })}`,
           },
           body: new URLSearchParams({ id: String(-1), position: "4" }),
-        })
+        }),
       );
       expect(response.status).toBe(404);
     });
 
     it("fails if the lobby doesn't have the user as a player", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
+
       const response = await gameApi.handle(
         new Request("http://localhost/game-move", {
           method: "POST",
@@ -97,12 +71,18 @@ describe("/api/game-move", () => {
             Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
           },
           body: new URLSearchParams({ id: String(lobbyId), position: "6" }),
-        })
+        }),
       );
       expect(response.status).toBe(401);
     });
 
     it("fails if the position specifies an occupied slot", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
+
       async function makeRequest() {
         return new Request("http://localhost/game-move", {
           method: "POST",
@@ -126,22 +106,19 @@ describe("/api/game-move", () => {
 
 describe("GET /api/game/is-asleep", () => {
   describe("in an active lobby", () => {
-    let lobbyId: number;
-    beforeEach(() => {
-      lobbyId = setupLobby("active", DebugUser, EasyComputer);
-    });
-
-    afterEach(() => {
-      teardownLobby(lobbyId);
-    });
-
     it("sends that lobby is asleep", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
+
       const response = await gameApi.handle(
         new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
           headers: {
             Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
           },
-        })
+        }),
       );
 
       expect(response.status).toBe(200);
@@ -149,13 +126,19 @@ describe("GET /api/game/is-asleep", () => {
     });
 
     it("sends that lobby is asleep with X-Trigger-Refresh", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
+
       const response = await gameApi.handle(
         new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
           headers: {
             Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
             "X-Trigger-Refresh": "true",
           },
-        })
+        }),
       );
 
       expect(response.status).toBe(200);
@@ -164,6 +147,11 @@ describe("GET /api/game/is-asleep", () => {
     });
 
     it("sends that lobby is not asleep", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
       using _state = gameStates.getOrCreate(lobbyId);
 
       const response = await gameApi.handle(
@@ -171,7 +159,7 @@ describe("GET /api/game/is-asleep", () => {
           headers: {
             Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
           },
-        })
+        }),
       );
 
       gameStates.delete(lobbyId);
@@ -181,6 +169,11 @@ describe("GET /api/game/is-asleep", () => {
     });
 
     it("sends HX-Refresh header when X-Trigger-Refresh is supplied", async () => {
+      using lobby = setupActiveLobby({
+        playerX: DebugUser,
+        playerO: EasyComputer,
+      });
+      const lobbyId = lobby.id;
       using _state = gameStates.getOrCreate(lobbyId);
 
       const response = await gameApi.handle(
@@ -189,7 +182,7 @@ describe("GET /api/game/is-asleep", () => {
             Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
             "X-Trigger-Refresh": "true",
           },
-        })
+        }),
       );
 
       gameStates.delete(lobbyId);
