@@ -60,7 +60,7 @@ class StatusError extends Error {
   statusArgs: Parameters<typeof status>;
 
   constructor(...args: Parameters<typeof status>) {
-    super((args[1] as object).toString());
+    super(String(args[1]));
     this.statusArgs = args;
   }
 }
@@ -86,7 +86,7 @@ export default new Elysia()
         description:
           "From HTMX, the page gets refreshed when the status is active.",
       },
-    }
+    },
   )
   .get(
     "/lobbies",
@@ -104,7 +104,7 @@ export default new Elysia()
           return status("Unprocessable Content");
       }
     },
-    { query: t.Object({ type: TLobbyType, page: intString }) }
+    { query: t.Object({ type: TLobbyType, page: intString }) },
   )
   .patch(
     "/lobby/forfeit",
@@ -115,7 +115,7 @@ export default new Elysia()
           if (playerResult === undefined) {
             throw new StatusError(
               "Forbidden",
-              "lobby does not exist or does not contain this user"
+              "lobby does not exist or does not contain this user",
             );
           }
 
@@ -141,19 +141,21 @@ export default new Elysia()
             });
 
             if (lobby === undefined) {
-              throw new CustomRollbackError(
-                "unable to forfeit lobby (deleted or not active)"
+              // this should already be checked by (playerResult === undefined)
+              throw new StatusError(
+                "Forbidden",
+                "lobby does not exist or is not active",
               );
             }
 
             insertFinishedLobby.run({ lobbyId, winner });
           }
 
-          return { success: true };
+          return status("No Content");
         });
       } catch (err) {
         if (err instanceof CustomRollbackError) {
-          return { success: false, message: err.message };
+          return status(500, JSON.stringify(err.message));
         } else if (err instanceof StatusError) {
           return status(...err.statusArgs);
         } else {
@@ -161,7 +163,7 @@ export default new Elysia()
         }
       }
     },
-    { body: t.Object({ id: intString }) }
+    { body: t.Object({ id: intString }) },
   )
   .patch(
     "/lobby/join",
@@ -175,7 +177,7 @@ export default new Elysia()
           });
           if (lobby === undefined) {
             throw new CustomRollbackError(
-              "unable to join lobby (deleted or not waiting)"
+              "unable to join lobby (deleted or not waiting)",
             );
           }
 
@@ -204,7 +206,7 @@ export default new Elysia()
         }
       }
     },
-    { body: t.Object({ id: intString }) }
+    { body: t.Object({ id: intString }) },
   )
   .post(
     "/lobby",
@@ -217,7 +219,7 @@ export default new Elysia()
         // both are computers, compute the game ASAP and create a finished lobby
         const { moves, winner: winnerMark } = await runGame(
           computerIdX,
-          computerIdO
+          computerIdO,
         );
         const winner =
           winnerMark === "X" ? computerIdX
@@ -259,7 +261,7 @@ export default new Elysia()
         set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
       }
     },
-    { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) }
+    { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) },
   )
   .delete(
     "/lobby",
@@ -280,5 +282,5 @@ export default new Elysia()
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";
     },
-    { query: t.Object({ id: intString }) }
+    { query: t.Object({ id: intString }) },
   );
