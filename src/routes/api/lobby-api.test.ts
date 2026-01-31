@@ -10,7 +10,11 @@ import {
 } from "#/test/util";
 
 import lobbyApi from "./lobby-api";
-import { selectFinishedLobby, selectLobbyById } from "#/src/db/queries";
+import {
+  selectFinishedLobby,
+  selectLobbyById,
+  selectPlayersInGame,
+} from "#/src/db/queries";
 
 const EasyComputer = 1;
 const DebugUser = 4;
@@ -227,10 +231,82 @@ describe("PATCH /api/lobby/forfeit", () => {
 });
 
 describe("PATCH /api/lobby/join", () => {
-  it.todo("lets a user join the game", () => {});
-  it.todo("errors when the game is active", () => {});
-  it.todo("errors when the game is finished", () => {});
-  it.todo("errors when the user is already in the game", () => {});
+  it("lets a user join the game", async () => {
+    using lobby: DisposableLobby = setupWaitingLobby(DebugUser);
+
+    const response = await as(AnotherDebugUser).patch(
+      "/lobby/join",
+      new URLSearchParams({ id: String(lobby.id) }),
+    );
+
+    expect(response.status).toBe(204);
+    const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
+    if (newLobby === undefined) expect.unreachable();
+    expect(newLobby.status).toBe("active");
+    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
+    if (players === undefined) expect.unreachable();
+    expect(new Set([players.playerX, players.playerO])).toStrictEqual(
+      new Set([DebugUser, AnotherDebugUser]),
+    );
+  });
+
+  it("errors when the game is active", async () => {
+    using lobby: DisposableLobby = setupActiveLobby({
+      playerX: DebugUser,
+      playerO: EasyComputer,
+    });
+
+    const response = await as(AnotherDebugUser).patch(
+      "/lobby/join",
+      new URLSearchParams({ id: String(lobby.id) }),
+    );
+
+    expect(response.status).toBe(403);
+    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
+    if (players === undefined) expect.unreachable();
+    expect(players).toStrictEqual({
+      playerX: DebugUser,
+      playerO: EasyComputer,
+    });
+  });
+
+  it("errors when the game is finished", async () => {
+    using lobby: DisposableLobby = setupFinishedLobby({
+      playerX: DebugUser,
+      playerO: EasyComputer,
+      winner: undefined,
+    });
+
+    const response = await as(AnotherDebugUser).patch(
+      "/lobby/join",
+      new URLSearchParams({ id: String(lobby.id) }),
+    );
+
+    expect(response.status).toBe(403);
+    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
+    if (players === undefined) expect.unreachable();
+    expect(players).toStrictEqual({
+      playerX: DebugUser,
+      playerO: EasyComputer,
+    });
+  });
+
+  it.failing("errors when the user is already in the game", async () => {
+    using lobby: DisposableLobby = setupWaitingLobby(DebugUser);
+
+    const response = await as(DebugUser).patch(
+      "/lobby/join",
+      new URLSearchParams({ id: String(lobby.id) }),
+    );
+
+    expect(response.status).toBe(403);
+    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
+    if (players === undefined) expect.unreachable();
+    expect(players).toStrictEqual({
+      playerX: DebugUser,
+      playerO: EasyComputer,
+    });
+  });
 });
 
 describe("POST /api/lobby", () => {

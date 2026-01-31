@@ -80,7 +80,7 @@ export function setupActiveLobby({ playerX, playerO }: ActiveLobbyProps) {
   return new _DisposableLobby(lobby);
 }
 
-type FinishedLobbyProps = { playerX: number; playerO: number; winner: number };
+type FinishedLobbyProps = { playerX: number; playerO: number; winner?: number };
 export function setupFinishedLobby({
   playerX,
   playerO,

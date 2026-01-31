@@ -55,7 +55,6 @@ const PlayerTypeString = t
   })
   .Encode((value: PlayerType) => value.toString());
 
-class CustomRollbackError extends Error {}
 class StatusError extends Error {
   statusArgs: Parameters<typeof status>;
 
@@ -154,9 +153,7 @@ export default new Elysia()
           return status("No Content");
         });
       } catch (err) {
-        if (err instanceof CustomRollbackError) {
-          return status(500, JSON.stringify(err.message));
-        } else if (err instanceof StatusError) {
+        if (err instanceof StatusError) {
           return status(...err.statusArgs);
         } else {
           throw err;
@@ -167,7 +164,7 @@ export default new Elysia()
   )
   .patch(
     "/lobby/join",
-    async ({ body: { id: lobbyId }, user: { id: userId } }) => {
+    async ({ body: { id: lobbyId }, user: { id: userId }, status }) => {
       try {
         return await tx(async () => {
           const lobby = updateLobbyStatus({
@@ -176,8 +173,9 @@ export default new Elysia()
             toStatus: "active",
           });
           if (lobby === undefined) {
-            throw new CustomRollbackError(
-              "unable to join lobby (deleted or not waiting)",
+            throw new StatusError(
+              "Forbidden",
+              "lobby does not exist or is not waiting",
             );
           }
 
@@ -196,11 +194,11 @@ export default new Elysia()
 
           // a new game state will be created when needed
 
-          return { success: true };
+          return status(204);
         });
       } catch (err) {
-        if (err instanceof CustomRollbackError) {
-          return { success: false, message: err.message };
+        if (err instanceof StatusError) {
+          return status(...err.statusArgs);
         } else {
           throw err;
         }
