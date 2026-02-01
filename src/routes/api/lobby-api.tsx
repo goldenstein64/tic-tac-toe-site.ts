@@ -106,7 +106,7 @@ export default new Elysia()
     },
   )
   .get(
-    "/lobbies",
+    "/lobby/list",
     async ({ query: { type, page }, user: { id: userId }, status }) => {
       switch (type) {
         case "waiting":

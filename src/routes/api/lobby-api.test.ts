@@ -69,7 +69,7 @@ describe("GET /api/lobby/status", () => {
   });
 });
 
-describe("GET /api/lobbies", () => {
+describe("GET /api/lobby/list", () => {
   it("sends a list of available lobbies", async () => {
     using stack = new DisposableStack();
     for (let i = 0; i < 3; i++) {
@@ -78,7 +78,7 @@ describe("GET /api/lobbies", () => {
 
     const response = await as(DebugUser)
       .withParams({ type: "available", page: 1 })
-      .get("/lobbies");
+      .get("/lobby/list");
 
     const document = await setupDocument();
     document.body.innerHTML = await response.text();
@@ -94,7 +94,7 @@ describe("GET /api/lobbies", () => {
 
     const response = await as(DebugUser)
       .withParams({ type: "waiting", page: 1 })
-      .get("/lobbies");
+      .get("/lobby/list");
 
     const document = await setupDocument();
     document.body.innerHTML = await response.text();
@@ -112,7 +112,7 @@ describe("GET /api/lobbies", () => {
 
     const response = await as(DebugUser)
       .withParams({ type: "active", page: 1 })
-      .get("/lobbies");
+      .get("/lobby/list");
 
     const document = await setupDocument();
     document.body.innerHTML = await response.text();
@@ -134,7 +134,7 @@ describe("GET /api/lobbies", () => {
 
     const response = await as(DebugUser)
       .withParams({ type: "finished", page: 1 })
-      .get("/lobbies");
+      .get("/lobby/list");
 
     const document = await setupDocument();
     document.body.innerHTML = await response.text();

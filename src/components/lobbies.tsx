@@ -31,7 +31,7 @@ function Paginator({ type, page, count }: PaginatorProps) {
       <button disabled>{"&lt;"}</button>
     : <button
         hx-target="closest .paginator-target"
-        hx-get="/api/lobbies"
+        hx-get="/api/lobby/list"
         hx-vals={JSON.stringify({ type, page: page - 1 })}
       >
         {"&lt;"}
@@ -42,7 +42,7 @@ function Paginator({ type, page, count }: PaginatorProps) {
       <button disabled>{"&gt;"}</button>
     : <button
         hx-target="closest .paginator-target"
-        hx-get="/api/lobbies"
+        hx-get="/api/lobby/list"
         hx-vals={JSON.stringify({ type, page: page + 1 })}
       >
         {"&gt;"}
