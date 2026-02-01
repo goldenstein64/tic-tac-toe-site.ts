@@ -11,8 +11,6 @@ import LoginHtml from "./components/login";
 import jwtAuth, { jwtMustAuth } from "./auth/jwt-auth";
 import discordLogin from "./routes/discord-login";
 
-import { intString } from "./types";
-
 import { selectLobbyById } from "./db/queries";
 
 import api from "./routes/api";
@@ -27,7 +25,7 @@ const newLobby = new Elysia({ name: "NewLobby" })
   .use(csrf({ cookie: true }))
   .use(jwtMustAuth())
   .get("/new-lobby", ({ user, csrfToken }) =>
-    NewLobbyHtml({ user, csrfToken: csrfToken() })
+    NewLobbyHtml({ user, csrfToken: csrfToken() }),
   );
 
 export const app = new Elysia({ name: "App" })
@@ -46,7 +44,7 @@ export const app = new Elysia({ name: "App" })
       return redirect("/login", 302);
   })
   .get("/login", async ({ user, redirect }) =>
-    user !== null ? redirect("/", 302) : LoginHtml()
+    user !== null ? redirect("/", 302) : LoginHtml(),
   )
   .resolve(({ user }) => ({ user: user! }))
   .get("/", ({ user }) => LobbiesHtml({ user }))
@@ -70,7 +68,7 @@ export const app = new Elysia({ name: "App" })
           return status("Not Found");
       }
     },
-    { query: t.Object({ id: intString }) }
+    { query: t.Object({ id: t.Numeric() }) },
   )
   .use(newLobby)
   .use(staticPlugin());

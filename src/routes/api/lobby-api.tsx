@@ -7,7 +7,7 @@ import { randomInt } from "node:crypto";
 
 import { gameStates } from "#/src/game/game-state";
 import runGame from "#/src/game/run-game";
-import { intString, TLobbyType } from "#/src/types";
+import { TLobbyType } from "#/src/types";
 import { tx } from "#/src/db";
 import {
   updateLobbyStatus,
@@ -90,7 +90,7 @@ export default new Elysia()
       return lobbyStatus;
     },
     {
-      query: t.Object({ id: intString }),
+      query: t.Object({ id: t.Numeric() }),
       response: { [200]: t.Optional(LobbyStatus), [404]: t.String() },
       detail: {
         summary: "the status of the lobby with the given id",
@@ -122,7 +122,7 @@ export default new Elysia()
       }
     },
     {
-      query: t.Object({ type: TLobbyType, page: intString }),
+      query: t.Object({ type: TLobbyType, page: t.Numeric() }),
       detail: {
         summary: "a list of lobbies with the given lobby type",
         description: `
@@ -184,7 +184,7 @@ export default new Elysia()
         }
       }
     },
-    { body: t.Object({ id: intString }) },
+    { body: t.Object({ id: t.Numeric() }) },
   )
   .patch(
     "/lobby/join",
@@ -229,7 +229,7 @@ export default new Elysia()
         }
       }
     },
-    { body: t.Object({ id: intString }) },
+    { body: t.Object({ id: t.Numeric() }) },
   )
   .post(
     "/lobby",
@@ -308,5 +308,5 @@ export default new Elysia()
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";
     },
-    { query: t.Object({ id: intString }) },
+    { query: t.Object({ id: t.Numeric() }) },
   );

@@ -8,7 +8,6 @@ import html, { Html } from "@elysiajs/html";
 import jwtAuth from "#/src/auth/jwt-auth";
 import { orderingToMark } from "#/src/game/run-game";
 import { gameStates, GameStateEvents } from "#/src/game/game-state";
-import { intString } from "#/src/types";
 import { GameRows } from "#/src/components/game-active";
 import {
   selectPlayersInGame,
@@ -84,7 +83,7 @@ export default new Elysia()
       }
       return isAsleep;
     },
-    { query: t.Object({ id: intString }), response: t.Boolean() }
+    { query: t.Object({ id: t.Numeric() }), response: t.Boolean() },
   )
   .post(
     "/game-move",
@@ -115,9 +114,9 @@ export default new Elysia()
       return status("No Content");
     },
     {
-      body: t.Object({ id: intString, position: intString }),
+      body: t.Object({ id: t.Numeric(), position: t.Numeric() }),
       parse: "application/x-www-form-urlencoded",
-    }
+    },
   )
   .get(
     "/game-move",
@@ -166,5 +165,5 @@ export default new Elysia()
         }
       }
     },
-    { query: t.Object({ id: intString }) }
+    { query: t.Object({ id: t.Numeric() }) },
   );

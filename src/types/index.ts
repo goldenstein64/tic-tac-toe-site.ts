@@ -1,10 +1,5 @@
 import { t, Static } from "elysia";
 
-export const intString = t
-  .Transform(t.String())
-  .Decode((s) => parseInt(s))
-  .Encode((v) => v.toString());
-
 export const TLobbyType = t.Union([
   t.Literal("waiting"),
   t.Literal("available"),
