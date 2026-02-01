@@ -3,7 +3,7 @@ import { HTMLButtonElement, HTMLElement } from "happy-dom";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 
-import { setupDocument } from "#/test/util";
+import { setupDocument } from "#/test/documents";
 import FinishedGameHtml from "./game-finished";
 import { db } from "../db";
 import { User, Lobby } from "../db/schema";
@@ -14,10 +14,10 @@ const finishedLobby = db.select().from(Lobby).where(eq(Lobby.id, 3)).get()!;
 
 it("matches finished lobby", async () => {
   const document = await setupDocument(
-    await (<FinishedGameHtml lobby={finishedLobby} user={debugUser} />)
+    await (<FinishedGameHtml lobby={finishedLobby} user={debugUser} />),
   );
   const gameButtons = document.querySelectorAll(
-    ".game-board button"
+    ".game-board button",
   ) as Iterable<HTMLButtonElement>;
 
   for (const button of gameButtons) {

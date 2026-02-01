@@ -6,14 +6,14 @@ import { NewLobbyHtml } from "./new-lobby";
 import { db } from "../db";
 import { User } from "../db/schema";
 
-import { getHTML, setupDocument } from "#/test/util";
+import { getHTML, setupDocument } from "#/test/documents";
 
 const debugUser = db.select().from(User).where(eq(User.id, 4)).get()!;
 
 describe("new-lobby.tsx", () => {
   it("matches new lobby", async () => {
     const document = await setupDocument(
-      await (<NewLobbyHtml user={debugUser} csrfToken="something" />)
+      await (<NewLobbyHtml user={debugUser} csrfToken="something" />),
     );
     expect(await getHTML(document)).toMatchSnapshot();
   });

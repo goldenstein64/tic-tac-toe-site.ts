@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 import { HTMLElement, HTMLButtonElement } from "happy-dom";
 
-import { setupDocument } from "#/test/util";
+import { setupDocument } from "#/test/documents";
 import { db } from "../db";
 import { Lobby, User } from "../db/schema";
 import { gameStates } from "../game/game-state";
@@ -18,7 +18,7 @@ const activeLobby = db.select().from(Lobby).where(eq(Lobby.id, 2)).get()!;
 it("matches active awake lobby for user with turn", async () => {
   using _state = gameStates.getOrCreate(activeLobby.id);
   const document = await setupDocument(
-    await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />)
+    await (<ActiveGameHtml lobby={activeLobby} user={debugUser} />),
   );
   gameStates.delete(activeLobby.id);
 
@@ -43,7 +43,7 @@ it("matches active awake lobby for user with turn", async () => {
 it("matches active awake lobby for user without turn", async () => {
   using _state = gameStates.getOrCreate(activeLobby.id);
   const document = await setupDocument(
-    await (<ActiveGameHtml lobby={activeLobby} user={hardComputer} />)
+    await (<ActiveGameHtml lobby={activeLobby} user={hardComputer} />),
   );
   gameStates.delete(activeLobby.id);
 

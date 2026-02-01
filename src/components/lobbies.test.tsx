@@ -2,7 +2,7 @@ import { describe, it, expect } from "bun:test";
 import { Html } from "@elysiajs/html";
 
 import LobbiesHtml from "./lobbies";
-import { setupDocument, getHTML } from "#/test/util";
+import { setupDocument, getHTML } from "#/test/documents";
 import { selectUserById } from "../db/queries";
 
 const debugUser = selectUserById.get({ userId: 4 })!;

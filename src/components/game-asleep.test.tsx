@@ -3,7 +3,7 @@ import { HTMLButtonElement, HTMLElement } from "happy-dom";
 import { eq } from "drizzle-orm";
 import { Html } from "@elysiajs/html";
 
-import { setupDocument } from "#/test/util";
+import { setupDocument } from "#/test/documents";
 import { gameStates } from "../game/game-state";
 import { db } from "../db";
 import { User, Lobby } from "../db/schema";
@@ -17,7 +17,7 @@ const activeLobby = db.select().from(Lobby).where(eq(Lobby.id, 2)).get()!;
 
 it("matches active sleeping lobby for user with turn", async () => {
   const document = await setupDocument(
-    await (<SleepingGameHtml lobby={activeLobby} user={debugUser} />)
+    await (<SleepingGameHtml lobby={activeLobby} user={debugUser} />),
   );
 
   const gameButtons = document.querySelectorAll(".game-board button");
@@ -40,11 +40,11 @@ it("matches active sleeping lobby for user with turn", async () => {
 });
 it("matches active sleeping lobby for user without turn", async () => {
   const document = await setupDocument(
-    await (<SleepingGameHtml lobby={activeLobby} user={hardComputer} />)
+    await (<SleepingGameHtml lobby={activeLobby} user={hardComputer} />),
   );
 
   const gameButtons = document.querySelectorAll(
-    ".game-board button"
+    ".game-board button",
   ) as Iterable<HTMLButtonElement>;
 
   for (const button of gameButtons) {

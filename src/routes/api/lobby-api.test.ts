@@ -1,13 +1,13 @@
 import { describe, it, expect } from "bun:test";
 
+import { createTestClient } from "#/test/clients";
+import { setupDocument } from "#/test/documents";
 import {
-  signAccess,
-  setupDocument,
   setupWaitingLobby,
   setupActiveLobby,
   setupFinishedLobby,
   DisposableLobby,
-} from "#/test/util";
+} from "#/test/lobbies";
 
 import lobbyApi from "./lobby-api";
 import {
@@ -20,62 +20,7 @@ const EasyComputer = 1;
 const DebugUser = 4;
 const AnotherDebugUser = 5;
 
-class TestClient {
-  private params: URLSearchParams;
-
-  constructor(private headers: Promise<Headers>) {
-    this.params = new URLSearchParams();
-  }
-
-  withParams(params: Record<string, unknown>): this {
-    this.params = new URLSearchParams(
-      Object.entries(params).map(([k, v]) => [k, String(v)]),
-    );
-    return this;
-  }
-
-  async get(url: string): Promise<Response> {
-    const reqUrl = new URL(url, "http://localhost");
-    reqUrl.search = this.params.toString();
-    const headers = await this.headers;
-    const request = new Request(reqUrl, { headers });
-    return lobbyApi.handle(request);
-  }
-
-  async patch(url: string, body?: BodyInit): Promise<Response> {
-    const reqUrl = new URL(url, "http://localhost");
-    reqUrl.search = this.params.toString();
-    const headers = await this.headers;
-    const request = new Request(reqUrl, { method: "PATCH", body, headers });
-    return lobbyApi.handle(request);
-  }
-
-  async post(url: string, body?: BodyInit): Promise<Response> {
-    const reqUrl = new URL(url, "http://localhost");
-    reqUrl.search = this.params.toString();
-    const headers = await this.headers;
-    const request = new Request(reqUrl, { method: "POST", body, headers });
-    return lobbyApi.handle(request);
-  }
-
-  async delete(url: string): Promise<Response> {
-    const reqUrl = new URL(url, "http://localhost");
-    reqUrl.search = this.params.toString();
-    const headers = await this.headers;
-    const request = new Request(reqUrl, { method: "DELETE", headers });
-    return lobbyApi.handle(request);
-  }
-}
-
-function as(userId: number, headers?: HeadersInit) {
-  const reqHeaders = new Headers(headers);
-  const headersPromise = signAccess({ userId }).then((access) => {
-    const accessCookie = new Bun.Cookie("access", access);
-    reqHeaders.append("Cookie", accessCookie.toString());
-    return reqHeaders;
-  });
-  return new TestClient(headersPromise);
-}
+const as = createTestClient(lobbyApi);
 
 describe("GET /api/lobby/status", () => {
   it("sends lobby status", async () => {

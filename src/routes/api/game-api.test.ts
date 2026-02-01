@@ -1,14 +1,18 @@
 import { describe, it, expect } from "bun:test";
 import { once } from "node:events";
 
-import { signAccess, setupActiveLobby } from "#/test/util";
+import { signAccess } from "#/test/jwts";
+import { setupActiveLobby } from "#/test/lobbies";
 
 import gameApi from "./game-api";
 import { gameStates, GameState } from "#/src/game/game-state";
+import { createTestClient } from "#/test/clients";
 
 const EasyComputer = 1;
 const DebugUser = 4;
 const AnotherDebugUser = 5;
+
+const as = createTestClient(gameApi);
 
 describe("/api/game-move", () => {
   describe("POST", () => {
@@ -24,15 +28,11 @@ describe("/api/game-move", () => {
       const moveStreamPromise = once(state, "move-stream");
       const newMovePromise = once(state, "new-move");
 
-      const response = await gameApi.handle(
-        new Request("http://localhost/game-move", {
-          method: "POST",
-          headers: {
-            Cookie: `access=${await signAccess({ userId: DebugUser })}`,
-          },
-          body: new URLSearchParams({ id: String(lobbyId), position: "4" }),
-        }),
+      const response = await as(DebugUser).post(
+        "/game-move",
+        new URLSearchParams({ id: String(lobbyId), position: String(4) }),
       );
+
       expect(response.status).toBe(204);
 
       expect(moveStreamPromise).resolves.toStrictEqual(["new-move", [0]]);
@@ -45,15 +45,11 @@ describe("/api/game-move", () => {
         playerO: EasyComputer,
       });
 
-      const response = await gameApi.handle(
-        new Request("http://localhost/game-move", {
-          method: "POST",
-          headers: {
-            Cookie: `access=${await signAccess({ userId: DebugUser })}`,
-          },
-          body: new URLSearchParams({ id: String(-1), position: "4" }),
-        }),
+      const response = await as(DebugUser).post(
+        "/game-move",
+        new URLSearchParams({ id: String(-1), position: String(4) }),
       );
+
       expect(response.status).toBe(404);
     });
 
@@ -64,15 +60,11 @@ describe("/api/game-move", () => {
       });
       const lobbyId = lobby.id;
 
-      const response = await gameApi.handle(
-        new Request("http://localhost/game-move", {
-          method: "POST",
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-          },
-          body: new URLSearchParams({ id: String(lobbyId), position: "6" }),
-        }),
+      const response = await as(AnotherDebugUser).post(
+        "/game-move",
+        new URLSearchParams({ id: String(lobbyId), position: String(6) }),
       );
+
       expect(response.status).toBe(401);
     });
 
@@ -83,20 +75,17 @@ describe("/api/game-move", () => {
       });
       const lobbyId = lobby.id;
 
-      async function makeRequest() {
-        return new Request("http://localhost/game-move", {
-          method: "POST",
-          headers: {
-            Cookie: `access=${await signAccess({ userId: DebugUser })}`,
-          },
-          body: new URLSearchParams({ id: String(lobbyId), position: "7" }),
-        });
+      async function sendRequest() {
+        return await as(DebugUser).post(
+          "/game-move",
+          new URLSearchParams({ id: String(lobbyId), position: String(7) }),
+        );
       }
 
-      const response1: Response = await gameApi.handle(await makeRequest());
+      const response1: Response = await sendRequest();
       expect(response1.status).toBe(204);
 
-      const response2: Response = await gameApi.handle(await makeRequest());
+      const response2: Response = await sendRequest();
       expect(response2.status).toBe(401);
     });
   });
@@ -113,13 +102,9 @@ describe("GET /api/game/is-asleep", () => {
       });
       const lobbyId = lobby.id;
 
-      const response = await gameApi.handle(
-        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-          },
-        }),
-      );
+      const response = await as(AnotherDebugUser)
+        .withParams({ id: lobbyId })
+        .get("/game/is-asleep");
 
       expect(response.status).toBe(200);
       expect(await response.json()).toBe(true);
@@ -132,14 +117,11 @@ describe("GET /api/game/is-asleep", () => {
       });
       const lobbyId = lobby.id;
 
-      const response = await gameApi.handle(
-        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-            "X-Trigger-Refresh": "true",
-          },
-        }),
-      );
+      const response = await as(AnotherDebugUser, {
+        "X-Trigger-Refresh": "true",
+      })
+        .withParams({ id: lobbyId })
+        .get("/game/is-asleep");
 
       expect(response.status).toBe(200);
       expect(await response.json()).toBe(true);
@@ -154,13 +136,9 @@ describe("GET /api/game/is-asleep", () => {
       const lobbyId = lobby.id;
       using _state = gameStates.getOrCreate(lobbyId);
 
-      const response = await gameApi.handle(
-        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-          },
-        }),
-      );
+      const response = await as(AnotherDebugUser)
+        .withParams({ id: lobbyId })
+        .get("/game/is-asleep");
 
       gameStates.delete(lobbyId);
 
@@ -176,14 +154,11 @@ describe("GET /api/game/is-asleep", () => {
       const lobbyId = lobby.id;
       using _state = gameStates.getOrCreate(lobbyId);
 
-      const response = await gameApi.handle(
-        new Request(`http://localhost/game/is-asleep?id=${lobbyId}`, {
-          headers: {
-            Cookie: `access=${await signAccess({ userId: AnotherDebugUser })}`,
-            "X-Trigger-Refresh": "true",
-          },
-        }),
-      );
+      const response = await as(AnotherDebugUser, {
+        "X-Trigger-Refresh": "true",
+      })
+        .withParams({ id: lobbyId })
+        .get("/game/is-asleep");
 
       gameStates.delete(lobbyId);
 

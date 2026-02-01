@@ -18,7 +18,7 @@ import discordOauthPlugin from "./discord-login";
 import { db } from "../db";
 import { DiscordUser } from "../db/schema";
 import { ACCESS_MAX_AGE, REFRESH_MAX_AGE } from "../auth/jwt-auth";
-import { verifyAccess, verifyRefresh } from "#/test/util";
+import { verifyAccess, verifyRefresh } from "#/test/jwts";
 
 const DAYS = 60 * 60 * 24;
 
@@ -53,7 +53,7 @@ const server = setupServer(
       avatar_decoration: undefined,
       avatar_decoration_data: null,
     } as DiscordAPIUser);
-  })
+  }),
 );
 
 beforeAll(() => server.listen());
@@ -75,10 +75,10 @@ describe("/login/discord", async () => {
     expect(locationURL.pathname).toEqual("/oauth2/authorize");
     expect(locationURL.searchParams.get("response_type")).toEqual("code");
     expect(locationURL.searchParams.get("client_id")).toEqual(
-      Bun.env.DISCORD_CLIENT_ID
+      Bun.env.DISCORD_CLIENT_ID,
     );
     expect(locationURL.searchParams.get("redirect_uri")).toEqual(
-      Bun.env.DISCORD_REDIRECT_URL
+      Bun.env.DISCORD_REDIRECT_URL,
     );
   });
 });

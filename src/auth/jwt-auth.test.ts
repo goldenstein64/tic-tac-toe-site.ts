@@ -5,11 +5,11 @@ import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { User } from "../db/schema";
 import jwtAuth from "./jwt-auth";
-import { signAccess } from "#/test/util";
+import { signAccess } from "#/test/jwts";
 
 const debugUserId = 4;
 const debugUser = JSON.parse(
-  JSON.stringify(db.select().from(User).where(eq(User.id, debugUserId)).get()!)
+  JSON.stringify(db.select().from(User).where(eq(User.id, debugUserId)).get()!),
 );
 
 const testApp = new Elysia({ name: "test-jwt-auth" }).use(jwtAuth()).get(
@@ -17,7 +17,7 @@ const testApp = new Elysia({ name: "test-jwt-auth" }).use(jwtAuth()).get(
   ({ user }) =>
     new Response(JSON.stringify(user), {
       headers: { "Content-Type": "application/json" },
-    })
+    }),
 );
 
 describe("jwt-auth", () => {
