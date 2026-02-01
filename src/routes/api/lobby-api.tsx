@@ -93,9 +93,15 @@ export default new Elysia()
       query: t.Object({ id: intString }),
       response: { [200]: t.Optional(LobbyStatus), [404]: t.String() },
       detail: {
-        summary: "returns the status of the lobby with the given id",
-        description:
-          "From HTMX, the page gets refreshed when the status is active.",
+        summary: "the status of the lobby with the given id",
+        description: `
+          - On 200, return \`waiting\`, \`active\`, or \`finished\`.
+          - On 404, return error message.
+          - On 422, return JSON error message.
+
+          - With header "X-Trigger-Refresh", add "HX-Refresh" header when status
+          is \`active\`.
+        `,
       },
     },
   )
@@ -115,7 +121,15 @@ export default new Elysia()
           return status("Unprocessable Content");
       }
     },
-    { query: t.Object({ type: TLobbyType, page: intString }) },
+    {
+      query: t.Object({ type: TLobbyType, page: intString }),
+      detail: {
+        summary: "a list of lobbies with the given lobby type",
+        description: `
+          - On 200, return an HTML list of lobbies.
+        `,
+      },
+    },
   )
   .patch(
     "/lobby/forfeit",
