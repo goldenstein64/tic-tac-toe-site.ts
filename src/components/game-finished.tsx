@@ -4,7 +4,7 @@ import { Html } from "@elysiajs/html";
 import { SelectLobby, SelectUser } from "../db/schema";
 import {
   selectPlayersInGame,
-  selectFinishedLobby,
+  selectFinishedLobbyById,
   selectUsernameById,
   selectUserById,
 } from "../db/queries";
@@ -20,7 +20,7 @@ function GameBody({ lobby, user }: GameBodyProps) {
   const { playerX, playerO } = selectPlayersInGame.get({
     lobbyId: lobby.id,
   })!;
-  const winnerId = selectFinishedLobby.get({ lobbyId: lobby.id })?.winner;
+  const winnerId = selectFinishedLobbyById.get({ lobbyId: lobby.id })?.winner;
   return (
     <body>
       <header>

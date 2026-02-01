@@ -11,7 +11,7 @@ import {
 
 import lobbyApi from "./lobby-api";
 import {
-  selectFinishedLobby,
+  selectFinishedLobbyById,
   selectGameById,
   selectLobbyById,
 } from "#/src/db/queries";
@@ -203,7 +203,7 @@ describe("PATCH /api/lobby/forfeit", () => {
 
     expect(response.status).toBe(204);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
-    const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
+    const finishedLobby = selectFinishedLobbyById.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("finished");
     expect(finishedLobby?.winner).toBe(EasyComputer);
   });
@@ -220,7 +220,7 @@ describe("PATCH /api/lobby/forfeit", () => {
 
     expect(response.status).toBe(409);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
-    const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
+    const finishedLobby = selectFinishedLobbyById.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("active");
     expect(finishedLobby).toBeUndefined();
   });
@@ -234,7 +234,7 @@ describe("PATCH /api/lobby/forfeit", () => {
 
     expect(response.status).toBe(409);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
-    const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
+    const finishedLobby = selectFinishedLobbyById.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("waiting");
     expect(finishedLobby).toBeUndefined();
   });
@@ -252,7 +252,7 @@ describe("PATCH /api/lobby/forfeit", () => {
 
     expect(response.status).toBe(409);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
-    const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
+    const finishedLobby = selectFinishedLobbyById.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("finished");
     expect(finishedLobby?.winner).toBe(DebugUser);
   });
@@ -364,7 +364,7 @@ describe("POST /api/lobby", () => {
       status: "waiting",
     });
     expect(selectGameById.get({ lobbyId })).toBeUndefined();
-    expect(selectFinishedLobby.get({ lobbyId })).toBeUndefined();
+    expect(selectFinishedLobbyById.get({ lobbyId })).toBeUndefined();
   });
 
   it("creates a new active lobby if one player is human", async () => {
@@ -395,7 +395,7 @@ describe("POST /api/lobby", () => {
       playerX: DebugUser,
       playerO: EasyComputer,
     });
-    expect(selectFinishedLobby.get({ lobbyId })).toBeUndefined();
+    expect(selectFinishedLobbyById.get({ lobbyId })).toBeUndefined();
   });
 
   it("creates a new finished lobby if neither player is human", async () => {
@@ -426,7 +426,7 @@ describe("POST /api/lobby", () => {
       playerX: EasyComputer,
       playerO: EasyComputer,
     });
-    expect(selectFinishedLobby.get({ lobbyId })).toMatchObject({
+    expect(selectFinishedLobbyById.get({ lobbyId })).toMatchObject({
       id: lobbyId,
       winner: EasyComputer,
     });

@@ -452,7 +452,7 @@ export const selectLobbyById = typePrepared(
   _placeholders as { lobbyId: number },
 );
 
-export const selectFinishedLobby = typePrepared(
+export const selectFinishedLobbyById = typePrepared(
   db
     .select()
     .from(FinishedLobby)
