@@ -57,7 +57,7 @@ export default () =>
     .use(discordOAuth2())
     /** redirects the user to the Discord auth page */
     .get("/login/discord", ({ discord }) =>
-      discord.redirect(["identify", "email"])
+      discord.redirect(["identify", "email"]),
     )
     .get(
       "/login/discord/callback",
@@ -129,5 +129,5 @@ export default () =>
 
         // redirect the user back to the home page
         return redirect("/", 302);
-      }
+      },
     );
