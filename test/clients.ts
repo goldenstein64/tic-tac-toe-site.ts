@@ -53,13 +53,20 @@ class TestClient {
 export function createTestClient(api: {
   handle(request: Request): Promise<Response>;
 }) {
-  function as(userId: number, headers?: HeadersInit) {
-    const reqHeaders = new Headers(headers);
-    const headersPromise = signAccess({ userId }).then((access) => {
-      const accessCookie = new Bun.Cookie("access", access);
-      reqHeaders.append("Cookie", accessCookie.toString());
-      return reqHeaders;
-    });
+  function as(userId: number | undefined, headers?: HeadersInit) {
+    const headersObj = new Headers(headers);
+
+    let headersPromise: Promise<Headers>;
+    if (userId === undefined) {
+      headersPromise = Promise.resolve(headersObj);
+    } else {
+      headersPromise = signAccess({ userId }).then((access) => {
+        const accessCookie = new Bun.Cookie("access", access);
+        headersObj.append("Cookie", accessCookie.toString());
+        return headersObj;
+      });
+    }
+
     return new TestClient(headersPromise, api);
   }
 
