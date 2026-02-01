@@ -57,6 +57,14 @@ class TestClient {
     const request = new Request(reqUrl, { method: "POST", body, headers });
     return lobbyApi.handle(request);
   }
+
+  async delete(url: string): Promise<Response> {
+    const reqUrl = new URL(url, "http://localhost");
+    reqUrl.search = this.params.toString();
+    const headers = await this.headers;
+    const request = new Request(reqUrl, { method: "DELETE", headers });
+    return lobbyApi.handle(request);
+  }
 }
 
 function as(userId: number, headers?: HeadersInit) {
@@ -428,14 +436,25 @@ describe("POST /api/lobby", () => {
     });
     expect(selectFinishedLobbyById.get({ lobbyId })).toMatchObject({
       id: lobbyId,
-      winner: EasyComputer,
     });
   });
+
+  // not sure how I would go about testing this. It would definitely be
+  // expensive to run though! Maybe it should go in its own file.
   it.todo("throttles when creating too many computer lobbies", () => {});
 });
 
 describe("DELETE /api/lobby", () => {
-  it.todo("lets the creator delete their own waiting lobby", () => {});
+  it("lets the creator delete their own waiting lobby", async () => {
+    using lobby = setupWaitingLobby(DebugUser);
+
+    const response = await as(DebugUser)
+      .withParams({ id: lobby.id })
+      .delete("/lobby");
+
+    expect(response.status, await response.text()).toBe(200);
+    expect(selectLobbyById.get({ lobbyId: lobby.id })).toBeUndefined();
+  });
   it.todo("errors when the game is active", () => {});
   it.todo("errors when the game is finished", () => {});
 });

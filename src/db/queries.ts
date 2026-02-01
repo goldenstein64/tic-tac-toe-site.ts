@@ -373,20 +373,31 @@ export const selectUsernameById = typePrepared(
   _placeholders as { userId: number },
 );
 
-export const selectLobbyByIdStatusCreatedBy = typePrepared(
-  db
+// A bug with custom types (which `status` is) combined with placeholder values
+// in prepared statements causes them not to be converted to the correct type
+// during comparison, leading to never finding the lobby unless the raw integer
+// value is used for status.
+export function selectLobbyByIdStatusCreatedBy({
+  lobbyId,
+  status,
+  createdBy,
+}: {
+  lobbyId: number;
+  status: LobbyStatus;
+  createdBy: number;
+}) {
+  return db
     .select({ id: Lobby.id })
     .from(Lobby)
     .where(
       and(
-        eq(Lobby.id, sql.placeholder("lobbyId")),
-        eq(Lobby.createdBy, sql.placeholder("createdBy")),
-        eq(Lobby.status, sql.placeholder("status")),
+        eq(Lobby.id, lobbyId),
+        eq(Lobby.status, status),
+        eq(Lobby.createdBy, createdBy),
       ),
     )
-    .prepare(),
-  _placeholders as { lobbyId: number; createdBy: number; status: LobbyStatus },
-);
+    .get();
+}
 
 export const insertGame = typePrepared(
   db

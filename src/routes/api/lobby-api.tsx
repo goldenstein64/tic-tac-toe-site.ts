@@ -277,10 +277,10 @@ export default new Elysia()
   )
   .delete(
     "/lobby",
-    async ({ query: { id }, set, user: { id: userId }, status }) => {
+    async ({ query: { id: lobbyId }, set, user: { id: userId }, status }) => {
       // delete a waiting lobby
-      const lobby = selectLobbyByIdStatusCreatedBy.get({
-        lobbyId: id,
+      const lobby = selectLobbyByIdStatusCreatedBy({
+        lobbyId,
         createdBy: userId,
         status: "waiting",
       });
@@ -289,7 +289,7 @@ export default new Elysia()
         return status(403, "not a waiting lobby or not created by user");
       }
 
-      deleteLobbyById.run({ id });
+      deleteLobbyById.run({ id: lobbyId });
 
       // otherwise, I guess reload the page after changing the db
       set.headers["HX-Refresh"] = "true";
