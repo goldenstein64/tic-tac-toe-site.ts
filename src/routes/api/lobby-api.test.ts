@@ -12,8 +12,8 @@ import {
 import lobbyApi from "./lobby-api";
 import {
   selectFinishedLobby,
+  selectGameById,
   selectLobbyById,
-  selectPlayersInGame,
 } from "#/src/db/queries";
 
 const EasyComputer = 1;
@@ -49,6 +49,14 @@ class TestClient {
     const request = new Request(reqUrl, { method: "PATCH", body, headers });
     return lobbyApi.handle(request);
   }
+
+  async post(url: string, body?: BodyInit): Promise<Response> {
+    const reqUrl = new URL(url, "http://localhost");
+    reqUrl.search = this.params.toString();
+    const headers = await this.headers;
+    const request = new Request(reqUrl, { method: "POST", body, headers });
+    return lobbyApi.handle(request);
+  }
 }
 
 function as(userId: number, headers?: HeadersInit) {
@@ -62,29 +70,49 @@ function as(userId: number, headers?: HeadersInit) {
 }
 
 describe("GET /api/lobby/status", () => {
-  it("sends lobby status to any user", async () => {
+  it("sends lobby status", async () => {
     using lobby = setupActiveLobby({
       playerX: DebugUser,
       playerO: EasyComputer,
     });
     const lobbyId = lobby.id;
 
-    const response1 = await as(AnotherDebugUser)
+    const response = await as(AnotherDebugUser)
       .withParams({ id: lobbyId })
       .get("/lobby/status");
 
-    expect(response1.status).toBe(200);
-    expect(await response1.text()).toBe("active");
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("active");
+  });
 
-    const response2 = await as(AnotherDebugUser, {
+  it("sends lobby status with X-Trigger-Refresh", async () => {
+    using lobby = setupActiveLobby({
+      playerX: DebugUser,
+      playerO: EasyComputer,
+    });
+    const lobbyId = lobby.id;
+
+    const response = await as(AnotherDebugUser, {
       "X-Trigger-Refresh": "true",
     })
       .withParams({ id: lobbyId })
       .get("/lobby/status");
 
-    expect(response2.status).toBe(200);
-    expect(await response2.text()).toBe("active");
-    expect(response2.headers.get("HX-Refresh")).toBe("true");
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("active");
+    expect(response.headers.get("HX-Refresh")).toBe("true");
+  });
+
+  const NONEXISTENT_LOBBY_ID = -1;
+
+  it("errors if lobby does not exist", async () => {
+    const lobbyId = NONEXISTENT_LOBBY_ID;
+
+    const response = await as(AnotherDebugUser)
+      .withParams({ id: lobbyId })
+      .get("/lobby/status");
+
+    expect(response.status).toBe(404);
   });
 });
 
@@ -190,7 +218,7 @@ describe("PATCH /api/lobby/forfeit", () => {
       new URLSearchParams({ id: String(lobby.id) }),
     );
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(409);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
     const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("active");
@@ -204,7 +232,7 @@ describe("PATCH /api/lobby/forfeit", () => {
       new URLSearchParams({ id: String(lobby.id) }),
     );
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(409);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
     const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("waiting");
@@ -222,7 +250,7 @@ describe("PATCH /api/lobby/forfeit", () => {
       new URLSearchParams({ id: String(lobby.id) }),
     );
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(409);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
     const finishedLobby = selectFinishedLobby.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("finished");
@@ -243,9 +271,9 @@ describe("PATCH /api/lobby/join", () => {
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
     if (newLobby === undefined) expect.unreachable();
     expect(newLobby.status).toBe("active");
-    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
-    if (players === undefined) expect.unreachable();
-    expect(new Set([players.playerX, players.playerO])).toStrictEqual(
+    const game = selectGameById.get({ lobbyId: lobby.id });
+    if (game === undefined) expect.unreachable();
+    expect(new Set([game.playerX, game.playerO])).toStrictEqual(
       new Set([DebugUser, AnotherDebugUser]),
     );
   });
@@ -255,16 +283,18 @@ describe("PATCH /api/lobby/join", () => {
       playerX: DebugUser,
       playerO: EasyComputer,
     });
+    const lobbyId = lobby.id;
 
     const response = await as(AnotherDebugUser).patch(
       "/lobby/join",
-      new URLSearchParams({ id: String(lobby.id) }),
+      new URLSearchParams({ id: String(lobbyId) }),
     );
 
-    expect(response.status).toBe(403);
-    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
-    if (players === undefined) expect.unreachable();
-    expect(players).toStrictEqual({
+    expect(response.status).toBe(409);
+    const game = selectGameById.get({ lobbyId });
+    if (game === undefined) expect.unreachable();
+    expect(game).toMatchObject({
+      lobbyId,
       playerX: DebugUser,
       playerO: EasyComputer,
     });
@@ -276,22 +306,24 @@ describe("PATCH /api/lobby/join", () => {
       playerO: EasyComputer,
       winner: undefined,
     });
+    const lobbyId = lobby.id;
 
     const response = await as(AnotherDebugUser).patch(
       "/lobby/join",
-      new URLSearchParams({ id: String(lobby.id) }),
+      new URLSearchParams({ id: String(lobbyId) }),
     );
 
-    expect(response.status).toBe(403);
-    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
-    if (players === undefined) expect.unreachable();
-    expect(players).toStrictEqual({
+    expect(response.status).toBe(409);
+    const game = selectGameById.get({ lobbyId });
+    if (game === undefined) expect.unreachable();
+    expect(game).toMatchObject({
+      lobbyId,
       playerX: DebugUser,
       playerO: EasyComputer,
     });
   });
 
-  it.failing("errors when the user is already in the game", async () => {
+  it("errors when the user is already in the game", async () => {
     using lobby: DisposableLobby = setupWaitingLobby(DebugUser);
 
     const response = await as(DebugUser).patch(
@@ -299,20 +331,106 @@ describe("PATCH /api/lobby/join", () => {
       new URLSearchParams({ id: String(lobby.id) }),
     );
 
-    expect(response.status).toBe(403);
-    const players = selectPlayersInGame.get({ lobbyId: lobby.id });
-    if (players === undefined) expect.unreachable();
-    expect(players).toStrictEqual({
-      playerX: DebugUser,
-      playerO: EasyComputer,
-    });
+    expect(response.status).toBe(409);
+    const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
+    expect(newLobby?.status).toBe("waiting");
   });
 });
 
 describe("POST /api/lobby", () => {
-  it.todo("creates a new waiting lobby if both players are human", () => {});
-  it.todo("creates a new active lobby if one player is human", () => {});
-  it.todo("creates a new finished lobby if neither player is human", () => {});
+  const Human = -1;
+
+  it("creates a new waiting lobby if both players are human", async () => {
+    const response = await as(DebugUser).post(
+      "/lobby",
+      new URLSearchParams({
+        typeX: String(Human),
+        typeO: String(Human),
+      }),
+    );
+
+    expect(response.status).toBe(201);
+    const redirect = response.headers.get("HX-Redirect");
+    if (redirect === null) expect.unreachable();
+
+    const redirectUrl = new URL(redirect, "http://localhost");
+    const lobbyIdStr = redirectUrl.searchParams.get("id");
+    if (lobbyIdStr === null) expect.unreachable();
+    const lobbyId = parseInt(lobbyIdStr);
+
+    expect(selectLobbyById.get({ lobbyId })).toMatchObject({
+      id: lobbyId,
+      createdBy: DebugUser,
+      status: "waiting",
+    });
+    expect(selectGameById.get({ lobbyId })).toBeUndefined();
+    expect(selectFinishedLobby.get({ lobbyId })).toBeUndefined();
+  });
+
+  it("creates a new active lobby if one player is human", async () => {
+    const response = await as(DebugUser).post(
+      "/lobby",
+      new URLSearchParams({
+        typeX: String(Human),
+        typeO: String(EasyComputer),
+      }),
+    );
+
+    expect(response.status).toBe(201);
+    const redirect = response.headers.get("HX-Redirect");
+    if (redirect === null) expect.unreachable();
+
+    const redirectUrl = new URL(redirect, "http://localhost");
+    const lobbyIdStr = redirectUrl.searchParams.get("id");
+    if (lobbyIdStr === null) expect.unreachable();
+    const lobbyId = parseInt(lobbyIdStr);
+
+    expect(selectLobbyById.get({ lobbyId })).toMatchObject({
+      id: lobbyId,
+      createdBy: DebugUser,
+      status: "active",
+    });
+    expect(selectGameById.get({ lobbyId })).toMatchObject({
+      lobbyId,
+      playerX: DebugUser,
+      playerO: EasyComputer,
+    });
+    expect(selectFinishedLobby.get({ lobbyId })).toBeUndefined();
+  });
+
+  it("creates a new finished lobby if neither player is human", async () => {
+    const response = await as(DebugUser).post(
+      "/lobby",
+      new URLSearchParams({
+        typeX: String(EasyComputer),
+        typeO: String(EasyComputer),
+      }),
+    );
+
+    expect(response.status).toBe(201);
+    const redirect = response.headers.get("HX-Redirect");
+    if (redirect === null) expect.unreachable();
+
+    const redirectUrl = new URL(redirect, "http://localhost");
+    const lobbyIdStr = redirectUrl.searchParams.get("id");
+    if (lobbyIdStr === null) expect.unreachable();
+    const lobbyId = parseInt(lobbyIdStr);
+
+    expect(selectLobbyById.get({ lobbyId })).toMatchObject({
+      id: lobbyId,
+      createdBy: DebugUser,
+      status: "finished",
+    });
+    expect(selectGameById.get({ lobbyId })).toMatchObject({
+      lobbyId,
+      playerX: EasyComputer,
+      playerO: EasyComputer,
+    });
+    expect(selectFinishedLobby.get({ lobbyId })).toMatchObject({
+      id: lobbyId,
+      winner: EasyComputer,
+    });
+  });
   it.todo("throttles when creating too many computer lobbies", () => {});
 });
 

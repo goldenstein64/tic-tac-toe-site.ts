@@ -56,6 +56,15 @@ export const selectPlayersInGame = typePrepared(
   _placeholders as { lobbyId: number },
 );
 
+export const selectGameById = typePrepared(
+  db
+    .select()
+    .from(Game)
+    .where(eq(Game.lobbyId, sql.placeholder("lobbyId")))
+    .prepare(),
+  _placeholders as { lobbyId: number },
+);
+
 export const selectUserActiveLobbies = (() => {
   const playerX = aliasedTable(User, "playerX");
   const playerO = aliasedTable(User, "playerO");

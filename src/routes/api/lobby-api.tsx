@@ -64,22 +64,34 @@ class StatusError extends Error {
   }
 }
 
+function throwOnLobbyNotFound(lobbyId: number) {
+  const lobby = selectLobbyStatusById.get({ lobbyId });
+  if (lobby === undefined) {
+    throw new StatusError("Not Found", "lobby does not exist");
+  }
+}
+
 export default new Elysia()
   .use(html())
   .use(jwtAuth())
   .resolve(({ user }) => ({ user: user! }))
   .get(
     "/lobby/status",
-    ({ query: { id: lobbyId }, set, headers }) => {
-      const status = selectLobbyStatusById.get({ lobbyId })?.status;
-      if (status === "active" && headers["x-trigger-refresh"] === "true") {
+    ({ query: { id: lobbyId }, set, headers, status }) => {
+      const lobby = selectLobbyStatusById.get({ lobbyId });
+      if (lobby === undefined) {
+        return status("Not Found", "lobby does not exist");
+      }
+
+      const lobbyStatus = lobby.status;
+      if (lobbyStatus === "active" && headers["x-trigger-refresh"] === "true") {
         set.headers["HX-Refresh"] = "true";
       }
-      return status;
+      return lobbyStatus;
     },
     {
       query: t.Object({ id: intString }),
-      response: t.Union([LobbyStatus, t.Undefined()]),
+      response: { [200]: t.Optional(LobbyStatus), [404]: t.String() },
       detail: {
         summary: "returns the status of the lobby with the given id",
         description:
@@ -110,11 +122,12 @@ export default new Elysia()
     async ({ body: { id: lobbyId }, user: { id: userId }, status }) => {
       try {
         return await tx(async () => {
+          throwOnLobbyNotFound(lobbyId);
           const playerResult = selectPlayerInGame.get({ lobbyId, userId });
           if (playerResult === undefined) {
             throw new StatusError(
-              "Forbidden",
-              "lobby does not exist or does not contain this user",
+              "Conflict",
+              "lobby does not contain this user",
             );
           }
 
@@ -141,10 +154,7 @@ export default new Elysia()
 
             if (lobby === undefined) {
               // may be thrown if fromStatus was not "active"
-              throw new StatusError(
-                "Forbidden",
-                "lobby does not exist or is not active",
-              );
+              throw new StatusError("Conflict", "lobby is not active");
             }
 
             insertFinishedLobby.run({ lobbyId, winner });
@@ -167,16 +177,17 @@ export default new Elysia()
     async ({ body: { id: lobbyId }, user: { id: userId }, status }) => {
       try {
         return await tx(async () => {
+          throwOnLobbyNotFound(lobbyId);
+
           const lobby = updateLobbyStatus({
             lobbyId,
             fromStatus: "waiting",
             toStatus: "active",
           });
           if (lobby === undefined) {
-            throw new StatusError(
-              "Forbidden",
-              "lobby does not exist or is not waiting",
-            );
+            throw new StatusError("Conflict", "lobby is not waiting");
+          } else if (lobby.createdBy === userId) {
+            throw new StatusError("Conflict", "attempt to join own lobby");
           }
 
           // choose who will be Xs or Os
@@ -208,7 +219,7 @@ export default new Elysia()
   )
   .post(
     "/lobby",
-    async ({ body: { typeX, typeO }, user: { id: userId }, set }) => {
+    async ({ body: { typeX, typeO }, user: { id: userId }, set, status }) => {
       // create a new lobby
       const computerIdX = typeX === -1 ? undefined : typeX;
       const computerIdO = typeO === -1 ? undefined : typeO;
@@ -224,12 +235,12 @@ export default new Elysia()
           : winnerMark === "O" ? computerIdO
           : undefined;
 
-        await tx(async () => {
+        await tx(() => {
           const { id: lobbyId } = insertLobby.get({
             userId,
             status: "finished",
           })!;
-          await insertGame.execute({
+          insertGame.run({
             lobbyId,
             playerX: computerIdX,
             playerO: computerIdO,
@@ -237,6 +248,7 @@ export default new Elysia()
           insertMoves({ lobbyId, moves });
           insertFinishedLobby.run({ lobbyId, winner });
           set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
+          return Promise.resolve();
         });
       } else if (computerIdX !== undefined || computerIdO !== undefined) {
         // only one is a computer, create an active lobby with this user as the
@@ -258,6 +270,8 @@ export default new Elysia()
         const { id: lobbyId } = insertLobby.get({ userId, status: "waiting" })!;
         set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
       }
+
+      return status("Created");
     },
     { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) },
   )
