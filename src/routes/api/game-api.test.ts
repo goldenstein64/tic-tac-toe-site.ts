@@ -1,7 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { once } from "node:events";
 
-import { signAccess } from "#/test/jwts";
 import { setupActiveLobby } from "#/test/lobbies";
 
 import gameApi from "./game-api";
