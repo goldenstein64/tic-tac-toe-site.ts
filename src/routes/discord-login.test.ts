@@ -8,7 +8,6 @@ import {
   afterAll,
   beforeEach,
 } from "bun:test";
-import { parse as parseCookie } from "cookie";
 import { eq } from "drizzle-orm";
 import {
   NameplatePalette,
@@ -148,21 +147,19 @@ describe("/login/discord/callback", async () => {
     const cookies = response.headers
       .getAll("Set-Cookie")
       .values()
-      .map((value) => parseCookie(value));
+      .map((value) => new Bun.Cookie(value));
 
     for (const cookie of cookies) {
-      const accessValue = cookie["access"];
-      if (accessValue) {
-        expect(parseFloat(cookie["Max-Age"]!)).toBe(ACCESS_MAX_AGE);
+      if (cookie.name === "access") {
+        expect(cookie.maxAge).toBe(ACCESS_MAX_AGE);
 
-        const extracted = await verifyAccess(accessValue);
+        const extracted = await verifyAccess(cookie.value);
         expect(extracted.payload["userId"]).toEqual(discordUser.userId);
       }
 
-      const refreshValue = cookie["refresh"];
-      if (refreshValue) {
-        expect(parseFloat(cookie["Max-Age"]!)).toBe(REFRESH_MAX_AGE);
-        const extracted = await verifyRefresh(refreshValue);
+      if (cookie.name === "refresh") {
+        expect(cookie.maxAge).toBe(REFRESH_MAX_AGE);
+        const extracted = await verifyRefresh(cookie.value);
         expect(extracted.payload["userId"]).toEqual(discordUser.userId);
       }
     }
