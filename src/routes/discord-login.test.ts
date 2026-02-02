@@ -144,12 +144,7 @@ describe("/login/discord/callback", async () => {
     });
     if (!discordUser) expect.unreachable();
 
-    const cookies = response.headers
-      .getAll("Set-Cookie")
-      .values()
-      .map((value) => new Bun.Cookie(value));
-
-    for (const cookie of cookies) {
+    for (const cookie of setCookieArray) {
       if (cookie.name === "access") {
         expect(cookie.maxAge).toBe(ACCESS_MAX_AGE);
 
