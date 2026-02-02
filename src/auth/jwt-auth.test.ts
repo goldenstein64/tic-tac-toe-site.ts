@@ -7,41 +7,38 @@ import { User } from "../db/schema";
 import jwtAuth from "./jwt-auth";
 import { signAccess } from "#/test/jwts";
 
-const debugUserId = 4;
-const debugUser = JSON.parse(
-  JSON.stringify(db.select().from(User).where(eq(User.id, debugUserId)).get()!),
-);
+const DebugUser = 4;
 
-const testApp = new Elysia({ name: "test-jwt-auth" }).use(jwtAuth()).get(
-  "/user",
-  ({ user }) =>
-    new Response(JSON.stringify(user), {
-      headers: { "Content-Type": "application/json" },
-    }),
-);
+const debugUser = (() => {
+  const user = db.select().from(User).where(eq(User.id, DebugUser)).get()!;
+  return { ...user, createdAt: user.createdAt.toISOString() };
+})();
+
+const testApp = new Elysia({ name: "test-jwt-auth" })
+  .use(jwtAuth())
+  .get("/user", ({ user }) => Response.json(user));
 
 describe("jwt-auth", () => {
   it("resolves user to null if cookie is empty", async () => {
-    const response = await testApp.handle(new Request("http://localhost/user"));
+    const request = new Request("http://localhost/user");
+    const response = await testApp.handle(request);
 
     expect(await response.json()).toBeNull();
   });
 
   it("resolves user to null if cookie is invalid", async () => {
-    const request = new Request("http://localhost/user", {
-      headers: { Cookie: `access=${await signAccess({ userId: -1 })}` },
-    });
-
+    const access = new Bun.Cookie("access", await signAccess({ userId: -1 }));
+    const request = new Request("http://localhost/user");
+    request.headers.append("Cookie", String(access));
     const response = await testApp.handle(request);
 
     expect(await response.json()).toBeNull();
   });
 
   it("resolves user to an object if cookie is valid", async () => {
-    const request = new Request("http://localhost/user", {
-      headers: { Cookie: `access=${await signAccess({ userId: 4 })}` },
-    });
-
+    const access = new Bun.Cookie("access", await signAccess({ userId: 4 }));
+    const request = new Request("http://localhost/user");
+    request.headers.append("Cookie", String(access));
     const response = await testApp.handle(request);
 
     expect(await response.json()).toEqual(debugUser);
