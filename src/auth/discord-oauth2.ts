@@ -64,6 +64,8 @@ export default function discordOAuth2() {
           return redirect(url.href);
         },
         authorize(): Promise<OAuth2Tokens> {
+          // if both of these originate from the client, couldn't both of them
+          // also be spoofed?
           if (cookie["state"].value !== query["state"])
             throw new Error("state mismatch");
 
@@ -71,7 +73,7 @@ export default function discordOAuth2() {
           const codeVerifier = cookie["codeVerifier"].value as string | null;
           if (!codeVerifier)
             throw new Error(
-              `Bug with ${String(provider)} and codeVerifier. Please open issue`,
+              `Bug with ${provider} and codeVerifier. Please open issue`,
             );
 
           cookie["codeVerifier"].remove();

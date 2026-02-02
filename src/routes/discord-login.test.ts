@@ -1,4 +1,4 @@
-import type { RESTGetAPICurrentUserResult as DiscordAPIUser } from "discord-api-types/v10";
+import type { RESTGetAPICurrentUserResult } from "discord-api-types/v10";
 
 import {
   describe,
@@ -10,7 +10,11 @@ import {
 } from "bun:test";
 import { parse as parseCookie } from "cookie";
 import { eq } from "drizzle-orm";
-import { UserPremiumType } from "discord-api-types/v10";
+import {
+  NameplatePalette,
+  UserFlags,
+  UserPremiumType,
+} from "discord-api-types/v10";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
@@ -22,7 +26,44 @@ import { verifyAccess, verifyRefresh } from "#/test/jwts";
 
 const DAYS = 60 * 60 * 24;
 
+// source: https://discord.com/developers/docs/resources/user#user-object-example-user
+const NELLY: RESTGetAPICurrentUserResult = {
+  id: "80351110224678912",
+  username: "Nelly",
+  global_name: null,
+  discriminator: "1337",
+  avatar: "8342729096ea3675442027381ff50dfe",
+  verified: true,
+  email: "nelly@discord.com",
+  flags: UserFlags.HypeSquadOnlineHouse1,
+  banner: "06c16474723fe537c283b8efa61a30c8",
+  accent_color: 16711680,
+  premium_type: UserPremiumType.NitroClassic,
+  public_flags: UserFlags.HypeSquadOnlineHouse1,
+  avatar_decoration_data: {
+    sku_id: "1144058844004233369",
+    asset: "a_fed43ab12698df65902ba06727e20c0e",
+  },
+  collectibles: {
+    nameplate: {
+      sku_id: "2247558840304243311",
+      asset: "nameplates/nameplates/twilight/",
+      label: "",
+      palette: NameplatePalette.Cobalt,
+    },
+  },
+  primary_guild: {
+    identity_guild_id: "1234647491267808778",
+    identity_enabled: true,
+    tag: "DISC",
+    badge: "7d1734ae5a615e82bc7a4033b98fade8",
+  },
+};
+
 const server = setupServer(
+  http.get("https://discord.com/api/v10/users/@me", () =>
+    HttpResponse.json(NELLY),
+  ),
   http.post("https://discord.com/api/oauth2/token", () => {
     return HttpResponse.json({
       access_token: "ACCESS_TOKEN",
@@ -31,28 +72,6 @@ const server = setupServer(
       refresh_token: "REFRESH_TOKEN",
       scope: "identify email",
     });
-  }),
-  http.get("https://discord.com/api/v10/users/@me", () => {
-    return HttpResponse.json({
-      id: "DISCORD_USER_ID",
-      username: "DiscordDebugUser",
-      discriminator: "DiscordDiscriminator",
-      global_name: "DiscordGlobalDebugUser",
-      avatar: "DiscordAvatar",
-      bot: false,
-      system: false,
-      mfa_enabled: true,
-      banner: "DiscordBanner",
-      accent_color: 0xffffff, // white
-      locale: "en-us",
-      verified: true,
-      email: "user@debug.com",
-      flags: undefined,
-      premium_type: UserPremiumType.None,
-      public_flags: undefined,
-      avatar_decoration: undefined,
-      avatar_decoration_data: null,
-    } as DiscordAPIUser);
   }),
 );
 
@@ -84,20 +103,18 @@ describe("/login/discord", async () => {
 });
 
 describe("/login/discord/callback", async () => {
-  const STATE_REGEX = /^state=(.*?);/;
-
   it("redirects and sets cookies on GET", async () => {
     const setCookieArray = await (async () => {
       const request = new Request("http://localhost/login/discord");
       const response: Response = await discordOauth.handle(request);
       expect(response.status, await response.text()).toBe(302);
       return response.headers.getSetCookie();
-    })();
+    })().then((a) => a.map((s) => new Bun.Cookie(s)));
     expect(setCookieArray.length).toBeGreaterThan(0);
 
-    const stateCookie = setCookieArray.find((pred) => STATE_REGEX.test(pred));
-    if (!stateCookie) return expect().fail("state not found!");
-    const state = stateCookie.match(STATE_REGEX)![1];
+    const stateCookie = setCookieArray.find((c) => c.name === "state");
+    if (!stateCookie) expect.unreachable("state not found!");
+    const state = stateCookie.value;
 
     const response: Response = await (() => {
       const requestURL = new URL("http://localhost/login/discord/callback");
@@ -118,16 +135,15 @@ describe("/login/discord/callback", async () => {
     const discordUser = db
       .select()
       .from(DiscordUser)
-      .where(eq(DiscordUser.discordId, "DISCORD_USER_ID"))
+      .where(eq(DiscordUser.discordId, NELLY.id))
       .get();
 
-    if (!discordUser) return expect().fail("discord user was absent!");
-
     expect(discordUser).toMatchObject({
-      discordId: "DISCORD_USER_ID",
+      discordId: NELLY.id,
       accessToken: "ACCESS_TOKEN",
       refreshToken: "REFRESH_TOKEN",
     });
+    if (!discordUser) expect.unreachable();
 
     const cookies = response.headers
       .getAll("Set-Cookie")
