@@ -34,8 +34,8 @@ describe("/api/game-move", () => {
 
       expect(response.status).toBe(204);
 
-      expect(moveStreamPromise).resolves.toStrictEqual(["new-move", [0]]);
-      expect(newMovePromise).resolves.toStrictEqual([0]);
+      expect(await moveStreamPromise).toStrictEqual(["new-move", [0]]);
+      expect(await newMovePromise).toStrictEqual([0]);
     });
 
     it("fails if the lobby doesn't exist", async () => {

@@ -88,7 +88,7 @@ describe("discordOAuth2()", () => {
 
       const response = await app.handle(new Request("http://localhost/user"));
 
-      expect(response.json()).resolves.toStrictEqual(NELLY);
+      expect(await response.json()).toStrictEqual(NELLY);
     });
   });
 
@@ -116,7 +116,7 @@ describe("discordOAuth2()", () => {
         }),
       );
 
-      expect(response.json()).resolves.toStrictEqual(OAUTH2_TOKEN);
+      expect(await response.json()).toStrictEqual(OAUTH2_TOKEN);
     });
     it("errors if query and cookie states mismatch", async () => {
       const state = generateState();
