@@ -1,5 +1,5 @@
 {
-  "name": "tic-tac-toe-site2",
+  "name": "tic-tac-toe-site",
   "version": "1.0.50",
   "scripts": {
     "dev": "NODE_ENV=development bun run",
