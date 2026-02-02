@@ -111,7 +111,7 @@ export default new Elysia()
       const ordering = (maxOrderResult?.maxOrdering ?? -1) + 1;
       state.setMark(position, ordering);
       state.resetSleep();
-      return status("No Content");
+      return status("Created");
     },
     {
       body: t.Object({ id: t.Numeric(), position: t.Numeric() }),

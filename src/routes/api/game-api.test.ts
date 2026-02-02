@@ -32,7 +32,7 @@ describe("/api/game-move", () => {
         new URLSearchParams({ id: String(lobbyId), position: String(4) }),
       );
 
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(201);
 
       expect(await moveStreamPromise).toStrictEqual(["new-move", [0]]);
       expect(await newMovePromise).toStrictEqual([0]);
@@ -82,7 +82,7 @@ describe("/api/game-move", () => {
       }
 
       const response1: Response = await sendRequest();
-      expect(response1.status).toBe(204);
+      expect(response1.status).toBe(201);
 
       const response2: Response = await sendRequest();
       expect(response2.status).toBe(401);
