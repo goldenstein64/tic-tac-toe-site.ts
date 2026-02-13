@@ -97,7 +97,7 @@ export function GameRows({ lobbyId, board, disabled }: GameRowsProps) {
     board.data
       .entries()
       .filter((entry): entry is [number, Mark] => entry[1] !== undefined)
-      .map(([pos, mark]) => [pos, mark === "X" ? 0 : 1] as const)
+      .map(([pos, mark]) => [pos, mark === "X" ? 0 : 1] as const),
   );
   return (
     <>
@@ -122,7 +122,7 @@ export function GameBoard({
 }: GameBoardProps) {
   const movesArray = selectMovesInGame.all({ lobbyId });
   const moves = new Map<number, number>(
-    movesArray.map(({ position, ordering }) => [position, ordering])
+    movesArray.map(({ position, ordering }) => [position, ordering]),
   );
   return (
     <section class="game-board" hx-swap="innerHTML" sse-swap="board">
