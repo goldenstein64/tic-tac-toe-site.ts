@@ -199,9 +199,15 @@ export default new Elysia()
             toStatus: "active",
           });
           if (lobby === undefined) {
-            throw new StatusError("Conflict", "lobby is not waiting");
+            throw new StatusError(
+              "Unprocessable Content",
+              "lobby is not waiting",
+            );
           } else if (lobby.createdBy === userId) {
-            throw new StatusError("Conflict", "attempt to join own lobby");
+            throw new StatusError(
+              "Unprocessable Content",
+              "attempt to join own lobby",
+            );
           }
 
           // choose who will be Xs or Os
@@ -219,7 +225,7 @@ export default new Elysia()
 
           // a new game state will be created when needed
 
-          return status(204);
+          return status("No Content");
         });
       } catch (err) {
         if (err instanceof StatusError) {
