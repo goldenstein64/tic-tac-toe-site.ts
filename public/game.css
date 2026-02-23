@@ -75,7 +75,7 @@ main {
 
     /* attempts to keep the button the same size even if it's empty */
     &:empty::after {
-      content: "X";
+      content: "O";
       font: inherit;
       visibility: hidden;
     }
