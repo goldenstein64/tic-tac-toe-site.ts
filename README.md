@@ -1,6 +1,6 @@
-# tic-tac-toe-site2
+# tic-tac-toe-site.ts
 
-A website that lets users play tic-tac-toe against each other online. It keeps a record of saved games and uses Discord OAuth2 to implement user authentication and individual game history.
+A website that lets users play tic-tac-toe against each other online. It keeps a record of saved games and uses Discord OAuth2 to implement user authentication.
 
 ## Outline
 
