@@ -55,13 +55,13 @@ exports[`GET / matches snapshot 1`] = `
                 ><td class="actions"
                   ><button
                     type="button"
-                    hx-on-click="location.href=&amp;#34;/game?id=2&amp;#34;"
+                    hx-on-click='location.href="/game?id=2"'
                     >View</button
                   ><button
                     type="button"
                     hx-patch="/api/lobby/forfeit"
                     hx-swap="none"
-                    hx-vals="{&amp;#34;id&amp;#34;:2}"
+                    hx-vals='{"id":2}'
                     >Forfeit</button
                   ></td
                 ><td>2</td><td class="date-time">2024-11-28T02:30:00.000Z</td
@@ -87,14 +87,14 @@ exports[`GET / matches snapshot 1`] = `
                 ><td class="actions"
                   ><button
                     type="button"
-                    hx-on-click="location.href=&amp;#34;/game?id=4&amp;#34;"
+                    hx-on-click='location.href="/game?id=4"'
                     >View</button
                   ><button
                     type="button"
                     hx-patch="/api/lobby/join"
-                    hx-vals="{&amp;#34;id&amp;#34;:4}"
+                    hx-vals='{"id":4}'
                     hx-swap="none"
-                    hx-on--after-request="location.href=&amp;#34;/game?id=4&amp;#34;"
+                    hx-on--after-request='location.href="/game?id=4"'
                     >Join</button
                   ></td
                 ><td>4</td><td class="date-time">2024-11-28T02:31:00.000Z</td
@@ -118,12 +118,12 @@ exports[`GET / matches snapshot 1`] = `
                 ><td class="actions"
                   ><button
                     type="button"
-                    hx-on-click="location.href=&amp;#34;/game?id=1&amp;#34;"
+                    hx-on-click='location.href="/game?id=1"'
                     >View</button
                   ><button
                     type="button"
                     hx-delete="/api/lobby"
-                    hx-vals="{&amp;#34;id&amp;#34;:1}"
+                    hx-vals='{"id":1}'
                     >Forget</button
                   ></td
                 ><td>1</td
@@ -150,7 +150,7 @@ exports[`GET / matches snapshot 1`] = `
                 ><td class="actions"
                   ><button
                     type="button"
-                    hx-on-click="location.href=&amp;#34;/game?id=3&amp;#34;"
+                    hx-on-click='location.href="/game?id=3"'
                     >View</button
                   ></td
                 ><td>3</td><td class="date-time">2024-11-28T02:31:00.000Z</td
@@ -160,7 +160,7 @@ exports[`GET / matches snapshot 1`] = `
                 ><td class="actions"
                   ><button
                     type="button"
-                    hx-on-click="location.href=&amp;#34;/game?id=5&amp;#34;"
+                    hx-on-click='location.href="/game?id=5"'
                     >View</button
                   ></td
                 ><td>5</td><td class="date-time">2025-11-30T02:35:00.000Z</td

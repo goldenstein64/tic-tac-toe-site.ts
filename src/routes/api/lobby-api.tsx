@@ -20,7 +20,7 @@ import {
   deleteLobbyById,
   selectLobbyStatusById,
 } from "#/src/db/queries";
-import jwtAuth from "#/src/auth/jwt-auth";
+import { jwtMustAuth } from "#/src/auth/jwt-auth";
 import {
   ActiveLobbies,
   AvailableLobbies,
@@ -72,11 +72,79 @@ function throwOnLobbyNotFound(lobbyId: number) {
   }
 }
 
+const PostLobby = new Elysia()
+  .use(jwtMustAuth())
+  .use(csrf({ cookie: { key: "_csrf" } }))
+  .post(
+    "/lobby",
+    async ({ body: { typeX, typeO }, user: { id: userId }, set, status }) => {
+      // create a new lobby
+      const computerIdX = typeX === -1 ? undefined : typeX;
+      const computerIdO = typeO === -1 ? undefined : typeO;
+
+      if (computerIdX !== undefined && computerIdO !== undefined) {
+        // both are computers, compute the game ASAP and create a finished lobby
+        const { moves, winner: winnerMark } = await runGame(
+          computerIdX,
+          computerIdO,
+        );
+        const winner =
+          winnerMark === "X" ? computerIdX
+          : winnerMark === "O" ? computerIdO
+          : undefined;
+
+        await tx(() => {
+          const { id: lobbyId } = insertLobby.get({
+            userId,
+            status: "finished",
+          })!;
+          insertGame.run({
+            lobbyId,
+            playerX: computerIdX,
+            playerO: computerIdO,
+          });
+          insertMoves({ lobbyId, moves });
+          insertFinishedLobby.run({ lobbyId, winner });
+          set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
+          return Promise.resolve();
+        });
+      } else if (computerIdX !== undefined || computerIdO !== undefined) {
+        // only one is a computer, create an active lobby with this user as the
+        // human
+        await tx(async () => {
+          const { id: lobbyId } = insertLobby.get({
+            userId,
+            status: "active",
+          })!;
+          insertGame.run({
+            lobbyId,
+            playerX: computerIdX ?? userId,
+            playerO: computerIdO ?? userId,
+          });
+          set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
+        });
+      } else {
+        // neither are computers, create a waiting lobby with this user waiting
+        const { id: lobbyId } = insertLobby.get({ userId, status: "waiting" })!;
+        set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
+      }
+
+      return status("Created");
+    },
+    {
+      parse: "application/x-www-form-urlencoded",
+      body: t.Object({
+        typeX: PlayerTypeString,
+        typeO: PlayerTypeString,
+        _csrf: t.String(),
+      }),
+    },
+  );
+
 export default new Elysia()
+  .use(PostLobby)
   .use(html())
-  .use(jwtAuth())
-  .use(csrf({ cookie: true }))
-  .resolve(({ user }) => ({ user: user! }))
+  .use(jwtMustAuth())
   .get(
     "/lobby/status",
     ({ query: { id: lobbyId }, set, headers, status }) => {
@@ -238,64 +306,6 @@ export default new Elysia()
       }
     },
     { body: t.Object({ id: t.Numeric() }) },
-  )
-  .post(
-    "/lobby",
-    async ({ body: { typeX, typeO }, user: { id: userId }, set, status }) => {
-      // create a new lobby
-      const computerIdX = typeX === -1 ? undefined : typeX;
-      const computerIdO = typeO === -1 ? undefined : typeO;
-
-      if (computerIdX !== undefined && computerIdO !== undefined) {
-        // both are computers, compute the game ASAP and create a finished lobby
-        const { moves, winner: winnerMark } = await runGame(
-          computerIdX,
-          computerIdO,
-        );
-        const winner =
-          winnerMark === "X" ? computerIdX
-          : winnerMark === "O" ? computerIdO
-          : undefined;
-
-        await tx(() => {
-          const { id: lobbyId } = insertLobby.get({
-            userId,
-            status: "finished",
-          })!;
-          insertGame.run({
-            lobbyId,
-            playerX: computerIdX,
-            playerO: computerIdO,
-          });
-          insertMoves({ lobbyId, moves });
-          insertFinishedLobby.run({ lobbyId, winner });
-          set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
-          return Promise.resolve();
-        });
-      } else if (computerIdX !== undefined || computerIdO !== undefined) {
-        // only one is a computer, create an active lobby with this user as the
-        // human
-        await tx(async () => {
-          const { id: lobbyId } = insertLobby.get({
-            userId,
-            status: "active",
-          })!;
-          insertGame.run({
-            lobbyId,
-            playerX: computerIdX ?? userId,
-            playerO: computerIdO ?? userId,
-          });
-          set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
-        });
-      } else {
-        // neither are computers, create a waiting lobby with this user waiting
-        const { id: lobbyId } = insertLobby.get({ userId, status: "waiting" })!;
-        set.headers["HX-Redirect"] = `/game?id=${lobbyId}`;
-      }
-
-      return status("Created");
-    },
-    { body: t.Object({ typeX: PlayerTypeString, typeO: PlayerTypeString }) },
   )
   .delete(
     "/lobby",

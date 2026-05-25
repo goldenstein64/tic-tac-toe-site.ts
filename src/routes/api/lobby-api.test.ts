@@ -1,7 +1,7 @@
 import { describe, it, expect } from "bun:test";
 
 import { createTestClient } from "#/test/clients";
-import { setupDocument } from "#/test/documents";
+import { getHTML, setupDocument } from "#/test/documents";
 import {
   setupWaitingLobby,
   setupActiveLobby,
@@ -10,6 +10,7 @@ import {
 } from "#/test/lobbies";
 
 import lobbyApi from "./lobby-api";
+import { app } from "../../app";
 import {
   selectFinishedLobbyById,
   selectGameById,
@@ -19,6 +20,26 @@ import {
 const EasyComputer = 1;
 const DebugUser = 4;
 const AnotherDebugUser = 5;
+
+const inHandler = (api: { handle(request: Request): Promise<Response> }) => ({
+  as: createTestClient(api),
+});
+async function getCsrf() {
+  const newLobbyResponse = await inHandler(app).as(DebugUser).get("/new-lobby");
+  const cookie = newLobbyResponse.headers.get("set-cookie");
+  if (cookie === null) {
+    throw new Error("_csrf cookie not found!");
+  }
+  const html = await newLobbyResponse.text();
+  const document = await setupDocument(html);
+  const csrfField = document.querySelector(
+    "input[name='_csrf']",
+  ) as HTMLInputElement | null;
+  if (csrfField === null) {
+    throw new Error("_csrf input not found!");
+  }
+  return [cookie, csrfField.value] as const;
+}
 
 const as = createTestClient(lobbyApi);
 
@@ -243,7 +264,7 @@ describe("PATCH /api/lobby/join", () => {
       new URLSearchParams({ id: String(lobbyId) }),
     );
 
-    expect(response.status).toBe(409);
+    expect(response.status, await response.text()).toBe(422);
     const game = selectGameById.get({ lobbyId });
     if (game === undefined) expect.unreachable();
     expect(game).toMatchObject({
@@ -266,7 +287,7 @@ describe("PATCH /api/lobby/join", () => {
       new URLSearchParams({ id: String(lobbyId) }),
     );
 
-    expect(response.status).toBe(409);
+    expect(response.status, await response.text()).toBe(422);
     const game = selectGameById.get({ lobbyId });
     if (game === undefined) expect.unreachable();
     expect(game).toMatchObject({
@@ -284,7 +305,7 @@ describe("PATCH /api/lobby/join", () => {
       new URLSearchParams({ id: String(lobby.id) }),
     );
 
-    expect(response.status).toBe(409);
+    expect(response.status, await response.text()).toBe(422);
     const newLobby = selectLobbyById.get({ lobbyId: lobby.id });
     expect(newLobby?.status).toBe("waiting");
   });
@@ -294,15 +315,17 @@ describe("POST /api/lobby", () => {
   const Human = -1;
 
   it("creates a new waiting lobby if both players are human", async () => {
-    const response = await as(DebugUser).post(
+    const [cookie, csrfToken] = await getCsrf();
+    const response = await as(DebugUser, { Cookie: cookie }).post(
       "/lobby",
       new URLSearchParams({
+        _csrf: csrfToken,
         typeX: String(Human),
         typeO: String(Human),
       }),
     );
 
-    expect(response.status).toBe(201);
+    expect(response.status, await response.text()).toBe(201);
     const redirect = response.headers.get("HX-Redirect");
     if (redirect === null) expect.unreachable();
 
@@ -321,9 +344,12 @@ describe("POST /api/lobby", () => {
   });
 
   it("creates a new active lobby if one player is human", async () => {
-    const response = await as(DebugUser).post(
+    const [cookie, csrfToken] = await getCsrf();
+
+    const response = await as(DebugUser, { Cookie: cookie }).post(
       "/lobby",
       new URLSearchParams({
+        _csrf: csrfToken,
         typeX: String(Human),
         typeO: String(EasyComputer),
       }),
@@ -352,15 +378,18 @@ describe("POST /api/lobby", () => {
   });
 
   it("creates a new finished lobby if neither player is human", async () => {
-    const response = await as(DebugUser).post(
+    const [cookie, csrfToken] = await getCsrf();
+
+    const response = await as(DebugUser, { Cookie: cookie }).post(
       "/lobby",
       new URLSearchParams({
+        _csrf: csrfToken,
         typeX: String(EasyComputer),
         typeO: String(EasyComputer),
       }),
     );
 
-    expect(response.status).toBe(201);
+    expect(response.status, await response.text()).toBe(201);
     const redirect = response.headers.get("HX-Redirect");
     if (redirect === null) expect.unreachable();
 
