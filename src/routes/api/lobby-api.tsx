@@ -27,6 +27,7 @@ import {
   FinishedLobbies,
   WaitingLobbies,
 } from "#/src/components/lobbies";
+import { csrf } from "elysia-csrf";
 
 const LobbyAction = t.Union([t.Literal("forfeit"), t.Literal("join")]);
 export type LobbyAction = Static<typeof LobbyAction>;
@@ -74,6 +75,7 @@ function throwOnLobbyNotFound(lobbyId: number) {
 export default new Elysia()
   .use(html())
   .use(jwtAuth())
+  .use(csrf({ cookie: true }))
   .resolve(({ user }) => ({ user: user! }))
   .get(
     "/lobby/status",
