@@ -1,13 +1,10 @@
-import type { Connection, Mark, Message } from "@goldenstein64/tic-tac-toe";
+import type { Mark } from "@goldenstein64/tic-tac-toe";
 import type { Player } from "@goldenstein64/tic-tac-toe/player";
-import Application, {
+import {
   EasyComputer,
   HardComputer,
   MediumComputer,
-  Board,
 } from "@goldenstein64/tic-tac-toe";
-import { EventEmitter } from "node:events";
-import { FixedArray } from "@goldenstein64/tic-tac-toe/util";
 
 export const idToComputerFactory = new Map<number, () => Player>()
   .set(1, () => new EasyComputer())
@@ -20,70 +17,50 @@ export function orderingToMark(ordering: number): Mark {
   return ordering % 2 === 0 ? "X" : "O";
 }
 
-export class NotComputerError extends Error {
-  constructor(
-    readonly mark: Mark,
-    playerId: number,
-  ) {
-    super(`${mark} (${playerId}) is not a computer!`);
-    this.mark = mark;
-  }
-}
+export type RunResult = Readonly<{ moves: number[]; winner: Mark | null }>;
 
-class BoardEmitter extends Board {
-  public emitter: EventEmitter<{ move: [pos: number, mark: Mark | undefined] }>;
-
-  constructor(data?: FixedArray<Mark | undefined, 9>) {
-    super(data);
-    this.emitter = new EventEmitter();
-  }
-
-  setMark(pos: number, mark: Mark | undefined): void {
-    this.emitter.emit("move", pos, mark);
-    super.setMark(pos, mark);
-  }
-}
-
-const SilentConnection: Connection = {
-  print(_: Message): Promise<void> {
-    return Promise.resolve();
-  },
-  prompt(_: Message): Promise<string> {
-    throw new Error("prompt not expected");
-  },
+export type WorkerInput = {
+  id: string;
+  playerX: ComputerId;
+  playerO: ComputerId;
 };
 
-type RunResult = Readonly<{ moves: number[]; winner: Mark | null }>;
+export type WorkerOutput = { id: string } & (
+  | RunResult
+  | { error: string | { name: string; message: string } }
+);
+
+const worker = new Worker("./src/game/run-game-worker.ts");
+
+const jobs = new Map<
+  string,
+  { resolve: (value: RunResult) => void; reject: (value: any) => void }
+>();
+worker.addEventListener("message", (evt: MessageEvent<WorkerOutput>) => {
+  const { id, ...runResult } = evt.data;
+  const resolvers = jobs.get(id);
+  if (resolvers === undefined) {
+    throw new Error(`could not find resolver for id ${id}`);
+  }
+
+  if ("error" in runResult) {
+    resolvers.reject(runResult.error);
+  } else {
+    resolvers.resolve(runResult);
+  }
+});
+
+worker.addEventListener("messageerror", (evt) => console.error(evt));
 
 export default async function (
   playerX: ComputerId,
   playerO: ComputerId,
 ): Promise<RunResult> {
-  const computerFactoryX = idToComputerFactory.get(playerX);
-  if (computerFactoryX === undefined) {
-    throw new NotComputerError("X", playerX);
-  }
-  const computerFactoryO = idToComputerFactory.get(playerO);
-  if (computerFactoryO === undefined) {
-    throw new NotComputerError("O", playerO);
-  }
+  const id = Bun.randomUUIDv7();
+  const messageData: WorkerInput = { id, playerX, playerO };
+  const { promise, resolve, reject } = Promise.withResolvers<RunResult>();
+  jobs.set(id, { resolve, reject });
 
-  const players: [Player, Player] = [computerFactoryX(), computerFactoryO()];
-  const marks: [Mark, Mark] = ["X", "O"];
-  const app = new Application(SilentConnection);
-  const boardEmitter = new BoardEmitter(app.board.data);
-  app.board = boardEmitter;
-  const moves: number[] = [];
-  boardEmitter.emitter.on("move", (pos) => moves.push(pos));
-  let currentIndex: 0 | 1 = 0;
-  while (true) {
-    const endedResult = await app.playTurn(
-      players[currentIndex],
-      marks[currentIndex],
-    );
-    if (endedResult) {
-      return { moves, ...endedResult };
-    }
-    currentIndex = currentIndex === 0 ? 1 : 0;
-  }
+  worker.postMessage(messageData);
+  return promise;
 }
